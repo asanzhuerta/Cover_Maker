@@ -1,0 +1,77 @@
+\documentclass{covermaker}
+\doctitle{Software Requirements Specification}
+\docsubtitle{Requirements for Cover\_Maker v1.0 (after ISO/IEC/IEEE 29148)}
+\docid{CM-SRS}
+\docstatus{Draft}
+\input{glossary}
+
+\begin{document}
+\cmtitlepage
+
+\begin{revisionhistory}
+  0.1 & 2026-11-03 & Initial requirements catalogue and constraints (M0). \\
+\end{revisionhistory}
+
+\tableofcontents
+
+\chapter{Introduction}
+
+\section{Purpose}
+This \gls{srs} defines what \CM{} version 1.0 shall do and the constraints it
+must respect. It is the reference for design, testing and acceptance.
+
+\section{Scope}
+\CM{} is a Windows desktop application that separates audio files supplied by
+the user into selectable \glspl{stem} and renders \glspl{backingtrack}, entirely
+on the local machine.
+
+\section{Conventions}
+Requirement identifiers are stable: \texttt{CON} for constraints, \texttt{FR}
+for functional and \texttt{NFR} for non-functional requirements. Priorities are
+\emph{must}, \emph{should} and \emph{could}. The catalogue is maintained in
+\texttt{docs/data/requirements.yaml}; the tables below are generated from it.
+
+\section{References}
+Project Plan (CM-PP); Architecture \& Design Document (CM-ADD).
+
+\chapter{Overall description}
+
+\section{Product perspective}
+\CM{} consists of a desktop shell (Tauri 2), a user interface (SvelteKit) and a
+local Python engine that runs the separation models on the CPU or an NVIDIA
+\gls{gpu}. It has no server component; network access is limited to downloading
+models chosen by the user, application updates and optional Creative Commons
+catalogues.
+
+\section{Users}
+\begin{description}
+  \item[Musician] Practises or records covers; needs quick backing tracks
+        without specific instruments.
+  \item[Producer] Works in a \gls{daw}; needs clean stems from material they
+        have rights to, without disturbing a running session.
+\end{description}
+
+\section{Operating environment}
+Windows 10 or 11, 64-bit; 16 GB RAM minimum; optional NVIDIA GPU (Turing or
+newer) with at least 4 GB \gls{vram}; WebView2 runtime.
+
+\section{Assumptions}
+Users process material they own or are licensed to use. Model availability
+depends on third-party hosts.
+
+\chapter{Constraints}
+\input{generated/constraints}
+
+\chapter{Functional requirements}
+\input{generated/requirements-functional}
+
+\chapter{Non-functional requirements}
+\input{generated/requirements-nonfunctional}
+
+\chapter{Traceability}
+\todoin{M3}
+A requirement-to-test matrix will be generated from test markers and included
+in the Test Report.
+
+\printnoidxglossaries
+\end{document}

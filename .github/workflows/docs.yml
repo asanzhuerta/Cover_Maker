@@ -1,0 +1,43 @@
+name: Docs
+
+on:
+  pull_request:
+    paths: ["docs/**", ".github/workflows/docs.yml"]
+  push:
+    branches: [main]
+    paths: ["docs/**", ".github/workflows/docs.yml"]
+  workflow_dispatch:
+
+jobs:
+  latex:
+    name: Build LaTeX documents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: Check generated tables are up to date
+        run: |
+          uv run docs/tools/gen_tex.py
+          git diff --exit-code -- docs/latex/common/generated
+      - name: Compile all documents
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: "*/main.tex"
+          working_directory: docs/latex
+          work_in_root_file_dir: true
+          latexmk_use_lualatex: true
+          pre_compile: git config --global --add safe.directory '*'
+      - name: Collect PDFs
+        run: |
+          mkdir -p pdf
+          for d in docs/latex/*/; do
+            name=$(basename "$d")
+            [ -f "$d/main.pdf" ] && cp "$d/main.pdf" "pdf/cover-maker-$name.pdf"
+          done
+          ls -l pdf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cover-maker-docs
+          path: pdf/*.pdf

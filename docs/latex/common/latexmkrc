@@ -1,0 +1,17 @@
+# Shared latexmk configuration for every Cover_Maker document.
+# Each document folder contains a one-line latexmkrc that loads this file.
+
+$pdf_mode = 4;    # LuaLaTeX
+$bibtex_use = 0;
+
+# Let documents find covermaker.cls and shared files.
+ensure_path('TEXINPUTS', '../common//');
+
+# Expose the git version (tag or short hash) to the documents as \cmgitversion.
+my $git_version = `git describe --tags --always --dirty`;
+chomp $git_version;
+$git_version = 'dev' if $git_version eq '';
+$git_version =~ s/[^A-Za-z0-9._+-]//g;
+open(my $fh, '>', 'version.tex') or die "Cannot write version.tex: $!";
+print $fh "\\def\\cmgitversion{$git_version}\n";
+close $fh;
