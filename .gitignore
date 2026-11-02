@@ -1,0 +1,66 @@
+# Secrets and local configuration
+.env
+.env.*
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Node / frontend
+node_modules/
+.svelte-kit/
+desktop/build/
+playwright-report/
+test-results/
+
+# Rust / Tauri
+target/
+desktop/src-tauri/gen/
+
+# LaTeX build output
+docs/latex/**/*.aux
+docs/latex/**/*.fdb_latexmk
+docs/latex/**/*.fls
+docs/latex/**/*.log
+docs/latex/**/*.out
+docs/latex/**/*.toc
+docs/latex/**/*.lof
+docs/latex/**/*.lot
+docs/latex/**/*.glo
+docs/latex/**/*.gls
+docs/latex/**/*.glg
+docs/latex/**/*.ist
+docs/latex/**/*.acn
+docs/latex/**/*.acr
+docs/latex/**/*.alg
+docs/latex/**/*.synctex.gz
+docs/latex/**/*.pdf
+docs/latex/**/build/
+
+# Audio and model files never belong in the repository
+*.wav
+*.flac
+*.mp3
+*.m4a
+*.ogg
+*.opus
+*.aac
+*.ckpt
+*.pth
+*.onnx
+*.safetensors
+
+# OS / editors
+Thumbs.db
+.DS_Store
+.idea/
