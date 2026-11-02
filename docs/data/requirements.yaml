@@ -1,0 +1,121 @@
+# Requirements catalogue (single source of truth for the SRS and traceability).
+# priority: must | should | could     status: proposed | accepted | implemented | verified
+
+constraints:
+  - id: CON-01
+    title: No acquisition from streaming platforms
+    text: The software shall not download, capture or stream-rip audio from streaming platforms, nor use their APIs or web pages to locate music for acquisition.
+  - id: CON-02
+    title: Lawful sources only
+    text: Audio sources shall be limited to files supplied by the user and catalogues that publish an explicit Creative Commons licence per item.
+  - id: CON-03
+    title: No bundled model weights
+    text: The project shall not bundle or host AI model weights; each model is downloaded from its original source after the user accepts its licence.
+  - id: CON-04
+    title: No commercial audio in the repository
+    text: Tests, examples, screenshots and documentation shall use only synthetic or Creative Commons audio with attribution.
+  - id: CON-05
+    title: Trademark neutrality
+    text: Third-party service names shall appear only as plain text describing formats or compatibility, without logos and never in the product name.
+  - id: CON-06
+    title: Platform
+    text: Version 1.0 targets Windows 10/11 64-bit only.
+
+functional:
+  - id: FR-SRC-01
+    title: Open local files
+    text: The user shall be able to add audio files (WAV, FLAC, MP3, M4A, OGG, OPUS, AAC) by drag and drop or a file dialog.
+    priority: must
+    milestone: M3
+  - id: FR-SRC-02
+    title: Watched folders
+    text: The user shall be able to register folders whose new or changed audio files are processed incrementally.
+    priority: must
+    milestone: M4
+  - id: FR-SRC-03
+    title: Playlist file import
+    text: The system shall import playlist files (streaming data export JSON, CSV, JSPF, M3U) and match their entries against the local library.
+    priority: should
+    milestone: M4
+  - id: FR-SRC-04
+    title: Creative Commons catalogues
+    text: The system shall let the user browse and fetch items from Creative Commons catalogues, showing the licence and storing attribution.
+    priority: should
+    milestone: M8
+  - id: FR-SEP-01
+    title: Stem selection
+    text: The user shall choose any subset of the stems vocals, guitar, drums, bass, piano and other.
+    priority: must
+    milestone: M3
+  - id: FR-SEP-02
+    title: Track without X
+    text: The system shall render a mix of the song without the stems the user selects, optionally keeping the residual.
+    priority: must
+    milestone: M3
+  - id: FR-SEP-03
+    title: Presets
+    text: The system shall offer Fast, Balanced and Max quality presets adapted to the detected hardware tier.
+    priority: must
+    milestone: M3
+  - id: FR-MOD-01
+    title: Model catalogue
+    text: The system shall list available models with licence class, provenance, size and estimated memory, and download only models the user explicitly accepts.
+    priority: must
+    milestone: M3
+  - id: FR-JOB-01
+    title: Job queue
+    text: The system shall queue jobs, show per-song step progress, and support pause, resume, cancel and retry.
+    priority: must
+    milestone: M3
+  - id: FR-LIB-01
+    title: Library and re-sync
+    text: The system shall keep a library of processed recordings and reprocess only new or changed inputs on re-sync.
+    priority: must
+    milestone: M4
+  - id: FR-LIB-02
+    title: Match review
+    text: The user shall review and correct matches between imported playlist entries and local files.
+    priority: should
+    milestone: M8
+  - id: FR-MIX-01
+    title: Preview mixer
+    text: The user shall preview stems in sync with per-stem mute, solo and volume, and export the current mix.
+    priority: must
+    milestone: M7
+  - id: FR-UI-01
+    title: Languages
+    text: The user interface shall be available in English and Spanish.
+    priority: must
+    milestone: M6
+
+non_functional:
+  - id: NFR-PERF-01
+    title: GPU throughput
+    text: On an NVIDIA GPU with 8 GB VRAM, the Balanced preset should separate a 4-minute song in under 2 minutes (target to be confirmed by the M1 benchmarks).
+    priority: should
+    milestone: M1
+  - id: NFR-PERF-02
+    title: Low-memory fallback
+    text: On out-of-memory errors the system shall retry with smaller chunks and half precision before asking the user to fall back to CPU.
+    priority: must
+    milestone: M3
+  - id: NFR-PERF-03
+    title: DAW coexistence
+    text: Separation shall run at reduced priority with a thread cap, and offer a low-impact mode when a DAW is running.
+    priority: should
+    milestone: M3
+  - id: NFR-SEC-01
+    title: Local API protection
+    text: The local engine shall listen on 127.0.0.1 only and require a per-session token, an exact Host header and an allowed Origin.
+    priority: must
+    milestone: M5
+  - id: NFR-REL-01
+    title: Crash safety
+    text: Jobs shall survive application restarts and worker crashes without corrupting the library.
+    priority: must
+    milestone: M3
+  - id: NFR-INST-01
+    title: Small installer
+    text: The installer should stay below 100 MB, downloading PyTorch and models on first run with resumable progress.
+    priority: should
+    milestone: M9

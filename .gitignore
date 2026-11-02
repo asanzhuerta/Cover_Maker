@@ -64,3 +64,6 @@ docs/latex/**/build/
 Thumbs.db
 .DS_Store
 .idea/
+
+# latexmk-generated version stamp
+docs/latex/*/version.tex
