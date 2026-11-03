@@ -10,3 +10,6 @@
 /resources/runtime/*
 !/resources/runtime/deps.json
 !/resources/runtime/README.md
+!/resources/runtime/licenses/
+/resources/runtime/licenses/Cover_Maker-LICENSE.txt
+/resources/runtime/licenses/THIRD_PARTY_NOTICES.md

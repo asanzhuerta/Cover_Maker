@@ -57,6 +57,30 @@ const en = {
   "welcome.kicker": "Stem separation for musicians",
   "welcome.step.terms": "Terms of use",
   "welcome.step.hardware": "Your hardware",
+  "welcome.step.engine": "Preparing your PC",
+  "tour.engineTitle": "Preparing the separation engine",
+  "tour.engineIntro":
+    "Cover_Maker separates on your own PC. To do so it is now installing its local separation runtime (PyTorch and the AI tooling) in the background: about 4 GB with an NVIDIA graphics card, under 1 GB otherwise. You can keep going meanwhile.",
+  "tour.engineSidebar":
+    "After this welcome you will see the same status in the box at the bottom left of the sidebar. When it says “Separation runtime installed”, you can install models and start separating songs.",
+  "tour.runtimeRunning":
+    "Downloading and installing. This takes a few minutes, depending on your connection.",
+  "tour.runtimeReady": "Ready: you can install models and separate songs.",
+  "tour.scanning":
+    "The engine is scanning your PC (processor, memory and graphics card)…",
+  "tour.modelsIntro":
+    "Separation is done by AI models that you download yourself, after reading each one's licence. This is what the Models page looks like; the real list, with the models recommended for your PC, appears there once the engine has scanned your PC and the separation runtime is installed.",
+  "tour.preview": "Preview",
+  "tour.previewLabel": "Illustrative preview of the Models page",
+  "tour.previewCaption":
+    "Example only: the Models page shows the real models, their licences and a green bar while one downloads.",
+  "tour.nextTitle": "What happens next",
+  "tour.next1":
+    "The separation runtime finishes installing in the background; watch the box at the bottom left.",
+  "tour.next2":
+    "Open Models, read the licence of the recommended model and install it.",
+  "tour.next3":
+    "Go to New job, drop your songs, pick the stems and choose what to export.",
   "welcome.step.models": "Models",
   "welcome.next": "Next",
   "welcome.back": "Back",
@@ -241,6 +265,30 @@ const es: Dictionary = {
   "welcome.kicker": "Separación de stems para músicos",
   "welcome.step.terms": "Condiciones de uso",
   "welcome.step.hardware": "Tu equipo",
+  "welcome.step.engine": "Preparando tu PC",
+  "tour.engineTitle": "Preparando el motor de separación",
+  "tour.engineIntro":
+    "Cover_Maker separa en tu propio PC. Para ello está instalando ahora, en segundo plano, su runtime local de separación (PyTorch y las herramientas de IA): unos 4 GB con una tarjeta gráfica NVIDIA y menos de 1 GB en otro caso. Mientras tanto puedes seguir.",
+  "tour.engineSidebar":
+    "Al terminar esta bienvenida verás el mismo estado en el recuadro de abajo a la izquierda de la barra lateral. Cuando ponga «Runtime de separación instalado», podrás instalar modelos y empezar a separar canciones.",
+  "tour.runtimeRunning":
+    "Descargando e instalando. Tarda unos minutos, según tu conexión.",
+  "tour.runtimeReady": "Listo: ya puedes instalar modelos y separar canciones.",
+  "tour.scanning":
+    "El motor está analizando tu PC (procesador, memoria y tarjeta gráfica)…",
+  "tour.modelsIntro":
+    "La separación la hacen modelos de IA que descargas tú, después de leer la licencia de cada uno. Así es la página Modelos; la lista real, con los modelos recomendados para tu PC, aparece ahí cuando el motor ha analizado tu PC y el runtime de separación está instalado.",
+  "tour.preview": "Vista previa",
+  "tour.previewLabel": "Vista previa ilustrativa de la página Modelos",
+  "tour.previewCaption":
+    "Solo es un ejemplo: la página Modelos muestra los modelos reales, sus licencias y una barra verde mientras se descarga uno.",
+  "tour.nextTitle": "Qué pasa ahora",
+  "tour.next1":
+    "El runtime de separación termina de instalarse en segundo plano; fíjate en el recuadro de abajo a la izquierda.",
+  "tour.next2":
+    "Abre Modelos, lee la licencia del modelo recomendado e instálalo.",
+  "tour.next3":
+    "Ve a Nuevo trabajo, suelta tus canciones, elige los stems y qué quieres exportar.",
   "welcome.step.models": "Modelos",
   "welcome.next": "Siguiente",
   "welcome.back": "Atrás",

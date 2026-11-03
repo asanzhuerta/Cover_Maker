@@ -9,10 +9,15 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from ..store.assets import sha256_file
 from .catalog import Installs, ModelSpec
+
+# Fraction of the model downloaded so far, in [0, 1).
+Progress = Callable[[float], None]
+POLL_S = 0.5
 
 
 class InstallError(RuntimeError):
@@ -36,7 +41,44 @@ def separation_available() -> bool:
     return find_spec("audio_separator") is not None and find_spec("torch") is not None
 
 
-def install(model: ModelSpec, models_dir: Path, installs: Installs, *, accepted: bool) -> Path:
+def downloaded_bytes(target: Path) -> int:
+    """Bytes written so far: audio-separator streams into ``<name>.<pid>.partial``."""
+    if not target.parent.exists():
+        return 0
+    return sum(
+        path.stat().st_size for path in target.parent.glob(f"{target.name}*") if path.is_file()
+    )
+
+
+def download_fraction(written: int, size_mb: int) -> float | None:
+    """Progress against the catalogue size; never 1 before the download ends."""
+    if size_mb <= 0:
+        return None
+    return min(0.99, written / (size_mb * 1024 * 1024))
+
+
+def _run(command: list[str], on_tick: Callable[[], None]) -> subprocess.CompletedProcess[str]:
+    """Run the download, calling ``on_tick`` while it is in progress."""
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, encoding="utf-8", errors="replace",
+    )  # fmt: skip
+    while True:
+        try:
+            stdout, stderr = process.communicate(timeout=POLL_S)
+            return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+        except subprocess.TimeoutExpired:
+            on_tick()
+
+
+def install(
+    model: ModelSpec,
+    models_dir: Path,
+    installs: Installs,
+    *,
+    accepted: bool,
+    progress: Progress | None = None,
+) -> Path:
     if not accepted:
         raise InstallError("The licence notice must be accepted before downloading the model.")
     if not separation_available():
@@ -56,9 +98,13 @@ def install(model: ModelSpec, models_dir: Path, installs: Installs, *, accepted:
             "--download_model_only", "--model_filename", model.filename,
             "--model_file_dir", str(models_dir), "--log_level", "warning",
         ]  # fmt: skip
-        completed = subprocess.run(
-            command, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
-        )
+
+        def tick() -> None:
+            fraction = download_fraction(downloaded_bytes(target), model.size_mb)
+            if progress is not None and fraction is not None:
+                progress(fraction)
+
+        completed = _run(command, tick)
         if completed.returncode != 0 or not target.exists():
             output = (completed.stderr or completed.stdout).strip()[-500:]
             detail = output or f"exit code {completed.returncode}, no file was downloaded"

@@ -387,7 +387,34 @@ fn extract_bin(archive: &[u8], target: &Path) -> Result<(), String> {
     Ok(())
 }
 
-/// Install a pinned tool into `bin/` unless that exact build is there.
+/// Copy the licence files of an archive (`LICENSE*`, `COPYING*`, at any depth)
+/// into `target`: the LGPL asks for its text to travel with the ffmpeg build.
+fn extract_licences(archive: &[u8], target: &Path) -> Result<usize, String> {
+    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(archive))
+        .map_err(|e| format!("invalid archive: {e}"))?;
+    let mut copied = 0;
+    for index in 0..zip.len() {
+        let mut entry = zip.by_index(index).map_err(|e| e.to_string())?;
+        let Some(path) = entry.enclosed_name() else {
+            continue;
+        };
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let upper = name.to_ascii_uppercase();
+        if entry.is_dir() || !(upper.starts_with("LICENSE") || upper.starts_with("COPYING")) {
+            continue;
+        }
+        fs::create_dir_all(target).map_err(|e| e.to_string())?;
+        let mut file = fs::File::create(target.join(name)).map_err(|e| e.to_string())?;
+        std::io::copy(&mut entry, &mut file).map_err(|e| e.to_string())?;
+        copied += 1;
+    }
+    Ok(copied)
+}
+
+/// Install a pinned tool into `bin/` unless that exact build is there; its
+/// licence files go to `licenses/<name>/`.
 fn install_tool(
     layout: &Layout,
     name: &str,
@@ -400,6 +427,7 @@ fn install_tool(
     }
     let archive = download(dep, &layout.app_version, report)?;
     extract_bin(&archive, &layout.bin())?;
+    extract_licences(&archive, &layout.root.join("licenses").join(name))?;
     fs::write(&marker, &dep.version).map_err(|e| e.to_string())
 }
 
@@ -630,7 +658,10 @@ pub fn update_ytdlp(
             os("--upgrade"),
             os("--python"),
             venv.as_os_str(),
-            os("yt-dlp[default]"),
+            // Not `yt-dlp[default]`: that extra pulls in mutagen (GPL), which
+            // the engine does not use (see engine/pyproject.toml).
+            os("yt-dlp"),
+            os("yt-dlp-ejs"),
         ],
         &report,
     )?;
@@ -669,6 +700,7 @@ mod tests {
                 ("ffmpeg-x/bin/ffmpeg.exe", "exe"),
                 ("ffmpeg-x/bin/avcodec.dll", "dll"),
                 ("ffmpeg-x/doc/readme.txt", "doc"),
+                ("ffmpeg-x/LICENSE.txt", "lgpl"),
                 ("deno.exe", "deno"),
             ] {
                 zip.start_file(name, options).unwrap();
@@ -676,15 +708,24 @@ mod tests {
             }
             zip.finish().unwrap();
         }
+        let names_in = |dir: &Path| {
+            let mut names: Vec<_> = fs::read_dir(dir)
+                .unwrap()
+                .map(|e| e.unwrap().file_name().into_string().unwrap())
+                .collect();
+            names.sort();
+            names
+        };
         let target = std::env::temp_dir().join(format!("cm-extract-{}", std::process::id()));
         let _ = fs::remove_dir_all(&target);
-        extract_bin(buffer.get_ref(), &target).unwrap();
-        let mut names: Vec<_> = fs::read_dir(&target)
-            .unwrap()
-            .map(|e| e.unwrap().file_name().into_string().unwrap())
-            .collect();
-        names.sort();
-        assert_eq!(names, ["avcodec.dll", "deno.exe", "ffmpeg.exe"]);
+        extract_bin(buffer.get_ref(), &target.join("bin")).unwrap();
+        assert_eq!(
+            names_in(&target.join("bin")),
+            ["avcodec.dll", "deno.exe", "ffmpeg.exe"]
+        );
+        let licences = target.join("licenses");
+        assert_eq!(extract_licences(buffer.get_ref(), &licences).unwrap(), 1);
+        assert_eq!(names_in(&licences), ["LICENSE.txt"]);
         fs::remove_dir_all(&target).unwrap();
     }
 

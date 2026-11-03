@@ -40,7 +40,9 @@
     "windows": {
       "nsis": {
         "installMode": "currentUser",
-        "installerHooks": "windows/hooks.nsh"
+        "installerHooks": "windows/hooks.nsh",
+        "languages": ["English", "Spanish"],
+        "displayLanguageSelector": true
       }
     }
   },

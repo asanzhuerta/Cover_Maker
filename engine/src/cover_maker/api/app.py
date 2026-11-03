@@ -122,7 +122,12 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
                     with lock:
                         svc.installs.record(model, None)
                 else:
-                    install(model, svc.paths.models, svc.installs, accepted=True)
+                    install(
+                        model, svc.paths.models, svc.installs, accepted=True,
+                        progress=lambda fraction: svc.bus.emit(
+                            "model.install.progress", model=model_id, progress=round(fraction, 3)
+                        ),
+                    )  # fmt: skip
                 svc.bus.emit("model.install.done", model=model_id)
             except InstallError as exc:
                 svc.bus.emit("model.install.failed", model=model_id, error=str(exc), code=exc.code)

@@ -16,6 +16,8 @@
   let reviewing = $state<Model | null>(null);
   let accepted = $state(false);
   let installing = $state<Record<string, boolean>>({});
+  // Download progress in [0, 1] per model, from model.install.progress events.
+  let progress = $state<Record<string, number>>({});
   let errors = $state<Record<string, string>>({});
 
   // Scales for the size / VRAM meters (largest catalogue model ≈ full bar).
@@ -31,6 +33,7 @@
   async function install(model: Model) {
     if (!connection.api) return;
     installing = { ...installing, [model.id]: true };
+    progress = { ...progress, [model.id]: 0 };
     errors = { ...errors, [model.id]: "" };
     await connection.api.POST("/models/{model_id}/install", {
       params: { path: { model_id: model.id } },
@@ -59,7 +62,9 @@
 
   const stop = onEvent((event) => {
     const id = String(event.model ?? "");
-    if (event.type === "model.install.done") {
+    if (event.type === "model.install.progress") {
+      progress = { ...progress, [id]: Number(event.progress ?? 0) };
+    } else if (event.type === "model.install.done") {
       installing = { ...installing, [id]: false };
       void load();
     } else if (event.type === "model.install.failed") {
@@ -150,7 +155,26 @@
             )}</span
           >
         {:else if installing[model.id]}
-          <span class="badge accent">{t("models.installing")}</span>
+          <div
+            class="download"
+            role="progressbar"
+            aria-label={t("models.installing")}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow={Math.round((progress[model.id] ?? 0) * 100)}
+            data-testid="download-progress"
+          >
+            <span class="label"
+              >{t("models.installing")}
+              {Math.round((progress[model.id] ?? 0) * 100)}%</span
+            >
+            <span class="track"
+              ><span
+                class="fill"
+                style:width="{Math.max(2, (progress[model.id] ?? 0) * 100)}%"
+              ></span></span
+            >
+          </div>
         {:else}
           <button
             class="small"
@@ -228,6 +252,35 @@
 {/if}
 
 <style>
+  .download {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 180px;
+    flex: 1;
+    max-width: 320px;
+  }
+
+  .download .label {
+    font-size: 0.78rem;
+    color: var(--ok);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .download .track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .download .fill {
+    display: block;
+    height: 100%;
+    background: var(--ok);
+    transition: width 0.4s ease;
+  }
+
   .models {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));

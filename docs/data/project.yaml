@@ -41,6 +41,10 @@ milestones:
     name: Installer, first run and updates
     effort: L
     goal: NSIS installer, two-phase bootstrap, auto-update; beta release.
+  - id: M9.2
+    name: First-run guide and polish
+    effort: S
+    goal: Guided welcome while the runtime installs, installer language, model download progress, layout, licence review and author data.
   - id: M10
     name: Quality and 1.0
     effort: M
@@ -49,6 +53,10 @@ milestones:
     name: DAW integration (VST3 + REAPER)
     effort: L
     goal: VST3 plugin as a client of the local engine, plus a REAPER extension that inserts each stem as a new track.
+  - id: M12
+    name: About and credits
+    effort: S
+    goal: About page with the author profile, the app description and the open-source credits, from one data file in EN/ES.
 
 risks:
   - id: R-01

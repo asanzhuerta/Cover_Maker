@@ -9,6 +9,10 @@
 \RequirePackage{libertinus}
 \RequirePackage[english]{babel}
 \RequirePackage{microtype}
+% Long monospaced names (paths, identifiers) cannot be hyphenated; let TeX
+% stretch the spaces of such lines instead of pushing text into the margin.
+\setlength{\emergencystretch}{3em}
+\tolerance=2000
 
 % --------------------------------------------------------------- Layout ----
 \RequirePackage[margin=2.5cm,headheight=15pt]{geometry}

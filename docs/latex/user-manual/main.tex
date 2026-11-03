@@ -22,26 +22,36 @@ rights holders.}
 
 \chapter{Getting started}
 On the first start \CM{} shows a welcome screen. A step indicator at the top
-shows where you are (\emph{Terms of use}, \emph{Your hardware},
-\emph{Models}); \emph{Next} and \emph{Back} move between the steps:
+shows where you are (\emph{Terms of use}, \emph{Preparing your PC},
+\emph{Models}); \emph{Next} and \emph{Back} move between the steps. From the
+second step on, the screen explains what happens until you can use the app:
 \begin{enumerate}
   \item Read the notice about rights and tick \emph{I understand and accept these
         terms}.
-  \item Check the detected hardware. The application shows your processor,
-        memory and NVIDIA graphics card, the hardware tier (CPU, 4, 6, 8 or
-        12+~GB of video memory) and the recommended quality preset, as one
-        tile each.
-  \item Choose the separation models to download (see
-        \autoref{ch:models}), or choose them later from the \emph{Models} page.
+  \item \emph{Preparing your PC}: the separation runtime (PyTorch and the AI
+        tooling) is installed in the background, and a status card shows its
+        progress. After the welcome the same status appears in the box at the
+        bottom left of the side bar; when it says \emph{Separation runtime
+        installed} you can install models and separate songs. Below, the
+        application shows your processor, memory and NVIDIA graphics card, the
+        hardware tier (CPU, 4, 6, 8 or 12+~GB of video memory) and the
+        recommended quality preset, as one tile each, once the engine has
+        scanned your PC.
+  \item \emph{Models}: an illustrative preview of the \emph{Models} page (not
+        your real list, which needs the scan and the runtime) and the next
+        steps: wait for the runtime, install the recommended model on the
+        \emph{Models} page (\autoref{ch:models}), then start a job.
 \end{enumerate}
-The window has four pages in the side bar: \emph{New job}, \emph{Queue},
-\emph{Models} and \emph{Settings}. The bottom of the side bar shows whether the
-local engine is ready. Every stem has its own colour and icon (for example pink
+The window has five pages in the side bar: \emph{New job}, \emph{Queue},
+\emph{Models}, \emph{Settings} and \emph{About}. The bottom of the side bar
+shows the separation runtime while it installs and whether the local engine
+is ready. Every stem has its own colour and icon (for example pink
 for vocals and amber for guitar), used on the stem picker, in the queue and in
 the model list.
 
-The interface is available in English and Spanish; the language follows the
-system and can be changed in \emph{Settings}, together with the theme. The dark
+The interface is available in English and Spanish. The installed app starts
+in the language chosen in the installer (in development builds it follows the
+system); it can be changed in \emph{Settings}, together with the theme. The dark
 theme is the default; \emph{Light} and \emph{System} are also available.
 
 \chapter{Choosing and installing models}\label{ch:models}
@@ -61,7 +71,10 @@ source} link to the page where the licence (or the lack of one) can be checked,
 and the date on which the project last verified it at the original source;
 the full notice you accept can be expanded below. Read the notice, tick \emph{I accept this licence notice} and press
 \emph{Download}. The model is downloaded from its original source; \CM{} never
-hosts model files. You are responsible for respecting each model's licence.
+hosts model files. While it downloads, a green bar with the percentage replaces
+the button, so you can see that a large model is still advancing. Installing
+models needs the separation runtime: until it is installed the buttons are
+disabled and the page shows a notice. You are responsible for respecting each model's licence.
 When the project corrects a model's licence information, the notice changes and
 an installed model asks for the new notice to be accepted again.
 

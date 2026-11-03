@@ -89,7 +89,6 @@
     display: grid;
     gap: 1.2rem;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    max-width: 1000px;
     /* Size from the page, not from the content, so the grid never widens main. */
     container-type: inline-size;
   }

@@ -10,7 +10,11 @@ $engine = Join-Path $repo "engine"
 $out = Join-Path $repo "desktop\src-tauri\resources\runtime"
 $deps = Get-Content (Join-Path $out "deps.json") -Raw | ConvertFrom-Json
 
-Get-ChildItem $out -Exclude deps.json, README.md | Remove-Item -Recurse -Force
+Get-ChildItem $out -Exclude deps.json, README.md, licenses | Remove-Item -Recurse -Force
+
+# The app's own licence and the third-party notices travel with the installer.
+Copy-Item (Join-Path $repo "LICENSE") (Join-Path $out "licenses\Cover_Maker-LICENSE.txt")
+Copy-Item (Join-Path $repo "THIRD_PARTY_NOTICES.md") (Join-Path $out "licenses\THIRD_PARTY_NOTICES.md")
 
 # uv, pinned by version and hash.
 $zip = Join-Path $env:TEMP $deps.uv.file
