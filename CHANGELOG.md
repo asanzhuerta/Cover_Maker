@@ -6,6 +6,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-03
+
+First installable build, published for testing. Earlier work is listed
+below by milestone.
+
 ### Changed (branding)
 - Official logo in `branding/logo.svg` (the sidebar's gradient waveform mark)
   with a 1024 px PNG export; the app, installer and taskbar icons and the UI

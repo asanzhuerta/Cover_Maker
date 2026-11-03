@@ -1,6 +1,6 @@
 [package]
 name = "cover-maker-desktop"
-version = "0.2.0-dev.0"
+version = "0.2.0"
 description = "Cover_Maker desktop shell"
 authors = ["asanzhuerta and Cover_Maker contributors"]
 license = "MIT"
