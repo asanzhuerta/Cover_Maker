@@ -13,7 +13,7 @@
   let { children }: { children: Snippet } = $props();
 
   const nav: {
-    href: "/" | "/queue" | "/models" | "/settings";
+    href: "/" | "/queue" | "/models" | "/settings" | "/about";
     label: MessageKey;
     icon: IconName;
   }[] = [
@@ -21,6 +21,7 @@
     { href: "/queue", label: "nav.queue", icon: "queue" },
     { href: "/models", label: "nav.models", icon: "models" },
     { href: "/settings", label: "nav.settings", icon: "settings" },
+    { href: "/about", label: "nav.about", icon: "info" },
   ];
 
   const logo = [0.35, 0.7, 1, 0.55, 0.85, 0.4];
