@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cover-maker"
-version = "0.2.0.dev0"
+version = "0.2.0"
 description = "Local AI stem separation engine for Cover_Maker."
 readme = "README.md"
 license = "MIT"
