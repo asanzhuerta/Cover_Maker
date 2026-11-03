@@ -24,6 +24,12 @@ project follows [Semantic Versioning](https://semver.org/).
   exact-Host and Origin checks and WebSocket first-message auth; Tauri shell
   that starts the engine in a kill-on-close Job Object; multi-stem playback
   page; bootstrap measurement script. ADR-004 to ADR-007.
+- M3 engine core: SQLite store with migrations, content-addressed assets,
+  model catalogue with licence classes and acceptance, recipe graphs for the
+  Fast/Balanced/Max presets, GPU worker process with the out-of-memory
+  ladder, mixer for "track without X", cached job runner with crash
+  recovery, hardware detection, and the `separate`, `models` and `doctor`
+  commands.
 - M11 (DAW integration: VST3 plugin and REAPER extension) added to the roadmap.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.

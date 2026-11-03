@@ -119,6 +119,55 @@ Multi-stem playback & Six 4-minute stereo stems in one \texttt{AudioContext}: ab
 \bottomrule
 \end{tabularx}
 
+\section{Separation job (M3)}
+A job is a \texttt{JobSpec} (inputs, stems, mode, residual mode, preset, output
+folder and format) stored as JSON, with one item per input. For each item the
+runner executes these steps and records the current step in SQLite:
+\begin{enumerate}
+  \item \textbf{decode} -- the input is decoded to a canonical WAV (44.1~kHz,
+        stereo, float32) and stored in the content-addressed asset store;
+  \item \textbf{separate:\textit{node}} -- the recipe graph of the preset is
+        pruned to the stems the job needs and each node runs once: a model run
+        through the GPU worker, with the out-of-memory ladder of ADR-002, or an
+        average of stems produced by earlier nodes;
+  \item \textbf{export} -- selected stems are written as files, or the
+        ``track without X'' is rendered by the mixer.
+\end{enumerate}
+Every step has a cache key built from content hashes (input, model, recipe node,
+mode and format). Running a job again, or asking for another stem of a song that
+was already separated, reuses the cached results and runs no model.
+
+\section{Data model}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Table} & \textbf{Contents} \\
+\midrule
+\texttt{assets} & Files of the library by SHA-256: decoded mixes, stems, downloads. \\
+\texttt{step\_cache} & Step name and cache key $\rightarrow$ produced asset(s). \\
+\texttt{jobs}, \texttt{job\_items} & Job specification, status, current step, outputs and errors. \\
+\texttt{model\_installs} & Installed models and the SHA-256 of the licence notice the user accepted. \\
+\bottomrule
+\end{tabularx}
+
+\section{Job and item states}
+Items move from \emph{pending} to \emph{running} and end as \emph{done},
+\emph{failed} or \emph{cancelled}; a failed item does not stop the rest of the
+job. On start-up, items left \emph{running} by a crash return to \emph{pending}.
+A job ends as \emph{done}, \emph{failed} (at least one item failed) or
+\emph{cancelled}.
+
+\section{Mixer}
+For a mix $m$, estimated stems $s_k$ and the set $R$ of stems to remove:
+\[
+\textit{keep residual:}\quad y = m - \sum_{k \in R} s_k
+\qquad\qquad
+\textit{drop residual:}\quad y = \sum_{k \notin R} s_k
+\]
+With \emph{keep} nothing that the models missed is lost; with \emph{drop} the
+result is cleaner but loses whatever no stem captured. Stems are padded or
+trimmed to the mix length, all arithmetic is float32, and the gain is reduced
+only when the result would clip (never silent clipping).
+
 \chapter{Deployment view}
 \todoin{M9}
 

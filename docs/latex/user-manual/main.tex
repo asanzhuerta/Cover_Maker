@@ -39,7 +39,32 @@ rights holders.}
 
 \appendix
 \chapter{Command-line reference}
-\todoin{M3}
+The engine can be used without the desktop application.
+
+\begin{lstlisting}
+cover-maker doctor                      # hardware, tier and recommended preset
+cover-maker models list                 # catalogue with licence class
+cover-maker models install bs-roformer-sw
+cover-maker separate song.flac --stems vocals,guitar
+cover-maker separate song.flac --stems vocals --mode without -o backing
+\end{lstlisting}
+
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Option of \texttt{separate}} & \textbf{Meaning} \\
+\midrule
+\texttt{--stems} & Comma-separated: vocals, guitar, drums, bass, piano, other. \\
+\texttt{--mode} & \texttt{extract} (default) writes the stems; \texttt{without} writes the song without them. \\
+\texttt{--residual} & For \texttt{without}: \texttt{keep} (default) or \texttt{drop}. \\
+\texttt{--preset} & \texttt{auto} (default), \texttt{fast}, \texttt{balanced} or \texttt{max}. \\
+\texttt{--format} & \texttt{wav} (24-bit, default), \texttt{flac} or \texttt{mp3}. \\
+\texttt{--allow-cpu} & Continue on the CPU if the GPU runs out of memory. \\
+\texttt{--low-impact} & Use fewer CPU threads while a DAW is running. \\
+\bottomrule
+\end{tabularx}
+
+Models are never downloaded silently: \texttt{models install} shows the licence
+notice and asks for acceptance first.
 
 \printnoidxglossaries
 \end{document}
