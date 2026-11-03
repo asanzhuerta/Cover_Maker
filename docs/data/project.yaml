@@ -1,0 +1,84 @@
+# Milestones and risk register (source for the Project Plan).
+
+milestones:
+  - id: M0
+    name: Clean-up and foundations
+    effort: M
+    goal: Remove v1, scaffold the monorepo, CI, LaTeX class and initial documents.
+  - id: M1
+    name: "Spike: AI models on target hardware"
+    effort: M
+    goal: Benchmark separation models on 4 GB VRAM and CPU; fix presets per hardware tier.
+  - id: M2
+    name: "Spike: shell, audio and bootstrap"
+    effort: M
+    goal: Validate Tauri-Python lifecycle, synced multi-stem playback and uv/torch bootstrap.
+  - id: M3
+    name: "Engine: separation and mixing core (CLI)"
+    effort: L
+    goal: Store, pipeline, job runner, model catalogue, recipes, GPU worker, mixer and CLI.
+  - id: M4
+    name: "Engine: library, folders and playlist import"
+    effort: M
+    goal: Watched folders, playlist-file import with local matching, re-sync; alpha CLI release.
+  - id: M5
+    name: Local API
+    effort: S/M
+    goal: FastAPI + WebSocket API with token, Host and Origin checks; generated TypeScript types.
+  - id: M6
+    name: Desktop MVP
+    effort: L
+    goal: First-run wizard, new job flow, queue, settings and EN/ES interface.
+  - id: M7
+    name: Preview mixer
+    effort: L
+    goal: Synced multi-stem mixer with waveforms and export of the current mix.
+  - id: M8
+    name: Library UI, matching and CC catalogues
+    effort: M/L
+    goal: Library view, match review and Creative Commons sources with attribution.
+  - id: M9
+    name: Installer, first run and updates
+    effort: L
+    goal: NSIS installer, two-phase bootstrap, auto-update; beta release.
+  - id: M10
+    name: Quality and 1.0
+    effort: M
+    goal: Hardening, accessibility, test report and the 1.0 release.
+
+risks:
+  - id: R-01
+    risk: Best multi-stem model does not fit in 4 GB VRAM or is too slow on CPU
+    likelihood: medium
+    impact: high
+    mitigation: M1 benchmark spike, hardware tiers, half precision and smaller chunks, Demucs for CPU.
+  - id: R-02
+    risk: Licence or provenance problems with model weights
+    likelihood: high
+    impact: high
+    mitigation: No default model, licence classes in the catalogue, recorded acceptance, weights never hosted.
+  - id: R-03
+    risk: Tauri shell and Python engine lifecycle issues (orphan processes)
+    likelihood: medium
+    impact: medium
+    mitigation: Windows Job Object, parent watchdog, M2 kill test.
+  - id: R-04
+    risk: First-run download of PyTorch (about 2.5 GB) fails behind proxies or antivirus
+    likelihood: medium
+    impact: high
+    mitigation: Two-phase bootstrap, resumable downloads, CPU option.
+  - id: R-05
+    risk: Creative Commons catalogue APIs change or close
+    likelihood: medium
+    impact: low
+    mitigation: AudioSource interface, nightly canary tests, catalogues optional.
+  - id: R-06
+    risk: Separation load causes audio dropouts in a running DAW
+    likelihood: medium
+    impact: medium
+    mitigation: Low priority, EcoQoS, thread cap, low-impact mode.
+  - id: R-07
+    risk: Legal exposure from user misuse or from v1 remnants
+    likelihood: low
+    impact: high
+    mitigation: Legal-by-design constraints, rewritten history, disclaimer and export warnings.
