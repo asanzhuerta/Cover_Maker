@@ -87,7 +87,37 @@ Incremental work & Every pipeline step has a cache key; re-sync resubmits everyt
 \end{tabularx}
 
 \chapter{Runtime view}
-\todoin{M3}
+\section{Engine start-up (M2)}
+\begin{enumerate}
+  \item The shell generates a 32-byte token and starts \texttt{cover-maker serve}
+        with \texttt{COVER\_MAKER\_TOKEN} and \texttt{COVER\_MAKER\_PARENT\_PID}
+        in its environment and no console window.
+  \item The process is assigned to a kill-on-close Job Object.
+  \item The engine binds 127.0.0.1 on a free port and prints
+        \texttt{\{"event":"ready","port","pid","version"\}} on its first stdout line.
+  \item The UI asks the shell for the port and token (\texttt{engine\_info}),
+        calls \texttt{/health} with the token and opens \texttt{/events}, sending
+        the token as the first WebSocket message.
+\end{enumerate}
+
+\section{M2 spike results}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Check} & \textbf{Result (reference machine)} \\
+\midrule
+Kill test & \texttt{taskkill /F} on the shell while the engine ran: the
+\texttt{uv.exe} launcher and both \texttt{python.exe} processes were terminated;
+no orphans. \\
+Local API security & 11 automated tests: token, wrong token, wrong Host, foreign
+Origin, CORS for the Tauri origin, preflight, WebSocket first-message auth. \\
+Bootstrap (CPU) & Clean folder with its own uv cache: Python 3.12 in 4.5~s (60~MB),
+engine in 2.7~s, PyTorch CPU in 27.6~s; environment 520~MB, cache 528~MB. \\
+Bootstrap (CUDA) & PyTorch with CUDA 12.8 occupies about 4.2~GB installed. \\
+Multi-stem playback & Six 4-minute stereo stems in one \texttt{AudioContext}: about
+484~MB of float32 buffers (JS heap 492~MB), started with a common
+\texttt{start(t)} for sample alignment. \\
+\bottomrule
+\end{tabularx}
 
 \chapter{Deployment view}
 \todoin{M9}
@@ -116,6 +146,10 @@ Decisions are recorded as \glspl{adr}, one per file under
 
 \input{adr/adr-001-separation-engine}
 \input{adr/adr-002-vram-tiers}
+\input{adr/adr-004-transport}
+\input{adr/adr-005-process-model}
+\input{adr/adr-006-bootstrap}
+\input{adr/adr-007-audio-preview}
 
 \chapter{Compliance}\label{ch:compliance}
 \cmnote{This chapter summarises a risk analysis carried out on 2026-11-02. It is
