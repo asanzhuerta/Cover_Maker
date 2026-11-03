@@ -39,6 +39,13 @@ const en = {
   "bootstrap.retry": "Retry",
   "bootstrap.separation": "Installing the separation runtime…",
   "bootstrap.separationFailed": "Separation runtime not installed.",
+  "bootstrap.separationReady": "Separation runtime installed",
+  "runtime.wait":
+    "The separation runtime is still being installed. Models can be installed and songs separated once the box at the bottom left says it is installed.",
+  "runtime.failed":
+    "The separation runtime could not be installed. Use Retry in the box at the bottom left.",
+  "runtime.missing":
+    "Separation support is not installed yet. Wait until the box at the bottom left says the separation runtime is installed, then try again.",
   "updates.title": "Updates",
   "updates.app": "Cover_Maker",
   "updates.check": "Check for updates",
@@ -216,6 +223,13 @@ const es: Dictionary = {
   "bootstrap.retry": "Reintentar",
   "bootstrap.separation": "Instalando el runtime de separación…",
   "bootstrap.separationFailed": "Runtime de separación sin instalar.",
+  "bootstrap.separationReady": "Runtime de separación instalado",
+  "runtime.wait":
+    "El runtime de separación aún se está instalando. Podrás instalar modelos y separar canciones cuando el recuadro de abajo a la izquierda indique que está instalado.",
+  "runtime.failed":
+    "No se ha podido instalar el runtime de separación. Usa Reintentar en el recuadro de abajo a la izquierda.",
+  "runtime.missing":
+    "El soporte de separación aún no está instalado. Espera a que el recuadro de abajo a la izquierda indique que el runtime de separación está instalado y vuelve a intentarlo.",
   "updates.title": "Actualizaciones",
   "updates.app": "Cover_Maker",
   "updates.check": "Buscar actualizaciones",

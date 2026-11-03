@@ -16,7 +16,11 @@ from .catalog import Installs, ModelSpec
 
 
 class InstallError(RuntimeError):
-    pass
+    """A model could not be installed; ``code`` lets the UI show its own text."""
+
+    def __init__(self, message: str, code: str = "install_failed") -> None:
+        super().__init__(message)
+        self.code = code
 
 
 def separation_available() -> bool:
@@ -39,7 +43,8 @@ def install(model: ModelSpec, models_dir: Path, installs: Installs, *, accepted:
         raise InstallError(
             "Separation support is not installed yet. The app installs it in the "
             "background after the first start; in a development checkout run: "
-            "uv sync --extra separation --extra cu128 (or --extra cpu)"
+            "uv sync --extra separation --extra cu128 (or --extra cpu)",
+            code="separation_missing",
         )
     models_dir.mkdir(parents=True, exist_ok=True)
     target = models_dir / model.filename

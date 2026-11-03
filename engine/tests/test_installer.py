@@ -56,3 +56,12 @@ def test_silent_failure_is_reported(
 def test_licence_must_be_accepted(tmp_path: Path, installs: Installs) -> None:
     with pytest.raises(installer.InstallError, match="licence"):
         installer.install(Catalog.load().get("htdemucs"), tmp_path, installs, accepted=False)
+
+
+def test_missing_separation_runtime_has_a_code(
+    tmp_path: Path, installs: Installs, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(installer, "separation_available", lambda: False)
+    with pytest.raises(installer.InstallError) as raised:
+        installer.install(Catalog.load().get("htdemucs"), tmp_path, installs, accepted=True)
+    assert raised.value.code == "separation_missing"

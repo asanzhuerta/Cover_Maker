@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import type { Schemas } from "$lib/api/client";
+  import { bootstrap, separationReady } from "$lib/bootstrap.svelte";
   import Icon from "$lib/components/Icon.svelte";
+  import RuntimeNotice from "$lib/components/RuntimeNotice.svelte";
   import { connection, isTauri, onEvent } from "$lib/connection.svelte";
   import { i18n, t } from "$lib/i18n.svelte";
   import { stemColor } from "$lib/stems";
@@ -62,7 +64,13 @@
       void load();
     } else if (event.type === "model.install.failed") {
       installing = { ...installing, [id]: false };
-      errors = { ...errors, [id]: String(event.error ?? "") };
+      errors = {
+        ...errors,
+        [id]:
+          event.code === "separation_missing"
+            ? t("runtime.missing")
+            : String(event.error ?? ""),
+      };
     }
   });
 
@@ -81,6 +89,7 @@
   };
 </script>
 
+<RuntimeNotice />
 <ul class="models">
   {#each models as model (model.id)}
     {@const recommended =
@@ -143,7 +152,11 @@
         {:else if installing[model.id]}
           <span class="badge accent">{t("models.installing")}</span>
         {:else}
-          <button class="small" onclick={() => (reviewing = model)}
+          <button
+            class="small"
+            disabled={!separationReady(bootstrap.status)}
+            title={separationReady(bootstrap.status) ? "" : t("runtime.wait")}
+            onclick={() => (reviewing = model)}
             ><Icon name="shield" size={14} />{t("models.install")}</button
           >
         {/if}
