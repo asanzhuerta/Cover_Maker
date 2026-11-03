@@ -8,8 +8,16 @@ renders practice mixes. This document is not legal advice.
 Only process audio you own or are entitled to use: your own recordings,
 DRM-free purchases, copies of your own physical media where your local law
 allows it, or content released under a licence that permits it (for example
-Creative Commons). Cover_Maker does not download audio from streaming platforms
-and must not be used to circumvent technical protection measures.
+Creative Commons). This applies equally to video links you paste into the app:
+Cover_Maker downloads their audio with the third-party tool yt-dlp only at your
+request, and you are solely responsible for having the right to download and
+process that content under your local law and the platform's terms of service.
+Cover_Maker does not search for music, does not decrypt DRM-protected streams,
+and is not affiliated with any video or streaming platform.
+
+If you are a rights holder and believe this project infringes your rights,
+please open an issue or contact the maintainers before filing a takedown
+notice.
 
 ## Publishing results
 

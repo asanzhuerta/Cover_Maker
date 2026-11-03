@@ -4,10 +4,12 @@ Thanks for your interest in improving Cover_Maker.
 
 ## Ground rules
 
-- **Legal by design.** Do not add features that download or capture audio from
-  streaming platforms, or that use their APIs to locate music. Do not add
-  commercial recordings to tests, examples, screenshots or documentation; use
-  synthetic audio or Creative Commons material with attribution.
+- **Legal by design.** Do not add features that search for, scrape or match
+  music on streaming services, use their APIs to locate music, or decrypt DRM.
+  Online audio may only come from links the user pastes, through the unmodified
+  yt-dlp dependency. Do not add commercial recordings to tests, examples,
+  screenshots or documentation; use synthetic audio or Creative Commons
+  material with attribution.
 - **Model weights are never committed or hosted here.** New catalogue entries
   must state licence and provenance.
 - Code, commit messages and documentation are written in English.

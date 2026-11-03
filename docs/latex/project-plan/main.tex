@@ -27,11 +27,14 @@ audio and split it into two \glspl{stem} (vocals and instrumental). A review of
 that version found functional defects (identity based on file names, wrong
 matches, no tests) and, more importantly, significant legal risk in acquiring
 audio from streaming platforms. Version 2 is a complete rewrite with a new
-product definition; the old history was archived privately.
+product definition; the old history was archived privately. Automatic lookup of
+music on streaming services was dropped; downloading the audio of video links
+pasted by the user was kept as an explicit, documented product decision
+(\autoref{ch:legal}).
 
 \section{Product vision}
-\cmnote{\CM{} is a Windows desktop application that separates the user's own
-audio files into the stems they choose (vocals, guitar, drums, bass, piano,
+\cmnote{\CM{} is a Windows desktop application that separates local audio files
+or the audio of pasted video links into the stems the user chooses (vocals, guitar, drums, bass, piano,
 other) or renders the ``track without X'' so musicians can practise, rehearse
 or record covers. Everything runs locally.}
 
@@ -47,6 +50,8 @@ mid-range Windows PC or laptop, usually with a dedicated GPU and often with a
   \item Selection of stems to extract or to remove (``track without X''), with
         the option to keep or drop the \gls{residual}.
   \item Local files by drag and drop, and watched folders processed incrementally.
+  \item Video and playlist links pasted by the user, with audio-only download
+        through yt-dlp and a rights confirmation per job.
   \item Preview mixer with synced waveforms, mute, solo and volume per stem.
   \item Job queue with per-song progress, pause, cancel and retry.
   \item Library with re-sync: only new or changed inputs are processed again.
@@ -66,8 +71,9 @@ and cover-art tagging, ONNX/DirectML acceleration for AMD and Intel GPUs, and
 cloud separation backends.
 
 \section{Explicitly excluded}
-Any feature that downloads or captures audio from streaming platforms, or uses
-their \glspl{api} or web pages to locate music (see \autoref{ch:legal}).
+Searching, scraping or matching music on streaming services, use of their
+\glspl{api} to locate music, and decryption of protected (DRM) streams (see
+\autoref{ch:legal}).
 
 \chapter{Legal by design}\label{ch:legal}
 A risk analysis (not legal advice) carried out before the rewrite concluded that
@@ -78,7 +84,14 @@ measures, German courts have treated a major video platform's stream protection
 as an effective \gls{tpm}, and a large streaming service's developer terms
 forbid using its metadata to obtain music elsewhere. The full analysis with
 sources is kept in the Compliance chapter of the Architecture \& Design
-Document. The following constraints are binding for the whole project:
+Document.
+
+On 2026-11-03 the product owner decided to keep the download of audio from
+video links pasted by the user, using the unmodified yt-dlp project as a
+dependency. The residual risk is accepted and tracked as R-08: if a takedown
+notice is received, the project will follow the approach of the yt-dlp project
+and keep a disclaimer, and can move the feature into a separate optional plugin.
+The following constraints are binding for the whole project:
 
 \input{generated/constraints}
 
@@ -170,8 +183,9 @@ User Manual & -- & M3 & M10 \\
 Distribution & Public open source, MIT licence, Windows only. \\
 Repository & Same repository; v0.1 history archived privately and replaced. \\
 Desktop stack & Tauri 2 + Svelte 5 shell, Python engine over local HTTP + WebSocket. \\
-Audio sources & Local files, watched folders, playlist-file import, CC catalogues. \\
-Streaming platforms & No download, no API use, no scraping. \\
+Audio sources & Local files, watched folders, playlist-file import, CC catalogues, user-pasted video links (yt-dlp). \\
+Streaming services & No search, no API use, no scraping, no DRM decryption. \\
+Video links (2026-11-03) & Kept in scope; risk R-08 accepted; rights confirmation and disclaimer. \\
 Models & No default model; user chooses and accepts each licence. \\
 Documentation & LaTeX in English, six documents, built in CI. \\
 Interface & English and Spanish. \\

@@ -7,5 +7,5 @@
 - [ ] Tests added or updated, CI green
 - [ ] LaTeX documentation updated (which documents?)
 - [ ] `CHANGELOG.md` updated
-- [ ] Legal-by-design: no streaming-platform downloads, no commercial audio in
+- [ ] Legal-by-design: no music search/scraping, no DRM decryption, no commercial audio in
       tests/docs, brand names only as plain text

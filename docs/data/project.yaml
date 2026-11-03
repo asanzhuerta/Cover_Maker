@@ -20,7 +20,7 @@ milestones:
   - id: M4
     name: "Engine: library, folders and playlist import"
     effort: M
-    goal: Watched folders, playlist-file import with local matching, re-sync; alpha CLI release.
+    goal: Video links via yt-dlp, watched folders, playlist-file import with local matching, re-sync; alpha CLI release.
   - id: M5
     name: Local API
     effort: S/M
@@ -82,3 +82,8 @@ risks:
     likelihood: low
     impact: high
     mitigation: Legal-by-design constraints, rewritten history, disclaimer and export warnings.
+  - id: R-08
+    risk: DMCA or similar notice against the repository because of the video-link download feature
+    likelihood: medium
+    impact: high
+    mitigation: Unmodified yt-dlp as a dependency, user-pasted links only, rights confirmation, disclaimer; respond as the yt-dlp project does and, if required, move the feature to a separate optional plugin.

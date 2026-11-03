@@ -9,6 +9,7 @@
 \texttt{NFR-PERF-03} & \textbf{DAW coexistence}. Separation shall run at reduced priority with a thread cap, and offer a low-impact mode when a DAW is running. & should & M3 \\
 \texttt{NFR-SEC-01} & \textbf{Local API protection}. The local engine shall listen on 127.0.0.1 only and require a per-session token, an exact Host header and an allowed Origin. & must & M5 \\
 \texttt{NFR-REL-01} & \textbf{Crash safety}. Jobs shall survive application restarts and worker crashes without corrupting the library. & must & M3 \\
+\texttt{NFR-MNT-01} & \textbf{Downloader updates}. The yt-dlp dependency shall be updatable independently of application releases, because video platforms change frequently. & must & M9 \\
 \texttt{NFR-INST-01} & \textbf{Small installer}. The installer should stay below 100 MB, downloading PyTorch and models on first run with resumable progress. & should & M9 \\
 \bottomrule
 \end{longtable}

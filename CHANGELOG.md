@@ -15,5 +15,7 @@ project follows [Semantic Versioning](https://semver.org/).
 - LaTeX documentation set with a shared `covermaker` class: Project Plan, SRS,
   Architecture & Design, Test Plan, Installation Guide and User Manual; tables
   generated from `docs/data/*.yaml`.
+- Scope: user-pasted video and playlist links (audio downloaded with yt-dlp,
+  rights confirmation per job) added to v1.0; documented as accepted risk R-08.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.

@@ -3,11 +3,11 @@
 
 constraints:
   - id: CON-01
-    title: No acquisition from streaming platforms
-    text: The software shall not download, capture or stream-rip audio from streaming platforms, nor use their APIs or web pages to locate music for acquisition.
+    title: No automatic discovery of music
+    text: The software shall not search, scrape or match music on streaming services, nor use their APIs or web pages to locate music. Online audio is fetched only from links the user pastes explicitly.
   - id: CON-02
-    title: Lawful sources only
-    text: Audio sources shall be limited to files supplied by the user and catalogues that publish an explicit Creative Commons licence per item.
+    title: User-declared rights
+    text: Before processing online content the user shall confirm that they own it or are allowed to use it. Audio sources are limited to the user's files, user-supplied video links and catalogues with an explicit Creative Commons licence per item.
   - id: CON-03
     title: No bundled model weights
     text: The project shall not bundle or host AI model weights; each model is downloaded from its original source after the user accepts its licence.
@@ -42,6 +42,16 @@ functional:
     text: The system shall let the user browse and fetch items from Creative Commons catalogues, showing the licence and storing attribution.
     priority: should
     milestone: M8
+  - id: FR-SRC-05
+    title: Video links
+    text: The user shall be able to paste a video or playlist link; the system shall download only the best available audio track using yt-dlp and show download progress.
+    priority: must
+    milestone: M4
+  - id: FR-SRC-06
+    title: Rights confirmation
+    text: The system shall ask the user to confirm their rights to online content once per job and record the confirmation with the job.
+    priority: must
+    milestone: M4
   - id: FR-SEP-01
     title: Stem selection
     text: The user shall choose any subset of the stems vocals, guitar, drums, bass, piano and other.
@@ -114,6 +124,11 @@ non_functional:
     text: Jobs shall survive application restarts and worker crashes without corrupting the library.
     priority: must
     milestone: M3
+  - id: NFR-MNT-01
+    title: Downloader updates
+    text: The yt-dlp dependency shall be updatable independently of application releases, because video platforms change frequently.
+    priority: must
+    milestone: M9
   - id: NFR-INST-01
     title: Small installer
     text: The installer should stay below 100 MB, downloading PyTorch and models on first run with resumable progress.
