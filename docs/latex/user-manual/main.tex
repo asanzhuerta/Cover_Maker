@@ -20,23 +20,28 @@ track made from an original recording usually requires permission from the
 rights holders.}
 
 \chapter{Getting started}
-On the first start \CM{} shows a welcome screen:
+On the first start \CM{} shows a welcome screen. A step indicator at the top
+shows where you are (\emph{Terms of use}, \emph{Your hardware},
+\emph{Models}); \emph{Next} and \emph{Back} move between the steps:
 \begin{enumerate}
   \item Read the notice about rights and tick \emph{I understand and accept these
         terms}.
   \item Check the detected hardware. The application shows your processor,
         memory and NVIDIA graphics card, the hardware tier (CPU, 4, 6, 8 or
-        12+~GB of video memory) and the recommended quality preset.
+        12+~GB of video memory) and the recommended quality preset, as one
+        tile each.
   \item Choose the separation models to download (see
         \autoref{ch:models}), or choose them later from the \emph{Models} page.
 \end{enumerate}
 The window has four pages in the side bar: \emph{New job}, \emph{Queue},
 \emph{Models} and \emph{Settings}. The bottom of the side bar shows whether the
-local engine is ready.
+local engine is ready. Every stem has its own colour and icon (for example pink
+for vocals and amber for guitar), used on the stem picker, in the queue and in
+the model list.
 
 The interface is available in English and Spanish; the language follows the
-system and can be changed in \emph{Settings}, together with the light or dark
-theme.
+system and can be changed in \emph{Settings}, together with the theme. The dark
+theme is the default; \emph{Light} and \emph{System} are also available.
 
 \chapter{Choosing and installing models}\label{ch:models}
 \CM{} does not include any separation model. Each model in the catalogue shows
@@ -50,9 +55,25 @@ the stems it produces, its download size, the video memory it needs and its
   \item[copyleft] for example GPL.
 \end{description}
 Models recommended for your hardware are marked. Press \emph{Review licence and
-install}, read the notice, tick \emph{I accept this licence notice} and press
+install} to open the licence dialog. It shows the licence, a \emph{Licence
+source} link to the page where the licence (or the lack of one) can be checked,
+and the date on which the project last verified it at the original source;
+the full notice you accept can be expanded below. Read the notice, tick \emph{I accept this licence notice} and press
 \emph{Download}. The model is downloaded from its original source; \CM{} never
 hosts model files. You are responsible for respecting each model's licence.
+When the project corrects a model's licence information, the notice changes and
+an installed model asks for the new notice to be accepted again.
+
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Model} & \textbf{Licence (verified on 3 November 2026)} \\
+\midrule
+BS-RoFormer SW & none: no licence published; the rehoster says he did not train it and knows nothing of its origin. \\
+BS-RoFormer Resurrection & none: no licence published by the author (unwa). \\
+Mel-Band RoFormer (Kim) & permissive: MIT in the author's model card. \\
+HT Demucs (4 and 6 stems) & non-commercial: the code is MIT, but the author limits the weights to personal or research use. \\
+\bottomrule
+\end{tabularx}
 
 \begin{tabularx}{\linewidth}{@{}lY@{}}
 \toprule
@@ -70,34 +91,43 @@ Max quality & BS-RoFormer SW and BS-RoFormer Resurrection. \\
   \item On \emph{New job}, drop audio files or folders on the dashed area, use
         \emph{Add files} or \emph{Add folder}, or paste a video or playlist link
         and press \emph{Add link}.
-  \item Select the stems: Vocals, Guitar, Drums, Bass, Piano, Other.
+  \item Select the stems by clicking their cards: Vocals, Guitar, Drums, Bass,
+        Piano, Other. A selected card is lit in the stem's colour.
   \item Choose what to export:
         \begin{itemize}
           \item \emph{The selected stems}: one file per stem;
           \item \emph{The song without them}: one file with the song minus the
                 selected stems, for playing or singing along. Keep \emph{Keep
-                what the models missed} ticked for the most natural result.
+                what the models missed} ticked for the most natural result;
+          \item \emph{Both}: the stems and the song without them, from a single
+                separation.
         \end{itemize}
   \item Choose the quality preset (\emph{Automatic} picks the best one for your
         hardware), the format (WAV 24-bit, FLAC or MP3 320~kbps) and the output
         folder.
   \item If you added links, confirm that you own the content or are allowed to
         use it.
-  \item Press \emph{Start}. If a required model is missing, the page tells you
+  \item Check the summary at the bottom (stems and mode) and press
+        \emph{Start}. If a required model is missing, the page tells you
         which one to install.
 \end{enumerate}
 
 \section{The queue}
-\emph{Queue} lists the jobs with a progress bar and the current step of every
-song (download, decode, separation, export). You can pause after the current
-song, resume, cancel, retry failed songs and open the output folder. Jobs that
+\emph{Queue} lists the jobs as cards with their stems, mode and preset. Every
+song has a waveform-style progress bar that fills in the colour of the first
+stem, the current step (downloading, decoding, separating, exporting) and a
+percentage. You can pause after the current song, resume, cancel and retry
+failed songs. \emph{Open folder} opens the output folder in Explorer with the
+first exported file selected (before any file exists it shows the folder
+itself). Jobs that
 were interrupted because the application was closed continue when it starts
 again. Processing a song a second time, or asking for another stem of a song
 already separated, reuses the previous work and finishes in seconds.
 
 \section{File names}
 Stems are saved as \texttt{<song> - <Stem>.<format>} and backing tracks as
-\texttt{<song> - without <stems>.<format>}.
+\texttt{<song> - without <stems>.<format>}; the \emph{Both} mode writes both
+kinds.
 
 \chapter{The mixer}
 \todoin{M7}
@@ -151,8 +181,8 @@ cover-maker separate song.flac --stems vocals --mode without -o backing
 \textbf{Option of \texttt{separate}} & \textbf{Meaning} \\
 \midrule
 \texttt{--stems} & Comma-separated: vocals, guitar, drums, bass, piano, other. \\
-\texttt{--mode} & \texttt{extract} (default) writes the stems; \texttt{without} writes the song without them. \\
-\texttt{--residual} & For \texttt{without}: \texttt{keep} (default) or \texttt{drop}. \\
+\texttt{--mode} & \texttt{extract} (default) writes the stems; \texttt{without} writes the song without them; \texttt{both} writes both. \\
+\texttt{--residual} & For \texttt{without} and \texttt{both}: \texttt{keep} (default) or \texttt{drop}. \\
 \texttt{--preset} & \texttt{auto} (default), \texttt{fast}, \texttt{balanced} or \texttt{max}. \\
 \texttt{--format} & \texttt{wav} (24-bit, default), \texttt{flac} or \texttt{mp3}. \\
 \texttt{--allow-cpu} & Continue on the CPU if the GPU runs out of memory. \\

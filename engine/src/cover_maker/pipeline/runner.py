@@ -65,7 +65,7 @@ def safe_title(name: str) -> str:
 def stems_to_separate(spec: JobSpec) -> set[Stem]:
     """Stems the models must produce for this job."""
     selected = set(spec.stems)
-    if spec.mode is Mode.WITHOUT and spec.residual is ResidualMode.DROP:
+    if spec.mode is not Mode.EXTRACT and spec.residual is ResidualMode.DROP:
         return set(ALL_STEMS)  # the remaining stems are summed
     return selected  # extract, or without+keep (mix minus the selected stems)
 
@@ -412,7 +412,7 @@ class JobRunner:
                 self._store("export", key, str(target))
             outputs[name] = str(target)
 
-        if spec.mode is Mode.EXTRACT:
+        if spec.mode in (Mode.EXTRACT, Mode.BOTH):
             for stem in spec.stems:
                 sha = stems[stem]
                 export(
@@ -420,7 +420,7 @@ class JobRunner:
                     lambda sha=sha: io.read(self.assets.require(sha)),
                     [sha],
                 )
-        else:
+        if spec.mode in (Mode.WITHOUT, Mode.BOTH):
             removed = set(spec.stems)
             label = "without " + ", ".join(stem.value for stem in spec.stems)
 

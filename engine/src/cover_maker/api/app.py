@@ -91,7 +91,8 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         return schemas.ModelOut(
             id=model.id, name=model.name, stems=sorted(model.produces), size_mb=model.size_mb,
             vram_mb_fp16=model.vram_mb_fp16, licence_class=model.licence_class.value,
-            licence=model.licence, source=model.source, notice=model.notice(),
+            licence=model.licence, licence_url=model.licence_url,
+            verified_on=model.verified_on, source=model.source, notice=model.notice(),
             recommended_for=model.recommended_for, installed=svc.installs.is_installed(model),
         )  # fmt: skip
 

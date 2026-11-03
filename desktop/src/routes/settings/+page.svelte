@@ -23,7 +23,9 @@
   }
 </script>
 
-<h1>{t("settings.title")}</h1>
+<header class="page-head">
+  <h1>{t("settings.title")}</h1>
+</header>
 
 <div class="card form">
   <label>

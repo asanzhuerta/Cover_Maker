@@ -17,7 +17,7 @@ const KEY = "cover_maker.settings";
 
 const defaults: Settings = {
   locale: i18n.locale,
-  theme: "system",
+  theme: "dark",
   outputDir: "",
   format: "wav",
   allowCpu: false,
