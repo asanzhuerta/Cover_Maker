@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 from pydantic import BaseModel, Field, field_validator
@@ -47,6 +48,8 @@ class ModelOut(BaseModel):
     vram_mb_fp16: int
     licence_class: str
     licence: str
+    licence_url: str
+    verified_on: date
     source: str
     notice: str
     recommended_for: list[str]

@@ -178,3 +178,9 @@ def test_openapi_lists_endpoints(client: TestClient) -> None:
     paths = client.get("/openapi.json").json()["paths"]
 
     assert {"/jobs", "/models", "/system", "/library"} <= set(paths)
+
+
+def test_openapi_offers_every_export_mode(client: TestClient) -> None:
+    schemas = client.get("/openapi.json").json()["components"]["schemas"]
+
+    assert schemas["Mode"]["enum"] == ["extract", "without", "both"]

@@ -623,7 +623,8 @@
       "Mode": {
         "enum": [
           "extract",
-          "without"
+          "without",
+          "both"
         ],
         "title": "Mode",
         "type": "string"
@@ -644,6 +645,10 @@
           },
           "licence_class": {
             "title": "Licence Class",
+            "type": "string"
+          },
+          "licence_url": {
+            "title": "Licence Url",
             "type": "string"
           },
           "name": {
@@ -676,6 +681,11 @@
             "title": "Stems",
             "type": "array"
           },
+          "verified_on": {
+            "format": "date",
+            "title": "Verified On",
+            "type": "string"
+          },
           "vram_mb_fp16": {
             "title": "Vram Mb Fp16",
             "type": "integer"
@@ -689,6 +699,8 @@
           "vram_mb_fp16",
           "licence_class",
           "licence",
+          "licence_url",
+          "verified_on",
           "source",
           "notice",
           "recommended_for",
