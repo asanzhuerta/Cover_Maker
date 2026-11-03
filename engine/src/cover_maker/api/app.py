@@ -125,7 +125,7 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
                     install(model, svc.paths.models, svc.installs, accepted=True)
                 svc.bus.emit("model.install.done", model=model_id)
             except InstallError as exc:
-                svc.bus.emit("model.install.failed", model=model_id, error=str(exc))
+                svc.bus.emit("model.install.failed", model=model_id, error=str(exc), code=exc.code)
 
         threading.Thread(target=run, daemon=True).start()
         return await _db(lambda: _model_out(model_id))

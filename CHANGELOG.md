@@ -11,6 +11,14 @@ project follows [Semantic Versioning](https://semver.org/).
   with a 1024 px PNG export; the app, installer and taskbar icons and the UI
   favicon are generated from it instead of the Tauri and Svelte defaults.
 
+### Changed (M9.1)
+- While the separation runtime is still installing, the Models and New job
+  pages show a notice (EN/ES) and model installs are disabled; the sidebar box
+  says "Separation runtime installed" when it finishes.
+- A model install that fails because the separation runtime is missing now
+  shows a translated message (the engine sends the `separation_missing` code
+  with `model.install.failed`) instead of the engine's English text.
+
 ### Added (M12: About and credits)
 - About page (sidebar, EN/ES): author profile with placeholder photo, name,
   email, website (example.com), bio and contact links (GitHub, email,
