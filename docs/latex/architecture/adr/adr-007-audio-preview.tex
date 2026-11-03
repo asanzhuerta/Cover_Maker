@@ -1,0 +1,8 @@
+\section{ADR-007: Audio preview engine}
+\textbf{Status:} accepted (M2), implementation in M7. \textbf{Decision:} all
+stems of a song play from a single \texttt{AudioContext}; every
+\texttt{AudioBufferSourceNode} is started with the same \texttt{start(t)} time,
+which keeps them sample-aligned, and mute, solo and volume are gain nodes with
+short ramps to avoid clicks. \textbf{Memory:} decoded float32 buffers cost about
+85 MB per stereo stem for four minutes, so six stems need about 500 MB; the
+mixer will decode lazily and use reduced sample-rate previews for long songs.

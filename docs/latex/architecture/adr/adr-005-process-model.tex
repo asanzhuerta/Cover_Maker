@@ -1,0 +1,12 @@
+\section{ADR-005: Process model and lifecycle}
+\textbf{Status:} accepted (M2). \textbf{Decision:} the shell starts the engine
+with \texttt{CREATE\_NO\_WINDOW}, reads a one-line JSON handshake
+(\texttt{\{"event":"ready","port","pid","version"\}}) from its standard output and
+keeps draining the pipe. The engine process is assigned to a Windows Job Object
+with \texttt{JOB\_OBJECT\_LIMIT\_KILL\_ON\_JOB\_CLOSE}, so the whole process tree
+dies when the shell's handle closes, including when the shell is killed. As a
+second line of defence the engine watches the shell's PID
+(\texttt{COVER\_MAKER\_PARENT\_PID}) and exits when it disappears. The GPU worker
+(M3) is a child of the engine and inherits both protections.
+\textbf{Verification:} \texttt{taskkill /F} on the shell leaves no
+\texttt{python.exe} or \texttt{uv.exe} behind (see the M2 spike report).
