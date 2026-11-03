@@ -6,6 +6,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-04
+
+Second test build: the guided first run, the installer language, model
+download progress, the centred layout and the licence review (M9.2).
+
 ### Added (M9.2: first-run guide and polish)
 - Welcome: step 2 "Preparing your PC" explains the background separation
   runtime with its live status and where to watch it; step 3 shows an
