@@ -90,6 +90,7 @@ class JobRunner:
         self.assets = AssetStore(paths.assets, conn)
         self.installs = Installs(conn)
         self._cancel = threading.Event()
+        self._pause = threading.Event()
 
     # ------------------------------------------------------------ job state
 
@@ -109,6 +110,25 @@ class JobRunner:
         self.events.emit("job.submitted", job=job_id, items=len(spec.inputs))
         return job_id
 
+    def retry(self, job_id: int) -> int:
+        """Make failed and cancelled items pending again. Returns how many."""
+        cursor = self.conn.execute(
+            "UPDATE job_items SET status = 'pending', error = NULL "
+            "WHERE job_id = ? AND status IN ('failed', 'cancelled')",
+            (job_id,),
+        )
+        self._set_job(job_id, "pending")
+        return cursor.rowcount
+
+    def jobs(self, limit: int = 100) -> list[sqlite3.Row]:
+        return self.conn.execute(
+            "SELECT j.id, j.status, j.error, j.created_at, j.updated_at, j.spec_json, "
+            "COUNT(i.id) AS items, SUM(i.status = 'done') AS done, SUM(i.status = 'failed') AS failed "
+            "FROM jobs j LEFT JOIN job_items i ON i.job_id = j.id "
+            "GROUP BY j.id ORDER BY j.id DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+
     def recover(self) -> int:
         """Reset work interrupted by a crash so it runs again. Returns items reset."""
         cursor = self.conn.execute(
@@ -116,6 +136,10 @@ class JobRunner:
         )
         self.conn.execute("UPDATE jobs SET status = 'pending' WHERE status = 'running'")
         return cursor.rowcount
+
+    def pause(self) -> None:
+        """Stop after the current item; the remaining items stay pending."""
+        self._pause.set()
 
     def cancel(self) -> None:
         self._cancel.set()
@@ -150,6 +174,7 @@ class JobRunner:
     def run(self, job_id: int) -> str:
         """Run every pending item of a job. Returns the final job status."""
         self._cancel.clear()
+        self._pause.clear()
         spec = self.job_spec(job_id)
         recipe = recipes.load(spec.preset)
         wanted = stems_to_separate(spec)
@@ -163,7 +188,7 @@ class JobRunner:
         for item in self.items(job_id):
             if item["status"] == "done":
                 continue
-            if self._cancel.is_set():
+            if self._cancel.is_set() or self._pause.is_set():
                 break
             try:
                 self._set_item(item["id"], status="running", error=None)
@@ -185,6 +210,8 @@ class JobRunner:
 
         if self._cancel.is_set():
             status = "cancelled"
+        elif self._pause.is_set():
+            status = "paused"
         elif failures:
             status = "failed"
         else:

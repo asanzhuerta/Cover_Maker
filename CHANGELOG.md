@@ -35,6 +35,11 @@ project follows [Semantic Versioning](https://semver.org/).
   folders, video playlists and imported playlist files (data-export JSON, CSV,
   JSPF, M3U) matched to local files with review and manual correction, and
   the `library` commands.
+- M5 local API: system, models (licence-gated install), jobs (create, list,
+  detail, cancel, pause, resume, retry) and library endpoints; event stream
+  with sequence numbers and replay on reconnect; stable error codes; job thread
+  with its own connection; `serve --demo`; `cover-maker openapi` and generated
+  TypeScript types checked in CI.
 - M11 (DAW integration: VST3 plugin and REAPER extension) added to the roadmap.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.

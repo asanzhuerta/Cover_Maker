@@ -47,11 +47,27 @@ def main(
 
 
 @app.command()
-def serve() -> None:
+def serve(
+    demo: Annotated[
+        bool, typer.Option("--demo", help="Use a fake separator and a separate data folder.")
+    ] = False,
+) -> None:
     """Run the local API for the desktop app (token from COVER_MAKER_TOKEN)."""
     from .api.server import serve as run_server
 
-    run_server()
+    run_server(demo=demo)
+
+
+@app.command()
+def openapi() -> None:
+    """Print the OpenAPI schema of the local API (used to generate TypeScript types)."""
+    import json
+
+    from .api.app import create_app
+    from .api.security import AccessPolicy
+
+    schema = create_app(AccessPolicy(token="x" * 32, host="127.0.0.1:0")).openapi()
+    typer.echo(json.dumps(schema, indent=2, sort_keys=True))
 
 
 @app.command()
@@ -142,36 +158,7 @@ def models_install(
     console.print(f"[green]Installed[/green] {model.id} -> {target}")
 
 
-RIGHTS_NOTICE = (
-    "Only download content you own or are allowed to use. You are responsible for "
-    "complying with your local law and the platform's terms (see DISCLAIMER.md)."
-)
-
-
-def expand_inputs(raw_inputs: list[str]) -> tuple[list[str], int]:
-    """Expand folders into files and playlists into videos. Returns (inputs, online count)."""
-    from .library.matching import scan_folder
-    from .sources.links import InputKind, parse_input
-    from .sources.youtube import playlist_entries
-
-    expanded: list[str] = []
-    online = 0
-    for raw in raw_inputs:
-        parsed = parse_input(raw)
-        if parsed.kind is InputKind.FOLDER:
-            expanded += [str(path) for path in scan_folder(Path(parsed.value))]
-        elif parsed.kind is InputKind.FILE:
-            if not Path(parsed.value).exists():
-                raise FileNotFoundError(f"file not found: {parsed.value}")
-            expanded.append(parsed.value)
-        elif parsed.kind is InputKind.PLAYLIST:
-            entries = playlist_entries(parsed.url)
-            expanded += [f"https://www.youtube.com/watch?v={entry.video_id}" for entry in entries]
-            online += len(entries)
-        else:
-            expanded.append(parsed.url)
-            online += 1
-    return expanded, online
+from .sources.expand import RIGHTS_NOTICE, expand_inputs  # noqa: E402
 
 
 def _parse_stems(value: str) -> list[Stem]:
