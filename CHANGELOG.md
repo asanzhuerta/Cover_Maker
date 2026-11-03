@@ -7,6 +7,9 @@ project follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Model downloads did nothing: the installer ran `python -m
+  audio_separator.utils.cli`, which has no `__main__` guard; it now calls the
+  CLI entry point and reports a clear error when no file is downloaded.
 - The desktop shell starts the engine with `uv run --inexact`, so the optional
   separation runtime (PyTorch, audio-separator) is no longer removed on start.
 
