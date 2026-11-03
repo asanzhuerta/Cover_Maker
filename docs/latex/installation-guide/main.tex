@@ -2,7 +2,7 @@
 \doctitle{Installation Guide}
 \docsubtitle{Installing, updating and removing Cover\_Maker on Windows}
 \docid{CM-IG}
-\docstatus{Skeleton}
+\docstatus{Draft}
 \input{glossary}
 
 \begin{document}
@@ -10,6 +10,8 @@
 
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Document skeleton with system requirements (M0). \\
+  0.2 & 2026-11-03 & Installation, first run, updates, removal and
+  troubleshooting (M9). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -24,11 +26,29 @@ CPU & 4 cores / 8 threads with AVX2 & 6--8 cores, 2022 or newer \\
 RAM & 16 GB & 32 GB \\
 GPU & Optional (NVIDIA Turing or newer, 4 GB) & NVIDIA RTX with 8 GB or more \\
 Disk & SSD, 10 GB free & NVMe, 20 GB free or more \\
+Network & Internet access on first run & --- \\
 \bottomrule
 \end{tabularx}
 
+\CM{} needs the Microsoft Edge WebView2 runtime, which is part of Windows 10
+(since 2021) and Windows 11; the installer downloads it when it is missing.
+For the GPU path, install a current NVIDIA driver; the CUDA libraries come with
+the app.
+
 \chapter{Installation}
-\todoin{M9}
+\begin{enumerate}
+  \item Download \texttt{Cover\_Maker\_<version>\_x64-setup.exe} from the
+  project's GitHub Releases page.
+  \item Run it. The installer works per user and does not ask for administrator
+  rights. It installs into
+  \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker}, the same folder that
+  holds the runtime and your data, and adds a Start-menu entry.
+  \item Windows SmartScreen may warn that the publisher is unknown, because
+  the installer is not code-signed yet. Choose \emph{More info} and \emph{Run
+  anyway} only if you downloaded it from the official Releases page.
+\end{enumerate}
+
+For an unattended install, run the installer with \texttt{/S}.
 
 \section{Disk space}
 The installer is small; most space is used on first run (measured in M2):
@@ -36,21 +56,89 @@ The installer is small; most space is used on first run (measured in M2):
 \toprule
 \textbf{Component} & \textbf{Approximate size} \\
 \midrule
-Python runtime and engine & 0.6~GB \\
-PyTorch, CPU build & included above \\
-PyTorch, NVIDIA CUDA build & 4.2~GB \\
+App and bundled files & 50~MB \\
+Python runtime and engine core & 0.3~GB \\
+ffmpeg and deno & 0.3~GB \\
+Separation runtime, CPU build & 1~GB \\
+Separation runtime, NVIDIA CUDA build & 4.5~GB \\
+Download cache (\texttt{runtime\textbackslash cache}) & about the size of the
+downloads; safe to delete after setup \\
 Separation models (each) & 0.05--0.9~GB \\
 Library & 100--200~MB per processed song \\
 \bottomrule
 \end{tabularx}
 
 \chapter{First run}
-\todoin{M9}
+The first start installs the local engine. A \emph{Setting up Cover\_Maker}
+screen lists the steps and shows their progress:
+\begin{enumerate}
+  \item \textbf{Python 3.12}: a private copy, not added to \texttt{PATH}.
+  \item \textbf{Engine environment}: a virtual environment.
+  \item \textbf{Engine and core libraries}, installed from lock files that pin
+  every package by version and hash.
+  \item \textbf{ffmpeg} (LGPL build, for decoding and MP3) and \textbf{deno}
+  (used by yt-dlp for some video sites), checked against pinned SHA-256 hashes.
+\end{enumerate}
+This takes one to a few minutes, depending on the connection. When it is done
+the usual welcome screen appears.
+
+The \textbf{separation runtime} (PyTorch and audio-separator) is installed
+next, in the background; the sidebar shows \emph{Installing the separation
+runtime} with the chosen build. If an NVIDIA GPU with compute capability 7.5
+or higher (Turing, RTX~20 series or newer) is found, the CUDA build is used
+(about 4~GB of downloads), otherwise the CPU build (under 1~GB). You can go
+through the welcome screen meanwhile; separating needs this step to finish.
+
+Everything is stored in
+\texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash runtime}.
+Models are not part of the setup: you choose and download them on the
+\emph{Models} page after reading their licences.
 
 \chapter{Updates and removal}
-\todoin{M9}
+\section{App updates}
+\emph{Settings $\rightarrow$ Updates $\rightarrow$ Check for updates} asks
+GitHub Releases for a newer version. Updates are signed; the app verifies the
+signature before it installs one, then restarts. After an update the setup
+screen appears briefly while the engine is re-synced with the new lock files;
+the separation runtime is kept and updated in place.
+
+\section{yt-dlp updates}
+Video sites change often. \emph{Check for yt-dlp update} compares the installed
+yt-dlp with the newest release on PyPI and offers \emph{Update}; the engine
+restarts afterwards. The next app update sets yt-dlp back to the version tested
+with that release.
+
+\section{Removal}
+Uninstall from \emph{Settings $\rightarrow$ Apps} or the Start menu. The
+uninstaller always removes the app and its runtime folder. Your library,
+models, database and logs in
+\texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker} are removed only if you
+tick \emph{Delete the application data}. Exported stems in your own folders are
+never touched.
 
 \chapter{Troubleshooting}
-\todoin{M9}
+\begin{description}
+  \item[Setup could not finish.] The error is shown on the setup screen. Check
+  the internet connection, proxy or firewall, then choose \emph{Retry}:
+  completed downloads are kept in the cache, so the retry continues where it
+  stopped. The setup needs access to \texttt{github.com},
+  \texttt{pypi.org}, \texttt{files.pythonhosted.org} and
+  \texttt{download.pytorch.org}.
+  \item[Antivirus blocks the setup.] Some antivirus products quarantine
+  \texttt{uv.exe} or files in the new environment. Allow the folder
+  \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker} and retry.
+  \item[Separation runtime not installed.] The sidebar shows the error and a
+  \emph{Retry} button. The CUDA build is a large download; on slow or metered
+  connections you can force the smaller CPU build by setting the user
+  environment variable \texttt{COVER\_MAKER\_TORCH=cpu} and restarting the app.
+  \item[The GPU is not used.] Update the NVIDIA driver and check that
+  \texttt{nvidia-smi} works in a terminal. If the CPU build was installed
+  first, close the app, delete
+  \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash runtime} and
+  start the app again.
+  \item[Start over.] Close the app and delete the \texttt{runtime} folder; the
+  next start runs the setup again. Your library and models are not affected.
+  \item[Video links stop working.] Use \emph{Check for yt-dlp update}.
+\end{description}
 
 \end{document}

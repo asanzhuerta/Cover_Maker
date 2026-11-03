@@ -4,8 +4,15 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
+  import {
+    bootstrap,
+    needsSetup,
+    retryBootstrap,
+    startBootstrapWatch,
+  } from "$lib/bootstrap.svelte";
   import Icon from "$lib/components/Icon.svelte";
-  import { connect, connection } from "$lib/connection.svelte";
+  import Setup from "$lib/components/Setup.svelte";
+  import { connect, connection, isTauri } from "$lib/connection.svelte";
   import type { IconName } from "$lib/icons";
   import { t, type MessageKey } from "$lib/i18n.svelte";
   import { applyTheme, settings, saveSettings } from "$lib/settings.svelte";
@@ -29,6 +36,7 @@
   onMount(() => {
     saveSettings();
     applyTheme(settings.theme);
+    if (isTauri()) void startBootstrapWatch();
     void connect();
     if (!settings.welcomed && page.url.pathname !== "/welcome") {
       void goto(resolve("/welcome"));
@@ -44,56 +52,111 @@
   );
 </script>
 
-<div class="shell" class:bare={page.url.pathname === "/welcome"}>
-  <aside>
-    <div class="brand">
-      <svg viewBox="0 0 28 28" width="30" height="30" aria-hidden="true">
-        <defs>
-          <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#8f7bff" />
-            <stop offset="1" stop-color="#ff5c8a" />
-          </linearGradient>
-        </defs>
-        <rect width="28" height="28" rx="8" fill="url(#logo-gradient)" />
-        {#each logo as level, i (i)}
-          <rect
-            x={4.6 + i * 3.4}
-            y={14 - level * 8}
-            width="2"
-            height={level * 16}
-            rx="1"
-            fill="#fff"
-          />
+{#if needsSetup(bootstrap.status)}
+  <Setup />
+{:else}
+  <div class="shell" class:bare={page.url.pathname === "/welcome"}>
+    <aside>
+      <div class="brand">
+        <svg viewBox="0 0 28 28" width="30" height="30" aria-hidden="true">
+          <defs>
+            <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8f7bff" />
+              <stop offset="1" stop-color="#ff5c8a" />
+            </linearGradient>
+          </defs>
+          <rect width="28" height="28" rx="8" fill="url(#logo-gradient)" />
+          {#each logo as level, i (i)}
+            <rect
+              x={4.6 + i * 3.4}
+              y={14 - level * 8}
+              width="2"
+              height={level * 16}
+              rx="1"
+              fill="#fff"
+            />
+          {/each}
+        </svg>
+        <span>Cover<span class="muted">_</span>Maker</span>
+      </div>
+      <nav>
+        {#each nav as item (item.href)}
+          <a
+            href={resolve(item.href)}
+            class:active={page.url.pathname === item.href}
+            ><Icon name={item.icon} />{t(item.label)}</a
+          >
         {/each}
-      </svg>
-      <span>Cover<span class="muted">_</span>Maker</span>
-    </div>
-    <nav>
-      {#each nav as item (item.href)}
-        <a
-          href={resolve(item.href)}
-          class:active={page.url.pathname === item.href}
-          ><Icon name={item.icon} />{t(item.label)}</a
-        >
-      {/each}
-    </nav>
-    <div
-      class="engine {connection.status}"
-      data-testid="engine-status"
-      title={connection.error}
-    >
-      <span class="dot"></span>
-      <span>{statusLabel}</span>
-      {#if connection.demo}<span class="badge accent">{t("engine.demo")}</span
-        >{/if}
-    </div>
-  </aside>
-  <main>
-    {@render children()}
-  </main>
-</div>
+      </nav>
+      {#if bootstrap.status.separation.state === "running"}
+        <div class="runtime" data-testid="separation-install">
+          <span class="spinner"></span>
+          <span
+            >{t("bootstrap.separation")}
+            <span class="muted">({bootstrap.status.torch ?? "…"})</span></span
+          >
+        </div>
+      {:else if bootstrap.status.separation.state === "failed"}
+        <div class="runtime failed" title={bootstrap.status.separation.error}>
+          <span>{t("bootstrap.separationFailed")}</span>
+          <button class="small" onclick={() => void retryBootstrap()}
+            >{t("bootstrap.retry")}</button
+          >
+        </div>
+      {/if}
+      <div
+        class="engine {connection.status}"
+        data-testid="engine-status"
+        title={connection.error}
+      >
+        <span class="dot"></span>
+        <span>{statusLabel}</span>
+        {#if connection.demo}<span class="badge accent">{t("engine.demo")}</span
+          >{/if}
+      </div>
+    </aside>
+    <main>
+      {@render children()}
+    </main>
+  </div>
+{/if}
 
 <style>
+  .runtime {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+
+  .runtime.failed {
+    color: var(--danger);
+  }
+
+  .runtime + .engine {
+    margin-top: 0;
+  }
+
+  .spinner {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    border-top-color: var(--accent);
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .shell {
     display: grid;
     grid-template-columns: 232px 1fr;

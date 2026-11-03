@@ -1,0 +1,60 @@
+\CM{} runs on one Windows PC, for one user, without administrator rights
+(figure~\ref{fig:deployment}). The NSIS installer puts the shell and the
+bundled runtime files (in \texttt{bundle\textbackslash}) into
+\texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker}, the Tauri default for a
+per-user install; the runtime and the user data that the app creates live in
+sub-folders of the same directory.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node/.style={draw, rounded corners, align=left, inner sep=6pt, font=\small},
+  box/.style={draw, rounded corners, dashed, inner sep=8pt},
+  >=Stealth]
+  \node[node] (shell) {\textbf{Shell} \texttt{cover-maker-desktop.exe}\\
+    Tauri 2, WebView2, Svelte UI};
+  \node[node, below=0.5cm of shell] (bundle) {\textbf{Bundled runtime files}\\
+    \texttt{uv.exe}, engine wheel,\\ \texttt{pylock.*.toml}, \texttt{deps.json}};
+  \node[box, fit=(shell)(bundle), label=above:{\small Installed files}] {};
+
+  \node[node, right=2.6cm of shell] (engine) {\textbf{Engine} \texttt{cover-maker serve}\\
+    FastAPI on 127.0.0.1, GPU worker};
+  \node[node, below=0.5cm of engine] (venv) {\textbf{Runtime} \texttt{runtime\textbackslash}\\
+    Python 3.12, venv, PyTorch,\\ ffmpeg, deno, uv cache};
+  \node[node, below=0.5cm of venv] (data) {\textbf{User data}\\
+    library, models, database, logs};
+  \node[box, fit=(engine)(venv)(data),
+    label=above:{\small Created at run time}] {};
+
+  \node[node, below=1.4cm of bundle] (net) {\textbf{Internet} (first run and updates)\\
+    python-build-standalone, PyPI, download.pytorch.org,\\
+    GitHub Releases (updates, ffmpeg mirror), deno releases};
+
+  \draw[->] (shell) -- node[above, font=\footnotesize] {HTTP + WS} (engine);
+  \draw[->] (bundle) -- node[below, font=\footnotesize, sloped] {bootstrap} (venv);
+  \draw[->] (net.north) -- node[right, font=\footnotesize] {downloads} ++(0,1.1);
+\end{tikzpicture}
+\caption{Deployment on the user's PC.}\label{fig:deployment}
+\end{figure}
+
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Artefact} & \textbf{Origin and update path} \\
+\midrule
+Shell and bundled files & GitHub Releases; Tauri updater with a signed
+\texttt{latest.json} \\
+Python packages & \texttt{pylock.*.toml} exported from \texttt{uv.lock},
+re-synced after each app update \\
+yt-dlp & Locked with the engine; optional upgrade from Settings \\
+ffmpeg, deno & Pinned URL and SHA-256 in \texttt{deps.json} \\
+Models & Downloaded by the user from their original source (never bundled) \\
+\bottomrule
+\end{tabularx}
+
+The release workflow (\texttt{.github/workflows/release.yml}) runs on a
+\texttt{v*} tag: it stages the bundled files with
+\texttt{desktop/scripts/prepare-runtime.ps1}, builds and signs the installer
+and the updater manifest, mirrors the ffmpeg archive and attaches the six PDF
+documents to a draft release, which a maintainer publishes by hand. The
+uninstaller removes the runtime folder and, only when \emph{Delete the
+application data} is ticked, the user data too. ADR-006 explains the bootstrap.

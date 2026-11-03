@@ -1,0 +1,108 @@
+name: Release
+
+# Builds the signed NSIS installer and the updater manifest on a version tag
+# and attaches them, the ffmpeg mirror and the six PDF documents to a draft
+# GitHub release. Publishing the draft stays a manual step.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  installer:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: desktop/pnpm-lock.yaml
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+
+      - name: Check the tag matches the app version
+        shell: pwsh
+        run: |
+          $version = (Get-Content desktop/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          if ("v$version" -ne "${{ github.ref_name }}") {
+            throw "tag ${{ github.ref_name }} does not match tauri.conf.json version $version"
+          }
+
+      - name: Stage uv, the engine wheel and the lock files
+        shell: pwsh
+        run: ./desktop/scripts/prepare-runtime.ps1
+
+      - name: Fetch the ffmpeg build to mirror
+        shell: pwsh
+        run: |
+          $deps = Get-Content desktop/src-tauri/resources/runtime/deps.json -Raw | ConvertFrom-Json
+          New-Item -ItemType Directory -Force mirror | Out-Null
+          $file = Join-Path mirror $deps.ffmpeg.file
+          Invoke-WebRequest $deps.ffmpeg.urls[-1] -OutFile $file
+          $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $deps.ffmpeg.sha256) { throw "ffmpeg hash mismatch: $hash" }
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: desktop
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: desktop
+          tauriScript: pnpm tauri
+          args: --config src-tauri/tauri.release.conf.json
+          tagName: ${{ github.ref_name }}
+          releaseName: Cover_Maker ${{ github.ref_name }}
+          releaseBody: See CHANGELOG.md for the changes in this release.
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          includeUpdaterJson: true
+
+      - name: Attach the ffmpeg mirror
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" (Get-ChildItem mirror/*.zip).FullName --clobber
+        shell: pwsh
+
+  docs:
+    name: Documentation PDFs
+    needs: installer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Compile all documents
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: "*/main.tex"
+          working_directory: docs/latex
+          work_in_root_file_dir: true
+          latexmk_use_lualatex: true
+          pre_compile: git config --global --add safe.directory '*'
+      - name: Attach the PDFs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p pdf
+          for d in docs/latex/*/; do
+            name=$(basename "$d")
+            [ -f "$d/main.pdf" ] && cp "$d/main.pdf" "pdf/cover-maker-$name.pdf"
+          done
+          ls -l pdf
+          test "$(ls pdf/*.pdf | wc -l)" -eq 6
+          gh release upload "${{ github.ref_name }}" pdf/*.pdf --clobber

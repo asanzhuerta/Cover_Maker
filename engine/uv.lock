@@ -7,6 +7,10 @@ resolution-markers = [
 supported-markers = [
     "sys_platform == 'win32'",
 ]
+conflicts = [[
+    { package = "cover-maker", extra = "cpu" },
+    { package = "cover-maker", extra = "cu128" },
+]]
 
 [[package]]
 name = "absl-py"
@@ -72,7 +76,9 @@ dependencies = [
     { name = "scipy" },
     { name = "six" },
     { name = "soundfile" },
-    { name = "torch" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
     { name = "tqdm" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/2f/a2/3cfea84520ec72de00b0f1173b542bb615ad048177f6c8b55d61bc8b9ba5/audio_separator-0.48.0.tar.gz", hash = "sha256:5f80f4032aa844d5e8b5c958a440c3d702bf03e8a2c163bf199e023e999ea695", size = 381157, upload-time = "2026-10-29T17:22:06.975Z" }
@@ -213,10 +219,18 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+cpu = [
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" } },
+]
+cu128 = [
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" } },
+]
 separation = [
     { name = "audio-separator", extra = ["cpu"] },
     { name = "audioread" },
-    { name = "torch" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
 ]
 
 [package.dev-dependencies]
@@ -242,12 +256,14 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6" },
     { name = "rich", specifier = ">=14.0" },
     { name = "soundfile", specifier = ">=0.13" },
-    { name = "torch", marker = "extra == 'separation'", specifier = ">=2.8", index = "https://download.pytorch.org/whl/cu128" },
+    { name = "torch", marker = "extra == 'cpu'", specifier = ">=2.8", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "cover-maker", extra = "cpu" } },
+    { name = "torch", marker = "extra == 'cu128'", specifier = ">=2.8", index = "https://download.pytorch.org/whl/cu128", conflict = { package = "cover-maker", extra = "cu128" } },
+    { name = "torch", marker = "extra == 'separation'", specifier = ">=2.8" },
     { name = "typer", specifier = ">=0.16" },
     { name = "uvicorn", specifier = ">=0.38" },
     { name = "yt-dlp", extras = ["default"], specifier = ">=2026.10.26" },
 ]
-provides-extras = ["separation"]
+provides-extras = ["separation", "cpu", "cu128"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -300,7 +316,9 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cython" },
     { name = "numpy" },
-    { name = "torch" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/be/96/8ca5acf5ecfd4108aa6f345cef171f2fda0c081cf0e7430671712586f172/diffq_fixed-0.2.4.tar.gz", hash = "sha256:cbc906b76fa23d1cf3c0ae517fbab744d9624980a068fe7fbb00dede1d83208d", size = 189695, upload-time = "2024-11-07T21:33:26.204Z" }
 wheels = [
@@ -462,7 +480,9 @@ name = "julius"
 version = "0.2.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "torch" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1d/c6/5c2aea2b11ead1680bb5b17c996def31f8ccade471cada37cdb93855e06f/julius-0.2.8.tar.gz", hash = "sha256:d691e651200930affea4f6c849c26e95fec846087281ae3d1a7757eac90253d5", size = 48081, upload-time = "2026-06-03T16:05:34.52Z" }
 wheels = [
@@ -676,8 +696,11 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "onnx-weekly" },
-    { name = "torch" },
-    { name = "torchvision" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "torchvision", version = "0.26.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torchvision", version = "0.29.2", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-11-cover-maker-cpu' or extra != 'extra-11-cover-maker-cu128'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1e/bb/6301c1ea4c8f8859aff60d2d58a038fd68f9cdb507d1c60776d4e3b93b1f/onnx2torch_py313-1.6.0.tar.gz", hash = "sha256:d27b54c7e170f12ad252fe186e6cab8f3cade8ee4e596682acc5a3afddadb753", size = 49594, upload-time = "2025-04-11T03:52:32.88Z" }
 wheels = [
@@ -953,7 +976,9 @@ version = "0.6.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "einops" },
-    { name = "torch" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/99/7e/8dbb4a950a99ec2f459ec1eb73818c519b56a1fee8a9a98f7a57460a0d5a/rotary_embedding_torch-0.6.5.tar.gz", hash = "sha256:a3623274c559e0215922edc7cd14068d5a64dea1ca469e1ecd642b293ee8af78", size = 7114, upload-time = "2024-08-20T20:52:44.155Z" }
 wheels = [
@@ -1117,30 +1142,94 @@ wheels = [
 name = "torch"
 version = "2.11.0+cu128"
 source = { registry = "https://download.pytorch.org/whl/cu128" }
+resolution-markers = [
+    "sys_platform == 'win32'",
+]
 dependencies = [
-    { name = "filelock" },
-    { name = "fsspec" },
-    { name = "jinja2" },
-    { name = "networkx" },
-    { name = "setuptools" },
-    { name = "sympy" },
-    { name = "typing-extensions" },
+    { name = "filelock", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "fsspec", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "jinja2", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "networkx", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "setuptools", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "sympy", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "typing-extensions", marker = "extra == 'extra-11-cover-maker-cu128'" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-win_amd64.whl", hash = "sha256:7c78215c3af4f62e63f2b2e360f1722fc719b0853c7ac22666483d9810613a4c", upload-time = "2026-04-27T17:43:49Z" },
 ]
 
 [[package]]
+name = "torch"
+version = "2.15.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform == 'win32'",
+]
+dependencies = [
+    { name = "filelock", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "fsspec", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "jinja2", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "networkx", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "setuptools", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "sympy", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "typing-extensions", marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/0b/a57c0b58a64b7a197dc40fc464bb96c0de867f95a2b1cbb3ec9e54414fde/torch-2.15.0-cp312-cp312-win_amd64.whl", hash = "sha256:f2bd0a3709a7493a6ef2ac5a654111242a854439f7558f910b6b653b56f7504d", size = 126738207, upload-time = "2026-10-28T15:16:40.586Z" },
+]
+
+[[package]]
+name = "torch"
+version = "2.15.0+cpu"
+source = { registry = "https://download.pytorch.org/whl/cpu" }
+resolution-markers = [
+    "sys_platform == 'win32'",
+]
+dependencies = [
+    { name = "filelock", marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "fsspec", marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "jinja2", marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "networkx", marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "setuptools", marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "sympy", marker = "extra == 'extra-11-cover-maker-cpu'" },
+    { name = "typing-extensions", marker = "extra == 'extra-11-cover-maker-cpu'" },
+]
+wheels = [
+    { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.15.0%2Bcpu-cp312-cp312-win_amd64.whl", hash = "sha256:5af9fb357790db09e62484b12032304f046c22c4b1895ca88c4cf5987ea369ca", upload-time = "2026-10-28T13:18:45Z" },
+    { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.15.0%2Bcpu-cp312-cp312-win_arm64.whl", hash = "sha256:fe17318e964a6eb4b1380fd6dcd5405264af3e54b10bce7abcce5fa701a3f049", upload-time = "2026-10-28T13:18:48Z" },
+]
+
+[[package]]
 name = "torchvision"
 version = "0.26.0"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform == 'win32'",
+]
 dependencies = [
-    { name = "numpy" },
-    { name = "pillow" },
-    { name = "torch" },
+    { name = "numpy", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "pillow", marker = "extra == 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.11.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "extra == 'extra-11-cover-maker-cu128'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1c/a9/c272623a0f735c35f0f6cd6dc74784d4f970e800cf063bb76687895a2ab9/torchvision-0.26.0-cp312-cp312-win_amd64.whl", hash = "sha256:7993c01648e7c61d191b018e84d38fe0825c8fcb2720cd0f37caf7ba14404aa1", size = 4255155, upload-time = "2026-03-23T18:12:32.652Z" },
+]
+
+[[package]]
+name = "torchvision"
+version = "0.29.2"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform == 'win32'",
+]
+dependencies = [
+    { name = "numpy", marker = "extra == 'extra-11-cover-maker-cpu' or extra != 'extra-11-cover-maker-cu128'" },
+    { name = "pillow", marker = "extra == 'extra-11-cover-maker-cpu' or extra != 'extra-11-cover-maker-cu128'" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'extra-11-cover-maker-cpu' and extra != 'extra-11-cover-maker-cu128') or (extra == 'extra-11-cover-maker-cpu' and extra == 'extra-11-cover-maker-cu128')" },
+    { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-11-cover-maker-cpu'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cf/9a/a728c3af061bff5e0c8a8389b6dfe99646f8290a2f6a5f8fb624a0c15b92/torchvision-0.29.2-py3-none-win_amd64.whl", hash = "sha256:5812c312d4401c3587a045fa4c6228d982ebc4faa9b472275d11afe5852e24f9", size = 1379121, upload-time = "2026-10-28T15:21:30.558Z" },
 ]
 
 [[package]]

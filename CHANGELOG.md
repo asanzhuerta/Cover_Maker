@@ -15,6 +15,32 @@ project follows [Semantic Versioning](https://semver.org/).
   `desktop/src/lib/about.json` (photo in `desktop/static/about/avatar.svg`).
 - User Manual chapter "About and credits".
 
+### Added (M9: installer, first run and updates)
+- The per-user NSIS installer bundles `uv.exe`, the engine wheel and three
+  `pylock.toml` locks (core, CPU, CUDA cu128) exported from `uv.lock`
+  (`desktop/scripts/prepare-runtime.ps1`).
+- First-run bootstrap in the shell with a setup screen: Python 3.12, the engine
+  venv, ffmpeg (LGPL) and deno with pinned SHA-256 into
+  `%LOCALAPPDATA%\Cover_Maker\runtime`; then the separation runtime in the
+  background (CUDA when the GPU has compute capability 7.5 or higher, else
+  CPU), with Retry. Release builds run the engine from the runtime; debug
+  builds keep using the repository engine.
+- The venv is re-synced with `uv pip sync` after an app update.
+- Settings → Updates: Tauri updater (signed `latest.json` on GitHub Releases)
+  and "Check for yt-dlp update".
+- The uninstaller removes the runtime and, when "Delete the application data"
+  is ticked, the user data.
+- `release.yml`: on a `v*` tag, builds and signs the installer, mirrors the
+  ffmpeg archive and attaches the six PDF documents to a draft release.
+- Docs: Installation Guide (installation, first run, updates and removal,
+  troubleshooting), deployment view and final ADR-006; third-party notices for
+  the shipped components.
+
+### Changed
+- `engine/pyproject.toml` has mutually exclusive `cpu` and `cu128` extras that
+  pick the PyTorch build; development uses
+  `uv sync --extra separation --extra cu128` (or `--extra cpu`).
+
 ### Fixed
 - Model downloads did nothing: the installer ran `python -m
   audio_separator.utils.cli`, which has no `__main__` guard; it now calls the
