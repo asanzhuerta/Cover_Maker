@@ -1,0 +1,182 @@
+\documentclass{covermaker}
+\doctitle{Project Plan}
+\docsubtitle{Scope, milestones, risks and way of working for Cover\_Maker v2}
+\docid{CM-PP}
+\docstatus{Draft}
+\input{glossary}
+
+\begin{document}
+\cmtitlepage
+
+\begin{revisionhistory}
+  0.1 & 2026-11-03 & Initial plan approved at the start of the v2 rewrite (M0). \\
+\end{revisionhistory}
+
+\tableofcontents
+
+\chapter{Introduction}
+
+\section{Purpose}
+This document defines the scope, approach, milestones, risks and way of working
+for version 2 of \CM{}. It is updated at the end of every milestone.
+
+\section{Background}
+Version 0.1 of \CM{} was a command-line tool that read a playlist from a music
+streaming service, looked up each track on a video platform, downloaded the
+audio and split it into two \glspl{stem} (vocals and instrumental). A review of
+that version found functional defects (identity based on file names, wrong
+matches, no tests) and, more importantly, significant legal risk in acquiring
+audio from streaming platforms. Version 2 is a complete rewrite with a new
+product definition; the old history was archived privately.
+
+\section{Product vision}
+\cmnote{\CM{} is a Windows desktop application that separates the user's own
+audio files into the stems they choose (vocals, guitar, drums, bass, piano,
+other) or renders the ``track without X'' so musicians can practise, rehearse
+or record covers. Everything runs locally.}
+
+\section{Target users}
+Musicians who practise or record covers, and audio producers working on a
+mid-range Windows PC or laptop, usually with a dedicated GPU and often with a
+\gls{daw} open at the same time.
+
+\chapter{Scope}
+
+\section{In scope for version 1.0}
+\begin{itemize}
+  \item Selection of stems to extract or to remove (``track without X''), with
+        the option to keep or drop the \gls{residual}.
+  \item Local files by drag and drop, and watched folders processed incrementally.
+  \item Preview mixer with synced waveforms, mute, solo and volume per stem.
+  \item Job queue with per-song progress, pause, cancel and retry.
+  \item Library with re-sync: only new or changed inputs are processed again.
+  \item Import of playlist files (streaming data export JSON, CSV, JSPF, M3U)
+        matched against the local library, with manual match correction.
+  \item Creative Commons catalogues with licence display and attribution.
+  \item Model catalogue with licence class and provenance; no default model.
+  \item Hardware detection, presets per hardware tier and a low-impact mode
+        for \gls{daw} coexistence.
+  \item English and Spanish user interface; installer with auto-update.
+\end{itemize}
+
+\section{Out of scope for version 1.0 (backlog)}
+Lead/backing vocal separation, drum sub-stems, de-reverb, practice tools
+(tempo and pitch change, A--B loops, DAW export with tempo and key), metadata
+and cover-art tagging, ONNX/DirectML acceleration for AMD and Intel GPUs, and
+cloud separation backends.
+
+\section{Explicitly excluded}
+Any feature that downloads or captures audio from streaming platforms, or uses
+their \glspl{api} or web pages to locate music (see \autoref{ch:legal}).
+
+\chapter{Legal by design}\label{ch:legal}
+A risk analysis (not legal advice) carried out before the rewrite concluded that
+stem separation of lawfully obtained audio carries very low risk, while
+acquiring audio from streaming platforms does not: in Spain the private-copy
+exception requires a lawful source and cannot override technological protection
+measures, German courts have treated a major video platform's stream protection
+as an effective \gls{tpm}, and a large streaming service's developer terms
+forbid using its metadata to obtain music elsewhere. The full analysis with
+sources is kept in the Compliance chapter of the Architecture \& Design
+Document. The following constraints are binding for the whole project:
+
+\input{generated/constraints}
+
+\chapter{Target hardware}
+The reference machine is a mid-range producer PC or laptop. Many PCs sold for
+audio work have no dedicated GPU, so CPU operation is a first-class case.
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\linewidth}{@{}lYYY@{}}
+\toprule
+ & \textbf{Minimum} & \textbf{Recommended} & \textbf{Ideal} \\
+\midrule
+CPU & 4 cores / 8 threads, AVX2 & 6--8 cores, 2022 or newer & 8+ cores \\
+RAM & 16 GB & 32 GB & 32--64 GB \\
+GPU & Optional; NVIDIA Turing+ with 4 GB & NVIDIA RTX, 8--12 GB & NVIDIA RTX, 12--16 GB \\
+Disk & SSD, 10 GB free & NVMe, 20 GB+ free & NVMe \\
+\bottomrule
+\end{tabularx}
+\caption{Hardware reference specification.}
+\end{table}
+
+Estimated separation times per hardware tier are recorded in the Architecture
+\& Design Document and will be replaced by measurements from milestone M1. The
+development machine (RTX 3050 Laptop, 4 GB \gls{vram}) sits on the minimum GPU
+tier.
+
+\chapter{Approach}
+
+\section{Lifecycle}
+The project is incremental and risk-driven. The two riskiest technical unknowns
+(model performance on low-\gls{vram} hardware, and the desktop shell lifecycle
+and first-run bootstrap) are tackled as spikes in M1 and M2 before the
+production engine is built. Every milestone ends with something usable or
+demonstrable. There is no fixed deadline; effort is estimated relatively
+(S, M, L).
+
+\section{Workflow}
+\begin{enumerate}
+  \item A GitHub milestone and its issues are created when work on it starts.
+  \item Work happens on a branch named \texttt{mX/<slug>}, pushed frequently.
+  \item A pull request is opened with green \gls{ci}; it is merged after the
+        product owner's approval and tagged as a pre-release.
+\end{enumerate}
+
+\section{Definition of done}
+Tests added and passing; lint and type checks clean; affected documents and the
+changelog updated in the same pull request; a reproducible demo described in the
+pull request; legal-by-design checklist ticked.
+
+\section{Tooling}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Area} & \textbf{Tools} \\
+\midrule
+Engine & Python 3.12, uv, ruff, pyright (strict), pytest \\
+Desktop & Tauri 2, Rust (MSVC), SvelteKit + TypeScript, pnpm, eslint, prettier, vitest \\
+Documentation & LaTeX (LuaLaTeX, latexmk), YAML sources rendered by \texttt{gen\_tex.py} \\
+Delivery & GitHub Actions (Windows for code, Ubuntu for documents), GitHub Releases \\
+\bottomrule
+\end{tabularx}
+
+\chapter{Milestones}
+\input{generated/milestones}
+
+\chapter{Risk management}
+Risks are reviewed at the end of each milestone.
+\input{generated/risks}
+
+\chapter{Documentation plan}
+\begin{tabularx}{\linewidth}{@{}lYll@{}}
+\toprule
+\textbf{Document} & \textbf{Basis} & \textbf{Starts} & \textbf{Closes} \\
+\midrule
+Project Plan & Simplified PMBOK & M0 & every milestone \\
+Software Requirements Specification & ISO/IEC/IEEE 29148 & M0 & M8 \\
+Architecture \& Design Document & arc42, C4, ADRs & M0 & M9 \\
+Test Plan \& Report & ISO/IEC/IEEE 29119-3 (light) & M3 & M10 \\
+Installation Guide & -- & M2 & M9 \\
+User Manual & -- & M3 & M10 \\
+\bottomrule
+\end{tabularx}
+
+\chapter{Decision log}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Topic} & \textbf{Decision (2026-11-03)} \\
+\midrule
+Distribution & Public open source, MIT licence, Windows only. \\
+Repository & Same repository; v0.1 history archived privately and replaced. \\
+Desktop stack & Tauri 2 + Svelte 5 shell, Python engine over local HTTP + WebSocket. \\
+Audio sources & Local files, watched folders, playlist-file import, CC catalogues. \\
+Streaming platforms & No download, no API use, no scraping. \\
+Models & No default model; user chooses and accepts each licence. \\
+Documentation & LaTeX in English, six documents, built in CI. \\
+Interface & English and Spanish. \\
+\bottomrule
+\end{tabularx}
+
+\printnoidxglossaries
+\end{document}

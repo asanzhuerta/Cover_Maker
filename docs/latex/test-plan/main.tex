@@ -1,0 +1,45 @@
+\documentclass{covermaker}
+\doctitle{Test Plan and Test Report}
+\docsubtitle{Test strategy, environments and results (after ISO/IEC/IEEE 29119-3)}
+\docid{CM-TP}
+\docstatus{Skeleton}
+\input{glossary}
+
+\begin{document}
+\cmtitlepage
+
+\begin{revisionhistory}
+  0.1 & 2026-11-03 & Document skeleton (M0). \\
+\end{revisionhistory}
+
+\tableofcontents
+
+\chapter{Introduction}
+This document describes how \CM{} is tested and reports the results of each
+release.
+
+\chapter{Test strategy}
+\section{Test levels}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Level} & \textbf{Scope} \\
+\midrule
+Unit & Engine modules (pytest), UI logic (vitest), shell (cargo test). \\
+Integration & Pipeline with a fake separator and synthetic audio; real model on CPU nightly. \\
+API & REST and WebSocket contract, authentication checks. \\
+End-to-end & UI against the engine in demo mode (Playwright); desktop smoke test. \\
+Installation & Clean Windows Sandbox install, CPU and CUDA paths. \\
+\bottomrule
+\end{tabularx}
+
+\section{Test data}
+Only synthetic audio or Creative Commons material with attribution (CON-04).
+
+\chapter{Environments}
+\todoin{M3}
+
+\chapter{Test report}
+\todoin{M10}
+
+\printnoidxglossaries
+\end{document}
