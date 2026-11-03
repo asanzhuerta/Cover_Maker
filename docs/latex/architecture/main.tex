@@ -120,6 +120,28 @@ left pending by a closed app are queued again on start-up. \texttt{cover-maker
 serve --demo} uses a fake separator and its own data folder, for UI development
 and end-to-end tests without a GPU.
 
+\chapter{User interface (M6)}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Part} & \textbf{Responsibility} \\
+\midrule
+\texttt{routes/} & Pages: welcome (terms, hardware, model choice), new job, queue, models, settings. \\
+\texttt{lib/connection} & Gets port and token from the shell (\texttt{engine\_info}); creates the typed API client; keeps the event socket open and reconnects with replay. \\
+\texttt{lib/jobs} & Pure functions deriving item progress from events (unit-tested). \\
+\texttt{lib/i18n} & English and Spanish dictionaries with a reactive locale. \\
+\texttt{lib/settings} & Preferences in local storage: language, theme, output folder, format, CPU fallback. \\
+\texttt{lib/components} & Stem picker and model list with the licence dialog. \\
+\bottomrule
+\end{tabularx}
+
+Files and folders come from native dialogs (\texttt{tauri-plugin-dialog}) or from
+the window's drag-and-drop event, which provides real paths. For development the
+UI can run in a normal browser against \texttt{cover-maker serve --demo} by
+setting \texttt{VITE\_ENGINE\_PORT} and \texttt{VITE\_ENGINE\_TOKEN}; the
+engine's Origin allowlist includes the development server. The whole flow
+(welcome, model list, job creation, live queue progress, language and theme
+switches) was verified this way against the demo engine.
+
 \chapter{Runtime view}
 \section{Engine start-up (M2)}
 \begin{enumerate}
