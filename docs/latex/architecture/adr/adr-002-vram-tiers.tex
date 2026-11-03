@@ -1,0 +1,14 @@
+\section{ADR-002: Hardware tiers and out-of-memory fallback}
+\textbf{Status:} accepted (M1). \textbf{Decision:} the engine classifies the
+machine as CPU, 4, 6, 8 or 12+~GB from \texttt{nvidia-smi} (NVIDIA Turing or
+newer only), without loading PyTorch. Separation always starts in half
+precision (fp16) on the GPU; on an out-of-memory error it retries with 8~s and
+then 4~s chunks, and only falls back to the CPU when the user allows it.
+\textbf{Rationale:} on the 4~GB reference GPU, fp32 runs of the vocal models
+spilled into shared system memory through the driver's
+\emph{CUDA Sysmem Fallback} instead of failing, becoming 2.5--5.5 times slower
+(Kim Mel-Band: 72.8~s per audio minute in fp32 against 13.1~s in fp16). fp16
+avoids the spill and is the fastest setting for every RoFormer tested.
+\textbf{Consequences:} the engine records throughput per run so a sudden slowdown
+can be reported as a likely memory spill; CPU fallback is opt-in because RoFormer
+models are about 13 times slower on the reference CPU.

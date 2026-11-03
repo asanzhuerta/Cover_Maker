@@ -30,6 +30,20 @@ Disk & SSD, 10 GB free & NVMe, 20 GB free or more \\
 \chapter{Installation}
 \todoin{M9}
 
+\section{Disk space}
+The installer is small; most space is used on first run (measured in M2):
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Component} & \textbf{Approximate size} \\
+\midrule
+Python runtime and engine & 0.6~GB \\
+PyTorch, CPU build & included above \\
+PyTorch, NVIDIA CUDA build & 4.2~GB \\
+Separation models (each) & 0.05--0.9~GB \\
+Library & 100--200~MB per processed song \\
+\bottomrule
+\end{tabularx}
+
 \chapter{First run}
 \todoin{M9}
 

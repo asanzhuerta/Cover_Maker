@@ -26,6 +26,11 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run pyright
       - run: uv run pytest --cov=cover_maker --cov-report=term
+      - name: Check the API contract used by the UI is up to date
+        shell: bash
+        run: |
+          uv run cover-maker openapi > ../desktop/src/lib/api/openapi.json
+          git diff --exit-code -- ../desktop/src/lib/api/openapi.json
 
   frontend:
     name: Desktop UI (Svelte)

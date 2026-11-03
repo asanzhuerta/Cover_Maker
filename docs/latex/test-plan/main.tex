@@ -36,7 +36,33 @@ Installation & Clean Windows Sandbox install, CPU and CUDA paths. \\
 Only synthetic audio or Creative Commons material with attribution (CON-04).
 
 \chapter{Environments}
-\todoin{M3}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Environment} & \textbf{Use} \\
+\midrule
+CI, \texttt{windows-latest} & Engine unit and integration tests with the fake separator, UI and shell tests. \\
+CI, \texttt{ubuntu-latest} & Documentation build and generated-table check. \\
+Reference machine & Real-model runs and benchmarks: i5-11400H, 16~GB, RTX 3050 Laptop 4~GB. \\
+\bottomrule
+\end{tabularx}
+
+\chapter{Engine test inventory (M3)}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Area} & \textbf{What is verified} \\
+\midrule
+Mixer & Property tests (hypothesis): keep = mix minus removed stems; drop = sum of
+remaining stems; equal results for perfect separation; padding; peak protection. \\
+Recipes & Every preset covers the six stems with catalogue models; pruning
+(vocals-only Max skips the instrumental pass); invalid graphs are rejected. \\
+Catalogue and hardware & Licence class and notice for every model;
+\texttt{nvidia-smi} parsing; hardware tiers. \\
+Job runner & Extract and without-X outputs; residual modes; second run does no
+separation; a new stem reuses an earlier separation; Max ensemble order; missing
+model, missing input; crash recovery; out-of-memory ladder; opt-in CPU fallback. \\
+Store & Migrations to the latest schema. \\
+\bottomrule
+\end{tabularx}
 
 \chapter{Test report}
 \todoin{M10}

@@ -4,7 +4,7 @@
 \textbf{ID} & \textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Mitigation} \\
 \midrule
 \endhead
-R-01 & Best multi-stem model does not fit in 4 GB VRAM or is too slow on CPU & medium & high & M1 benchmark spike, hardware tiers, half precision and smaller chunks, Demucs for CPU. \\
+R-01 & Best multi-stem model does not fit in 4 GB VRAM or is too slow on CPU & low & high & Measured in M1 - SW fits 4 GB in fp16 (about 80 s per song); hardware tiers, fp16 first, smaller chunks as fallback, Demucs on CPU. \\
 R-02 & Licence or provenance problems with model weights & high & high & No default model, licence classes in the catalogue, recorded acceptance, weights never hosted. \\
 R-03 & Tauri shell and Python engine lifecycle issues (orphan processes) & medium & medium & Windows Job Object, parent watchdog, M2 kill test. \\
 R-04 & First-run download of PyTorch (about 2.5 GB) fails behind proxies or antivirus & medium & high & Two-phase bootstrap, resumable downloads, CPU option. \\

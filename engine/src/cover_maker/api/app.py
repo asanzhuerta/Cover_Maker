@@ -1,0 +1,334 @@
+"""FastAPI application for the local engine API.
+
+All endpoints are ``async`` and hand database work to one worker thread at a
+time (``_db``), so the API's SQLite connection is never used concurrently.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import threading
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any, TypeVar
+
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse
+
+from .. import __version__
+from ..audio.io import ffmpeg_path
+from ..domain import JobSpec
+from ..pipeline.runner import RightsNotConfirmed, resolve_preset, stems_to_separate
+from ..separation import recipes
+from ..separation.hardware import Tier
+from ..separation.installer import InstallError, install, separation_available
+from ..sources.expand import expand_inputs
+from ..sources.links import InputKind, UnsupportedInput, parse_input
+from ..sources.youtube import DownloadError
+from . import schemas
+from .engine import EngineService
+from .security import AccessMiddleware, AccessPolicy
+
+HEARTBEAT_SECONDS = 15.0
+T = TypeVar("T")
+
+
+class ApiProblem(Exception):
+    def __init__(
+        self, status: int, code: str, detail: str, models: list[str] | None = None
+    ) -> None:
+        super().__init__(detail)
+        self.status, self.code, self.detail, self.models = status, code, detail, models or []
+
+
+def create_app(policy: AccessPolicy, service: EngineService | None = None) -> FastAPI:
+    app = FastAPI(title="Cover_Maker engine", version=__version__, docs_url=None, redoc_url=None)
+    lock = threading.Lock()
+
+    async def _db(fn: Callable[[], T]) -> T:
+        def locked() -> T:
+            with lock:
+                return fn()
+
+        return await asyncio.to_thread(locked)
+
+    def engine() -> EngineService:
+        if service is None:
+            raise HTTPException(503, "engine service not configured")
+        return service
+
+    @app.exception_handler(ApiProblem)
+    async def problem(_: Any, exc: ApiProblem) -> JSONResponse:  # pyright: ignore[reportUnusedFunction]
+        body = schemas.ApiError(detail=exc.detail, code=exc.code, models=exc.models)
+        return JSONResponse(body.model_dump(), status_code=exc.status)
+
+    # ------------------------------------------------------------ system
+
+    @app.get("/health", response_model=schemas.Health)
+    async def health() -> schemas.Health:  # pyright: ignore[reportUnusedFunction]
+        return schemas.Health(status="ok", version=__version__)
+
+    @app.get("/system", response_model=schemas.SystemOut)
+    async def system(refresh: bool = False) -> schemas.SystemOut:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        hw = await asyncio.to_thread(svc.hardware, refresh)
+        gpu = schemas.GpuOut(**hw.gpu.__dict__) if hw.gpu else None
+        return schemas.SystemOut(
+            version=__version__, data_dir=str(svc.paths.home), cpu=hw.cpu_name,
+            physical_cores=hw.physical_cores, ram_gb=hw.ram_gb, gpu=gpu, tier=hw.tier.value,
+            recommended_preset=resolve_preset("auto", hw.tier is not Tier.CPU).value,
+            free_disk_gb=hw.free_disk_gb, on_battery=hw.on_battery, daws=hw.daws,
+            ffmpeg=ffmpeg_path() is not None,
+            separation_available=svc.demo or separation_available(), demo=svc.demo,
+        )  # fmt: skip
+
+    # ------------------------------------------------------------ models
+
+    def _model_out(model_id: str) -> schemas.ModelOut:
+        svc = engine()
+        model = svc.catalog.get(model_id)
+        return schemas.ModelOut(
+            id=model.id, name=model.name, stems=sorted(model.produces), size_mb=model.size_mb,
+            vram_mb_fp16=model.vram_mb_fp16, licence_class=model.licence_class.value,
+            licence=model.licence, source=model.source, notice=model.notice(),
+            recommended_for=model.recommended_for, installed=svc.installs.is_installed(model),
+        )  # fmt: skip
+
+    @app.get("/models", response_model=list[schemas.ModelOut])
+    async def models() -> list[schemas.ModelOut]:  # pyright: ignore[reportUnusedFunction]
+        return await _db(lambda: [_model_out(m) for m in engine().catalog.models])
+
+    @app.post("/models/{model_id}/install", status_code=202, response_model=schemas.ModelOut)
+    async def install_model(model_id: str, body: schemas.InstallRequest) -> schemas.ModelOut:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        if model_id not in svc.catalog.models:
+            raise ApiProblem(404, "unknown_model", f"unknown model {model_id}")
+        if not body.accept_licence:
+            raise ApiProblem(400, "licence_not_accepted", "the licence notice must be accepted")
+        model = svc.catalog.get(model_id)
+
+        def run() -> None:
+            svc.bus.emit("model.install.started", model=model_id)
+            try:
+                if svc.demo:
+                    with lock:
+                        svc.installs.record(model, None)
+                else:
+                    install(model, svc.paths.models, svc.installs, accepted=True)
+                svc.bus.emit("model.install.done", model=model_id)
+            except InstallError as exc:
+                svc.bus.emit("model.install.failed", model=model_id, error=str(exc))
+
+        threading.Thread(target=run, daemon=True).start()
+        return await _db(lambda: _model_out(model_id))
+
+    # ------------------------------------------------------------ jobs
+
+    def _job_out(row: Any) -> schemas.JobOut:
+        spec = JobSpec.model_validate_json(row["spec_json"])
+        return schemas.JobOut(
+            id=row["id"], status=row["status"], error=row["error"], created_at=row["created_at"],
+            updated_at=row["updated_at"], items=row["items"] or 0, done=row["done"] or 0,
+            failed=row["failed"] or 0, stems=spec.stems, mode=spec.mode, preset=spec.preset.value,
+            output_dir=str(spec.output_dir),
+        )  # fmt: skip
+
+    def _job_detail(job_id: int) -> schemas.JobDetail:
+        svc = engine()
+        row = next((r for r in svc.jobs.jobs(10_000) if r["id"] == job_id), None)
+        if row is None:
+            raise ApiProblem(404, "unknown_job", f"job {job_id} does not exist")
+        items = [
+            schemas.ItemOut(
+                id=i["id"],
+                ordinal=i["ordinal"],
+                input=i["input_path"],
+                status=i["status"],
+                current_step=i["current_step"],
+                outputs=json.loads(i["outputs_json"] or "{}"),
+                error=i["error"],
+            )
+            for i in svc.jobs.items(job_id)
+        ]
+        return schemas.JobDetail(**_job_out(row).model_dump(), item_list=items)
+
+    @app.get("/jobs", response_model=list[schemas.JobOut])
+    async def list_jobs(limit: int = 50) -> list[schemas.JobOut]:  # pyright: ignore[reportUnusedFunction]
+        return await _db(lambda: [_job_out(r) for r in engine().jobs.jobs(limit)])
+
+    @app.get("/jobs/{job_id}", response_model=schemas.JobDetail)
+    async def get_job(job_id: int) -> schemas.JobDetail:  # pyright: ignore[reportUnusedFunction]
+        return await _db(lambda: _job_detail(job_id))
+
+    @app.post(
+        "/jobs", status_code=201, response_model=schemas.JobCreated,
+        responses={400: {"model": schemas.ApiError}, 409: {"model": schemas.ApiError}},
+    )  # fmt: skip
+    async def create_job(body: schemas.JobRequest) -> schemas.JobCreated:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        try:
+            expanded, online = await asyncio.to_thread(expand_inputs, body.inputs)
+        except (UnsupportedInput, FileNotFoundError) as exc:
+            raise ApiProblem(400, "bad_input", str(exc)) from exc
+        except DownloadError as exc:
+            raise ApiProblem(400, "playlist_unavailable", str(exc)) from exc
+        if not expanded:
+            raise ApiProblem(400, "no_audio", "no audio files were found in the inputs")
+        if online and not body.rights_confirmed:
+            raise ApiProblem(400, "rights_required", str(RightsNotConfirmed()))
+        hw = await asyncio.to_thread(svc.hardware)
+        spec = JobSpec(
+            inputs=expanded, stems=body.stems, mode=body.mode, residual=body.residual,
+            preset=resolve_preset(body.preset, hw.tier is not Tier.CPU), output_dir=body.output_dir,
+            output_format=body.output_format, allow_cpu_fallback=body.allow_cpu_fallback,
+            rights_confirmed=body.rights_confirmed,
+        )  # fmt: skip
+
+        def submit() -> int:
+            needed = recipes.load(spec.preset).models(stems_to_separate(spec))
+            missing = [
+                m for m in sorted(needed) if not svc.installs.is_installed(svc.catalog.get(m))
+            ]
+            if missing:
+                raise ApiProblem(
+                    409, "model_not_installed", "install the required models first", missing
+                )
+            return svc.submit(spec)
+
+        job_id = await _db(submit)
+        return schemas.JobCreated(job_id=job_id, items=len(expanded), online_items=online)
+
+    @app.post("/jobs/{job_id}/cancel", status_code=202)
+    async def cancel_job(job_id: int) -> dict[str, int]:  # pyright: ignore[reportUnusedFunction]
+        engine().cancel()
+        return {"job_id": job_id}
+
+    @app.post("/jobs/{job_id}/pause", status_code=202)
+    async def pause_job(job_id: int) -> dict[str, int]:  # pyright: ignore[reportUnusedFunction]
+        engine().pause()
+        return {"job_id": job_id}
+
+    @app.post("/jobs/{job_id}/resume", status_code=202)
+    async def resume_job(job_id: int) -> dict[str, int]:  # pyright: ignore[reportUnusedFunction]
+        engine().resume(job_id)
+        return {"job_id": job_id}
+
+    @app.post("/jobs/{job_id}/retry", response_model=schemas.Count)
+    async def retry_job(job_id: int) -> schemas.Count:  # pyright: ignore[reportUnusedFunction]
+        return schemas.Count(count=await _db(lambda: engine().retry(job_id)))
+
+    # ------------------------------------------------------------ library
+
+    def _collection_out(row: Any) -> schemas.CollectionOut:
+        return schemas.CollectionOut(
+            id=row["id"], kind=row["kind"], source=row["source"], title=row["title"],
+            items=row["items"], synced_at=row["synced_at"],
+        )  # fmt: skip
+
+    @app.get("/library", response_model=list[schemas.CollectionOut])
+    async def collections() -> list[schemas.CollectionOut]:  # pyright: ignore[reportUnusedFunction]
+        return await _db(lambda: [_collection_out(r) for r in engine().library.collections()])
+
+    @app.post("/library/folders", status_code=201, response_model=schemas.Created)
+    async def add_folder(body: schemas.FolderRequest) -> schemas.Created:  # pyright: ignore[reportUnusedFunction]
+        if not body.path.is_dir():
+            raise ApiProblem(400, "bad_input", f"not a folder: {body.path}")
+        return schemas.Created(id=await _db(lambda: engine().library.add_folder(body.path)))
+
+    @app.post("/library/playlists", status_code=201, response_model=schemas.Created)
+    async def add_playlist(body: schemas.PlaylistRequest) -> schemas.Created:  # pyright: ignore[reportUnusedFunction]
+        try:
+            parsed = parse_input(body.link, prefer_playlist=True)
+        except UnsupportedInput as exc:
+            raise ApiProblem(400, "bad_input", str(exc)) from exc
+        if parsed.kind is not InputKind.PLAYLIST:
+            raise ApiProblem(400, "bad_input", "that link is not a playlist")
+        return schemas.Created(
+            id=await _db(lambda: engine().library.add_video_playlist(parsed.value))
+        )
+
+    @app.post("/library/imports", status_code=201, response_model=list[schemas.Created])
+    async def import_playlist(body: schemas.ImportRequest) -> list[schemas.Created]:  # pyright: ignore[reportUnusedFunction]
+        if not body.file.is_file():
+            raise ApiProblem(400, "bad_input", f"file not found: {body.file}")
+        ids = await _db(lambda: engine().library.import_playlist_file(body.file, body.search))
+        return [schemas.Created(id=i) for i in ids]
+
+    @app.post("/library/{collection_id}/sync", response_model=schemas.SyncOut)
+    async def sync(collection_id: int) -> schemas.SyncOut:  # pyright: ignore[reportUnusedFunction]
+        def run() -> schemas.SyncOut:
+            try:
+                result = engine().library.sync(collection_id)
+            except KeyError as exc:
+                raise ApiProblem(404, "unknown_collection", str(exc)) from exc
+            except (FileNotFoundError, DownloadError) as exc:
+                raise ApiProblem(400, "sync_failed", str(exc)) from exc
+            return schemas.SyncOut(**result.__dict__)
+
+        return await _db(run)
+
+    @app.get("/library/{collection_id}/items", response_model=list[schemas.CollectionItemOut])
+    async def collection_items(collection_id: int) -> list[schemas.CollectionItemOut]:  # pyright: ignore[reportUnusedFunction]
+        def run() -> list[schemas.CollectionItemOut]:
+            return [
+                schemas.CollectionItemOut(
+                    id=r["id"],
+                    position=r["position"],
+                    title=r["title"],
+                    artist=r["artist"],
+                    duration_s=r["duration_s"],
+                    input=r["input"],
+                    score=r["score"],
+                    status=r["status"],
+                    manual=bool(r["manual"]),
+                )
+                for r in engine().library.items(collection_id)
+            ]
+
+        return await _db(run)
+
+    @app.put("/library/items/{item_id}/match", status_code=204)
+    async def set_match(item_id: int, body: schemas.MatchRequest) -> None:  # pyright: ignore[reportUnusedFunction]
+        if body.path is not None and not Path(body.path).is_file():
+            raise ApiProblem(400, "bad_input", f"file not found: {body.path}")
+        await _db(lambda: engine().library.set_match(item_id, body.path))
+
+    # ------------------------------------------------------------ events
+
+    @app.websocket("/events")
+    async def events(websocket: WebSocket) -> None:  # pyright: ignore[reportUnusedFunction]
+        await websocket.accept()
+        try:
+            hello: Any = json.loads(await asyncio.wait_for(websocket.receive_text(), timeout=5))
+        except (TimeoutError, json.JSONDecodeError, WebSocketDisconnect):
+            await websocket.close(code=4401)
+            return
+        if not (isinstance(hello, dict) and policy.token_ok(hello.get("token"))):  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+            await websocket.close(code=4401)
+            return
+        since = hello.get("since")  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        await websocket.send_json({"seq": 0, "type": "hello", "version": __version__})
+        if service is None:
+            await websocket.close()
+            return
+        subscriber, missed = service.events.subscribe(
+            asyncio.get_running_loop(), since if isinstance(since, int) else None
+        )
+        try:
+            for event in missed:
+                await websocket.send_json(event)
+            while True:
+                try:
+                    event = await asyncio.wait_for(subscriber.queue.get(), HEARTBEAT_SECONDS)
+                except TimeoutError:
+                    await websocket.send_json({"seq": 0, "type": "heartbeat"})
+                    continue
+                await websocket.send_json(event)
+        except (WebSocketDisconnect, RuntimeError):
+            return
+        finally:
+            service.events.unsubscribe(subscriber)
+
+    app.add_middleware(AccessMiddleware, policy=policy)
+    return app

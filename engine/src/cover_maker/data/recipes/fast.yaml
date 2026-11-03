@@ -1,0 +1,10 @@
+# Fast: one Demucs pass for all six stems (good on CPU-only machines).
+nodes:
+  - {id: demucs, model: htdemucs-6s, input: mix}
+outputs:
+  vocals: demucs.vocals
+  guitar: demucs.guitar
+  drums: demucs.drums
+  bass: demucs.bass
+  piano: demucs.piano
+  other: demucs.other

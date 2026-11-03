@@ -1,0 +1,75 @@
+[
+  {
+    "config": "htdemucs.yaml|cpu|fp32|default",
+    "model": "htdemucs.yaml",
+    "device": "cpu",
+    "precision": "fp32",
+    "chunk_s": null,
+    "label": "",
+    "extra": {},
+    "status": "ok",
+    "load_s": 0.23,
+    "sep_s": 20.37,
+    "s_per_audio_min": 40.75,
+    "torch_peak_mb": 0,
+    "sdr": {
+      "bass": 8.94,
+      "drums": 11.26,
+      "other": 6.76,
+      "vocals": 7.85
+    },
+    "sdr_mean": 8.7,
+    "peak_rss_mb": 1712,
+    "peak_vram_mb": 0
+  },
+  {
+    "config": "htdemucs_6s.yaml|cpu|fp32|default",
+    "model": "htdemucs_6s.yaml",
+    "device": "cpu",
+    "precision": "fp32",
+    "chunk_s": null,
+    "label": "",
+    "extra": {},
+    "status": "ok",
+    "load_s": 0.19,
+    "sep_s": 16.77,
+    "s_per_audio_min": 33.54,
+    "torch_peak_mb": 0,
+    "sdr": {
+      "bass": 8.06,
+      "drums": 11.22,
+      "other": -7.58,
+      "vocals": 11.57,
+      "guitar": 0.02,
+      "piano": 0.01
+    },
+    "sdr_mean": 3.88,
+    "peak_rss_mb": 1821,
+    "peak_vram_mb": 1
+  },
+  {
+    "config": "BS-Roformer-SW.ckpt|cpu|fp32|8s",
+    "model": "BS-Roformer-SW.ckpt",
+    "device": "cpu",
+    "precision": "fp32",
+    "chunk_s": 8.0,
+    "label": "",
+    "extra": {},
+    "status": "ok",
+    "load_s": 3.13,
+    "sep_s": 129.65,
+    "s_per_audio_min": 259.31,
+    "torch_peak_mb": 0,
+    "sdr": {
+      "bass": 0.36,
+      "drums": 6.74,
+      "other": -10.54,
+      "vocals": 0.0,
+      "guitar": 0.0,
+      "piano": 5.28
+    },
+    "sdr_mean": 0.31,
+    "peak_rss_mb": 2753,
+    "peak_vram_mb": 22
+  }
+]

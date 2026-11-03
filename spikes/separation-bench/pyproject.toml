@@ -1,0 +1,26 @@
+[project]
+name = "separation-bench"
+version = "0.0.0"
+description = "M1 spike: benchmark separation models on the target hardware."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "audio-separator[cpu]==0.48.0",
+    "torch>=2.8",
+    "numpy>=2",
+    "soundfile>=0.12",
+    "psutil>=6",
+    "audioread>=3",
+    "nvidia-ml-py>=12",
+]
+
+[tool.uv]
+package = false
+environments = ["sys_platform == 'win32'"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

@@ -101,8 +101,13 @@ functional:
 non_functional:
   - id: NFR-PERF-01
     title: GPU throughput
-    text: On an NVIDIA GPU with 8 GB VRAM, the Balanced preset should separate a 4-minute song in under 2 minutes (target to be confirmed by the M1 benchmarks).
-    priority: should
+    text: On an NVIDIA GPU with 4 GB VRAM or more, the Balanced preset shall separate a 4-minute song into six stems in under 2 minutes (measured in M1 at about 80 s on an RTX 3050 Laptop 4 GB).
+    priority: must
+    milestone: M1
+  - id: NFR-PERF-04
+    title: CPU-only operation
+    text: Without a usable GPU, the Fast preset shall separate a 4-minute song in under 5 minutes on a 6-core CPU from 2021 or newer (measured in M1 at about 2.5 minutes).
+    priority: must
     milestone: M1
   - id: NFR-PERF-02
     title: Low-memory fallback
