@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import { resolve } from "$app/paths";
   import type { Schemas } from "$lib/api/client";
   import Icon from "$lib/components/Icon.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
@@ -214,7 +215,16 @@
             />
             <div class="state">
               <span class="step">{stepLabel(item)}</span>
-              <span class="pct">{Math.round(progress * 100)}%</span>
+              {#if item.status === "done"}
+                <a
+                  class="mixer-link"
+                  href={resolve("/mixer/[item]", { item: String(item.id) })}
+                  data-testid="open-mixer"
+                  ><Icon name="mix" size={13} />{t("queue.mixer")}</a
+                >
+              {:else}
+                <span class="pct">{Math.round(progress * 100)}%</span>
+              {/if}
             </div>
             {#if item.error}<div class="error item-error">
                 {item.error}
@@ -363,6 +373,14 @@
   .pct {
     font-variant-numeric: tabular-nums;
     font-weight: 600;
+  }
+
+  .mixer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 600;
+    text-decoration: none;
   }
 
   .running .pct {
