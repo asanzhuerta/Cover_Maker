@@ -767,6 +767,12 @@
             "description": "Stem id -> asset id of every produced stem.",
             "title": "Stems",
             "type": "object"
+          },
+          "title": {
+            "default": "",
+            "description": "Track title used for rendered file names.",
+            "title": "Title",
+            "type": "string"
           }
         },
         "required": [
@@ -775,6 +781,64 @@
           "stems"
         ],
         "title": "PreviewOut",
+        "type": "object"
+      },
+      "RenderOut": {
+        "properties": {
+          "gain_db": {
+            "description": "Gain applied to avoid clipping (0 or negative).",
+            "title": "Gain Db",
+            "type": "number"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "peak_dbfs": {
+            "description": "Peak before protection (may be above 0 dBFS).",
+            "title": "Peak Dbfs",
+            "type": "number"
+          }
+        },
+        "required": [
+          "path",
+          "peak_dbfs",
+          "gain_db"
+        ],
+        "title": "RenderOut",
+        "type": "object"
+      },
+      "RenderRequest": {
+        "properties": {
+          "gains": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.",
+            "propertyNames": {
+              "$ref": "#/components/schemas/Stem"
+            },
+            "title": "Gains",
+            "type": "object"
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputFormat"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to the job's format."
+          },
+          "residual": {
+            "$ref": "#/components/schemas/ResidualMode",
+            "default": "keep",
+            "description": "keep: add back what no stem captured; drop: stems only."
+          }
+        },
+        "title": "RenderRequest",
         "type": "object"
       },
       "ResidualMode": {
@@ -1121,6 +1185,55 @@
           }
         },
         "summary": "Preview"
+      }
+    },
+    "/items/{item_id}/render": {
+      "post": {
+        "operationId": "render_items__item_id__render_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Render"
       }
     },
     "/jobs": {

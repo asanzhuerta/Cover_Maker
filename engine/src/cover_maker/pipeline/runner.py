@@ -14,6 +14,7 @@ import sqlite3
 import tempfile
 import threading
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -55,6 +56,36 @@ class ModelNotInstalled(RuntimeError):
             f"Run: cover-maker models install {model.id}"
         )
         self.model = model
+
+
+@dataclass(frozen=True)
+class MixSources:
+    title: str
+    mix: Path
+    stems: dict[Stem, Path]
+    spec: JobSpec
+
+
+def render_custom_mix(
+    sources: MixSources,
+    gains: dict[Stem, float],
+    residual: ResidualMode,
+    fmt: str | None = None,
+) -> tuple[Path, mixer.RenderResult]:
+    """Render mixer settings to a new file in the job's output folder (never overwrites)."""
+    fmt = fmt or sources.spec.output_format.value
+    mix = io.read(sources.mix)
+    stems = {stem: io.read(path) for stem, path in sources.stems.items()}
+    result = mixer.protect_peaks(mixer.mix_gains(mix, stems, gains, residual))
+    folder = sources.spec.output_dir
+    base = f"{sources.title} - custom mix"
+    target = folder / f"{base}.{fmt}"
+    counter = 2
+    while target.exists():
+        target = folder / f"{base} ({counter}).{fmt}"
+        counter += 1
+    io.write(result.audio, target, fmt)
+    return target, result
 
 
 def safe_title(name: str) -> str:
@@ -280,12 +311,17 @@ class JobRunner:
             produced[node.id] = self._run_node(node, mix_sha, produced, spec)
 
         stems = {stem: produced[recipe.output_ref(stem).node][stem] for stem in wanted}
-        self._record_preview(item_id, mix_sha, recipe, produced)
+        self._record_preview(item_id, title, mix_sha, recipe, produced)
         self._step(job_id, item_id, "export")
         return self._export(title, mix_sha, stems, spec)
 
     def _record_preview(
-        self, item_id: int, mix_sha: str, recipe: Recipe, produced: dict[str, dict[Stem, str]]
+        self,
+        item_id: int,
+        title: str,
+        mix_sha: str,
+        recipe: Recipe,
+        produced: dict[str, dict[Stem, str]],
     ) -> None:
         """Remember the mix and every final stem produced, for the preview mixer."""
         available: dict[str, str] = {}
@@ -294,7 +330,27 @@ class JobRunner:
             sha = produced.get(ref.node, {}).get(ref.stem)
             if sha:
                 available[stem.value] = sha
-        self._set_item(item_id, preview_json=json.dumps({"mix": mix_sha, "stems": available}))
+        preview = {"title": title, "mix": mix_sha, "stems": available}
+        self._set_item(item_id, preview_json=json.dumps(preview))
+
+    def preview(self, item_id: int) -> dict[str, Any] | None:
+        row = self.conn.execute(
+            "SELECT preview_json FROM job_items WHERE id = ?", (item_id,)
+        ).fetchone()
+        return json.loads(row["preview_json"]) if row and row["preview_json"] else None
+
+    def mix_sources(self, item_id: int) -> MixSources | None:
+        """Files the mixer needs for an item (store access only; rendering is separate)."""
+        preview = self.preview(item_id)
+        if preview is None:
+            return None
+        job = self.conn.execute("SELECT job_id FROM job_items WHERE id = ?", (item_id,)).fetchone()
+        return MixSources(
+            title=safe_title(preview.get("title") or "track"),
+            mix=self.assets.require(preview["mix"]),
+            stems={Stem(k): self.assets.require(v) for k, v in preview["stems"].items()},
+            spec=self.job_spec(job["job_id"]),
+        )
 
     def _download(self, job_id: int, item_id: int, video_id: str) -> tuple[Path, str]:
         """Download a video's audio once; later runs reuse the cached file."""

@@ -20,7 +20,12 @@ from .. import __version__
 from ..audio.io import ffmpeg_path
 from ..audio.peaks import compute_peaks
 from ..domain import JobSpec
-from ..pipeline.runner import RightsNotConfirmed, resolve_preset, stems_to_separate
+from ..pipeline.runner import (
+    RightsNotConfirmed,
+    render_custom_mix,
+    resolve_preset,
+    stems_to_separate,
+)
 from ..separation import recipes
 from ..separation.hardware import Tier
 from ..separation.installer import InstallError, install, separation_available
@@ -294,17 +299,31 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
     @app.get("/items/{item_id}/preview", response_model=schemas.PreviewOut)
     async def preview(item_id: int) -> schemas.PreviewOut:  # pyright: ignore[reportUnusedFunction]
         def run() -> schemas.PreviewOut:
-            row = (
-                engine()
-                .conn.execute("SELECT preview_json FROM job_items WHERE id = ?", (item_id,))
-                .fetchone()
-            )
-            if row is None or not row["preview_json"]:
+            data = engine().jobs.preview(item_id)
+            if data is None:
                 raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to preview yet")
-            data = json.loads(row["preview_json"])
-            return schemas.PreviewOut(item_id=item_id, mix=data["mix"], stems=data["stems"])
+            return schemas.PreviewOut(
+                item_id=item_id, title=data.get("title", ""), mix=data["mix"], stems=data["stems"]
+            )
 
         return await _db(run)
+
+    @app.post("/items/{item_id}/render", response_model=schemas.RenderOut)
+    async def render(item_id: int, body: schemas.RenderRequest) -> schemas.RenderOut:  # pyright: ignore[reportUnusedFunction]
+        sources = await _db(lambda: engine().jobs.mix_sources(item_id))
+        if sources is None:
+            raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to mix yet")
+        fmt = body.output_format.value if body.output_format else None
+        try:
+            # Rendering only reads library files, so it runs outside the store lock.
+            target, result = await asyncio.to_thread(
+                render_custom_mix, sources, body.gains, body.residual, fmt
+            )
+        except (RuntimeError, OSError) as exc:
+            raise ApiProblem(500, "render_failed", str(exc)) from exc
+        return schemas.RenderOut(
+            path=str(target), peak_dbfs=max(result.peak_dbfs, -200.0), gain_db=result.gain_db
+        )
 
     def _asset_path(sha: str) -> Path:
         # Only files registered in the library can be served (no arbitrary paths).

@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/items/{item_id}/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Render */
+        post: operations["render_items__item_id__render_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/jobs": {
         parameters: {
             query?: never;
@@ -653,6 +670,44 @@ export interface components {
             stems: {
                 [key: string]: string;
             };
+            /**
+             * Title
+             * @description Track title used for rendered file names.
+             * @default
+             */
+            title: string;
+        };
+        /** RenderOut */
+        RenderOut: {
+            /**
+             * Gain Db
+             * @description Gain applied to avoid clipping (0 or negative).
+             */
+            gain_db: number;
+            /** Path */
+            path: string;
+            /**
+             * Peak Dbfs
+             * @description Peak before protection (may be above 0 dBFS).
+             */
+            peak_dbfs: number;
+        };
+        /** RenderRequest */
+        RenderRequest: {
+            /**
+             * Gains
+             * @description Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.
+             */
+            gains?: {
+                [key: string]: number;
+            };
+            /** @description Defaults to the job's format. */
+            output_format?: components["schemas"]["OutputFormat"] | null;
+            /**
+             * @description keep: add back what no stem captured; drop: stems only.
+             * @default keep
+             */
+            residual: components["schemas"]["ResidualMode"];
         };
         /**
          * ResidualMode
@@ -833,6 +888,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    render_items__item_id__render_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderOut"];
                 };
             };
             /** @description Validation Error */

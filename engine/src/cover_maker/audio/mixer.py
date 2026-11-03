@@ -59,6 +59,32 @@ def without(
     return result
 
 
+def mix_gains(
+    mix: Audio,
+    stems: Mapping[Stem, Audio],
+    gains: Mapping[Stem, float],
+    residual: ResidualMode,
+) -> Audio:
+    """Return a custom mix: every stem scaled by its linear gain (default 1).
+
+    The residual (the mix minus every stem) is added back at unity gain with
+    ``residual=keep`` and left out with ``drop``. All gains at 1 with ``keep``
+    give the original mix; gain 0 on a stem matches :func:`without`. The
+    preview mixer in the desktop app uses the same formula.
+    """
+    frames = len(mix)
+    fitted = {stem: _fit(signal, frames) for stem, signal in stems.items()}
+    if residual is ResidualMode.KEEP:
+        result = mix.astype(np.float32, copy=True)
+        for stem, signal in fitted.items():
+            result += (gains.get(stem, 1.0) - 1.0) * signal
+        return result
+    result = np.zeros_like(mix, dtype=np.float32)
+    for stem, signal in fitted.items():
+        result += gains.get(stem, 1.0) * signal
+    return result
+
+
 def protect_peaks(audio: Audio) -> RenderResult:
     """Reduce gain only when the signal would clip; never clip silently."""
     peak = float(np.max(np.abs(audio))) if audio.size else 0.0
