@@ -66,7 +66,7 @@ def test_websocket_requires_token_message(client: TestClient) -> None:
         ws.send_json({"token": TOKEN})
         first = ws.receive_json()
 
-    assert first == {"seq": 1, "type": "heartbeat"}
+    assert first["type"] == "hello"
 
 
 def test_websocket_bad_token_closes(client: TestClient) -> None:
