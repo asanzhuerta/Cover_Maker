@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  justInstalled,
   needsSetup,
   phaseProgress,
+  separationReady,
   stepLabel,
   type BootstrapStatus,
   type PhaseStatus,
@@ -43,5 +45,33 @@ describe("bootstrap", () => {
   it("labels known steps", () => {
     expect(stepLabel("ffmpeg")).toBe("bootstrap.step.ffmpeg");
     expect(stepLabel("mystery")).toBeNull();
+  });
+});
+
+describe("separation runtime", () => {
+  const status = (
+    mode: BootstrapStatus["mode"],
+    state: PhaseStatus["state"],
+  ): BootstrapStatus => ({
+    mode,
+    core: phase({ state: "done" }),
+    separation: phase({ state }),
+    torch: "cu128",
+  });
+
+  it("is ready in development or once phase B is done", () => {
+    expect(separationReady(status("development", "pending"))).toBe(true);
+    expect(separationReady(status("runtime", "running"))).toBe(false);
+    expect(separationReady(status("runtime", "failed"))).toBe(false);
+    expect(separationReady(status("runtime", "done"))).toBe(true);
+  });
+
+  it("reports the install only when it finishes in this session", () => {
+    const done = status("runtime", "done");
+    expect(justInstalled(status("runtime", "running"), done)).toBe(true);
+    expect(justInstalled(status("runtime", "failed"), done)).toBe(true);
+    // Already installed on a previous start: nothing to announce.
+    expect(justInstalled(status("runtime", "pending"), done)).toBe(false);
+    expect(justInstalled(done, done)).toBe(false);
   });
 });

@@ -103,6 +103,14 @@
             >{t("bootstrap.retry")}</button
           >
         </div>
+      {:else if bootstrap.separationInstalled}
+        <div class="runtime ready" data-testid="separation-ready">
+          <Icon name="check" size={14} strokeWidth={3} />
+          <span
+            >{t("bootstrap.separationReady")}
+            <span class="muted">({bootstrap.status.torch ?? "…"})</span></span
+          >
+        </div>
       {/if}
       <div
         class="engine {connection.status}"
@@ -136,6 +144,10 @@
 
   .runtime.failed {
     color: var(--danger);
+  }
+
+  .runtime.ready {
+    color: var(--ok);
   }
 
   .runtime + .engine {

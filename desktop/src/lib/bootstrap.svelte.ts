@@ -32,14 +32,22 @@ const done: PhaseStatus = {
   error: "",
 };
 
-/** Outside the desktop app (browser development) there is nothing to install. */
-export const bootstrap = $state<{ status: BootstrapStatus }>({
+/**
+ * Outside the desktop app (browser development) there is nothing to install.
+ * `separationInstalled` turns true when phase B finishes during this session,
+ * so the sidebar can say so instead of just hiding its indicator.
+ */
+export const bootstrap = $state<{
+  status: BootstrapStatus;
+  separationInstalled: boolean;
+}>({
   status: {
     mode: "development",
     core: { ...done },
     separation: { ...done },
     torch: null,
   },
+  separationInstalled: false,
 });
 
 const STEP_LABELS: Record<string, MessageKey> = {
@@ -63,6 +71,24 @@ export function phaseProgress(phase: PhaseStatus): number | null {
   return Math.min(1, (phase.index - 1 + within) / phase.total);
 }
 
+/** True when models can be installed and jobs can run. */
+export function separationReady(status: BootstrapStatus): boolean {
+  return status.mode === "development" || status.separation.state === "done";
+}
+
+/** True when this update is phase B finishing (running or failed -> done). */
+export function justInstalled(
+  previous: BootstrapStatus,
+  next: BootstrapStatus,
+): boolean {
+  return (
+    next.mode === "runtime" &&
+    previous.separation.state !== "done" &&
+    previous.separation.state !== "pending" &&
+    next.separation.state === "done"
+  );
+}
+
 /** True while the core runtime is missing: the UI shows the setup screen. */
 export function needsSetup(status: BootstrapStatus): boolean {
   return status.mode === "runtime" && status.core.state !== "done";
@@ -74,6 +100,9 @@ export async function startBootstrapWatch(): Promise<void> {
     import("@tauri-apps/api/event"),
   ]);
   await listen<BootstrapStatus>("bootstrap", (event) => {
+    if (justInstalled(bootstrap.status, event.payload)) {
+      bootstrap.separationInstalled = true;
+    }
     bootstrap.status = event.payload;
   });
   bootstrap.status = await invoke<BootstrapStatus>("bootstrap_status");

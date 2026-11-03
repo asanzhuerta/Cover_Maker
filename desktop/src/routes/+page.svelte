@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import Icon from "$lib/components/Icon.svelte";
+  import RuntimeNotice from "$lib/components/RuntimeNotice.svelte";
   import StemPicker from "$lib/components/StemPicker.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
   import { connection, isTauri } from "$lib/connection.svelte";
@@ -142,6 +143,7 @@
     <p>{t("new.subtitle")}</p>
   </div>
 </header>
+<RuntimeNotice />
 
 <section class="card drop" class:dragging data-testid="drop-zone">
   <div class="drop-wave" aria-hidden="true">
