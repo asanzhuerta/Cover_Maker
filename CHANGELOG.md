@@ -6,6 +6,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed (branding)
+- Official logo in `branding/logo.svg` (the sidebar's gradient waveform mark)
+  with a 1024 px PNG export; the app, installer and taskbar icons and the UI
+  favicon are generated from it instead of the Tauri and Svelte defaults.
+
 ### Added (M12: About and credits)
 - About page (sidebar, EN/ES): author profile with placeholder photo, name,
   email, website (example.com), bio and contact links (GitHub, email,
