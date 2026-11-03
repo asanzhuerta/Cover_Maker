@@ -116,7 +116,8 @@ class WorkerService:
         # The spawned process copies the environment at start: hide the GPU from CPU workers.
         saved = os.environ.get("CUDA_VISIBLE_DEVICES")
         if device == "cpu":
-            os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # an empty value does not hide the GPU on Windows
+            # An empty value does not hide the GPU on Windows; -1 does.
+            os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
         try:
             process = context.Process(
                 target=worker.main, args=(child, self.threads, self.low_priority), daemon=True
