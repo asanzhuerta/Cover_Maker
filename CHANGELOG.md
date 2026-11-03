@@ -6,6 +6,10 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- The desktop shell starts the engine with `uv run --inexact`, so the optional
+  separation runtime (PyTorch, audio-separator) is no longer removed on start.
+
 ### Added
 - Start of the v2 rewrite: local, legal-by-design stem separation desktop app.
 - MIT licence, README and disclaimer.
