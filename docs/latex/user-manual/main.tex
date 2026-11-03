@@ -130,7 +130,51 @@ Stems are saved as \texttt{<song> - <Stem>.<format>} and backing tracks as
 kinds.
 
 \chapter{The mixer}
-\todoin{M7}
+When a song is finished, the queue shows a \emph{Mixer} link next to it. The
+mixer plays the original song and every stem the models produced, in sync, so
+you can hear the separation before you use it and build your own practice mix.
+
+\section{Playing and comparing}
+\begin{itemize}
+  \item Press the round play button (or the space bar) to play and pause. The
+        time shows the position and the length of the song.
+  \item Click any waveform to jump to that point. Drag across the waveform to
+        choose a region; \emph{Loop} repeats it until you switch looping off.
+        With no region chosen, \emph{Loop} repeats the whole song.
+  \item \emph{A~·~Original} plays the untouched song and \emph{B~·~Your mix}
+        plays your settings, so you can compare them at the same position.
+\end{itemize}
+
+\section{Shaping your mix}
+Every stem has its own row, with its colour, icon and waveform:
+\begin{itemize}
+  \item \textbf{M} mutes the stem; \textbf{S} plays it solo. While any stem is
+        soloed, only soloed stems are heard.
+  \item The slider sets the stem's volume from silence to +6~dB; double-click
+        it to return to 0~dB.
+  \item \emph{Keep what the models missed} adds back whatever no stem captured
+        (the residual), exactly as in a job's export. Untick it to hear only
+        the stems.
+  \item \emph{Reset} puts every stem back to 0~dB, unmuted and not soloed.
+\end{itemize}
+Changes are smooth, without clicks, and take effect while the song plays.
+
+\section{Exporting the mix}
+\emph{Export this mix} saves the current settings (volumes, mutes, solos and
+the residual option, not the A/B choice) in full quality as
+\texttt{<song> - custom mix.<format>} in the job's output folder, in the job's
+format. An existing file is never overwritten: later exports are numbered
+\texttt{(2)}, \texttt{(3)}, and so on. If the mix would clip, its level is
+lowered just enough and the mixer tells you by how much.
+
+\section{Long songs and memory}
+The preview decodes the song first and each stem only when your settings need
+it. Decoded audio takes memory (about 85~MB per stem for four minutes); for
+long songs the preview uses a lower sample rate and says so. This only affects
+what you hear in the mixer: exported files always keep full quality.
+
+Songs processed before the mixer existed have no preview data; process them
+again (this reuses the previous separation and takes seconds).
 
 \chapter{Library, folders and playlist import}
 \todoin{M8} The desktop views come in M8; the engine already supports these

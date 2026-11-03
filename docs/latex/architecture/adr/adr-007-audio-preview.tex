@@ -1,8 +1,24 @@
 \section{ADR-007: Audio preview engine}
-\textbf{Status:} accepted (M2), implementation in M7. \textbf{Decision:} all
-stems of a song play from a single \texttt{AudioContext}; every
+\textbf{Status:} accepted (M2), implemented in M7. \textbf{Decision:} all
+tracks of a song play from a single \texttt{AudioContext}; every
 \texttt{AudioBufferSourceNode} is started with the same \texttt{start(t)} time,
 which keeps them sample-aligned, and mute, solo and volume are gain nodes with
-short ramps to avoid clicks. \textbf{Memory:} decoded float32 buffers cost about
-85 MB per stereo stem for four minutes, so six stems need about 500 MB; the
-mixer will decode lazily and use reduced sample-rate previews for long songs.
+short ramps (about 15~ms) to avoid clicks. \textbf{Mix formula:} the player
+plays the decoded mix plus one source per stem. With the residual kept, the mix
+has gain 1 and each stem $g-1$, so the output is
+$\mathit{mix} + \sum_s (g_s - 1)\,\mathit{stem}_s$; with the residual dropped,
+the mix has gain 0 and each stem $g_s$. The engine's
+\texttt{POST /items/\{id\}/render} uses the same formula
+(\texttt{mixer.mix\_gains}), so an exported mix matches what was heard; A/B sets
+the mix to 1 and every stem to 0. \textbf{Memory:} decoded float32 buffers cost
+about 85~MB per stereo stem for four minutes, so a mix and six stems need about
+590~MB. The mix is decoded first and a stem only once the settings change it
+(any stem when the residual is dropped); a stem decoded during playback starts
+at the current position on the same clock. When the estimated decoded size
+exceeds 700~MB the context runs at 22.05~kHz, halving memory, and the page says
+so; rendering always uses the full-quality library files.
+\textbf{Security:} audio and peaks are fetched with the Bearer header (never a
+token in a URL), and \texttt{GET /assets/\{sha\}} only serves files registered
+in the library. \textbf{Consequences:} pausing stops and recreates the sources
+(they cannot restart); waveforms come from cached \texttt{[min, max]} peaks
+computed by the engine rather than from decoded audio.

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from ..domain import Mode, OutputFormat, ResidualMode, Stem
 
@@ -167,3 +167,40 @@ class MatchRequest(BaseModel):
 
 class Created(BaseModel):
     id: int
+
+
+class PreviewOut(BaseModel):
+    item_id: int
+    title: str = Field("", description="Track title used for rendered file names.")
+    mix: str = Field(description="Asset id (SHA-256) of the decoded mix.")
+    stems: dict[str, str] = Field(description="Stem id -> asset id of every produced stem.")
+
+
+class PeaksOut(BaseModel):
+    asset: str
+    points: int
+    peaks: list[list[float]] = Field(description="[min, max] per point of the mono mix-down.")
+
+
+class RenderRequest(BaseModel):
+    gains: dict[Stem, float] = Field(
+        default_factory=dict[Stem, float],
+        description="Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.",
+    )
+    residual: ResidualMode = Field(
+        ResidualMode.KEEP, description="keep: add back what no stem captured; drop: stems only."
+    )
+    output_format: OutputFormat | None = Field(None, description="Defaults to the job's format.")
+
+    @field_validator("gains")
+    @classmethod
+    def _bounded(cls, value: dict[Stem, float]) -> dict[Stem, float]:
+        if any(not 0.0 <= gain <= 4.0 for gain in value.values()):
+            raise ValueError("gains must be between 0 and 4")
+        return value
+
+
+class RenderOut(BaseModel):
+    path: str
+    peak_dbfs: float = Field(description="Peak before protection (may be above 0 dBFS).")
+    gain_db: float = Field(description="Gain applied to avoid clipping (0 or negative).")

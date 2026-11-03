@@ -61,6 +61,14 @@ project follows [Semantic Versioning](https://semver.org/).
   welcome hero with a three-step wizard (terms → hardware → models).
 - Model catalogue entries now record `licence_url` and `verified_on`, shown in
   the licence dialog (#25).
+- M7 preview mixer: finished queue items open a mixer that plays the mix and
+  every stem in sync from one AudioContext (ADR-007), with per-stem mute, solo
+  and volume, residual keep/drop, seek, drag-to-loop, A/B against the original
+  and waveforms from engine-computed peaks. Stems decode lazily and long songs
+  use a reduced preview sample rate. *Export this mix* renders the current
+  settings with the same formula. Engine: preview data per item (migration 3),
+  `GET /items/{id}/preview`, `GET /assets/{sha}`, `GET /assets/{sha}/peaks` and
+  `POST /items/{id}/render`.
 - M11 (DAW integration: VST3 plugin and REAPER extension) added to the roadmap.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.

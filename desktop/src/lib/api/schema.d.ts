@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/assets/{sha}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Asset */
+        get: operations["asset_assets__sha__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/{sha}/peaks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Peaks */
+        get: operations["peaks_assets__sha__peaks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -15,6 +49,40 @@ export interface paths {
         get: operations["health_health_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/items/{item_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview */
+        get: operations["preview_items__item_id__preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/items/{item_id}/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Render */
+        post: operations["render_items__item_id__render_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -576,10 +644,77 @@ export interface components {
          * @enum {string}
          */
         OutputFormat: "wav" | "flac" | "mp3";
+        /** PeaksOut */
+        PeaksOut: {
+            /** Asset */
+            asset: string;
+            /**
+             * Peaks
+             * @description [min, max] per point of the mono mix-down.
+             */
+            peaks: number[][];
+            /** Points */
+            points: number;
+        };
         /** PlaylistRequest */
         PlaylistRequest: {
             /** Link */
             link: string;
+        };
+        /** PreviewOut */
+        PreviewOut: {
+            /** Item Id */
+            item_id: number;
+            /**
+             * Mix
+             * @description Asset id (SHA-256) of the decoded mix.
+             */
+            mix: string;
+            /**
+             * Stems
+             * @description Stem id -> asset id of every produced stem.
+             */
+            stems: {
+                [key: string]: string;
+            };
+            /**
+             * Title
+             * @description Track title used for rendered file names.
+             * @default
+             */
+            title: string;
+        };
+        /** RenderOut */
+        RenderOut: {
+            /**
+             * Gain Db
+             * @description Gain applied to avoid clipping (0 or negative).
+             */
+            gain_db: number;
+            /** Path */
+            path: string;
+            /**
+             * Peak Dbfs
+             * @description Peak before protection (may be above 0 dBFS).
+             */
+            peak_dbfs: number;
+        };
+        /** RenderRequest */
+        RenderRequest: {
+            /**
+             * Gains
+             * @description Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.
+             */
+            gains?: {
+                [key: string]: number;
+            };
+            /** @description Defaults to the job's format. */
+            output_format?: components["schemas"]["OutputFormat"] | null;
+            /**
+             * @description keep: add back what no stem captured; drop: stems only.
+             * @default keep
+             */
+            residual: components["schemas"]["ResidualMode"];
         };
         /**
          * ResidualMode
@@ -660,6 +795,68 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    asset_assets__sha__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sha: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    peaks_assets__sha__peaks_get: {
+        parameters: {
+            query?: {
+                points?: number;
+            };
+            header?: never;
+            path: {
+                sha: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeaksOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_health_get: {
         parameters: {
             query?: never;
@@ -676,6 +873,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    preview_items__item_id__preview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    render_items__item_id__render_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

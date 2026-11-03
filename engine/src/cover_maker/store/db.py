@@ -78,6 +78,10 @@ MIGRATIONS: tuple[str, ...] = (
         UNIQUE (collection_id, key)
     )
     """,
+    # 3: what the preview mixer can load for each processed item.
+    """
+    ALTER TABLE job_items ADD COLUMN preview_json TEXT
+    """,
 )
 
 

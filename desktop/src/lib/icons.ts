@@ -141,6 +141,15 @@ export const ICONS = {
       "M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4",
     ],
   },
+  loop: {
+    stroke: [
+      "M17 2l3 3-3 3",
+      "M4 11V9a4 4 0 0 1 4-4h12",
+      "M7 22l-3-3 3-3",
+      "M20 13v2a4 4 0 0 1-4 4H4",
+    ],
+  },
+  reset: { stroke: ["M4 11a8 8 0 1 1 2.3 5.7", "M4 4v7h7"] },
   arrowRight: { stroke: ["M5 12h14", "M13 6l6 6-6 6"] },
   arrowLeft: { stroke: ["M19 12H5", "M11 6l-6 6 6 6"] },
   mix: {

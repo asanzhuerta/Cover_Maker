@@ -14,12 +14,18 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from .. import __version__
 from ..audio.io import ffmpeg_path
+from ..audio.peaks import compute_peaks
 from ..domain import JobSpec
-from ..pipeline.runner import RightsNotConfirmed, resolve_preset, stems_to_separate
+from ..pipeline.runner import (
+    RightsNotConfirmed,
+    render_custom_mix,
+    resolve_preset,
+    stems_to_separate,
+)
 from ..separation import recipes
 from ..separation.hardware import Tier
 from ..separation.installer import InstallError, install, separation_available
@@ -288,6 +294,79 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             ]
 
         return await _db(run)
+
+    # ------------------------------------------------------------ preview audio
+
+    @app.get("/items/{item_id}/preview", response_model=schemas.PreviewOut)
+    async def preview(item_id: int) -> schemas.PreviewOut:  # pyright: ignore[reportUnusedFunction]
+        def run() -> schemas.PreviewOut:
+            data = engine().jobs.preview(item_id)
+            if data is None:
+                raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to preview yet")
+            return schemas.PreviewOut(
+                item_id=item_id, title=data.get("title", ""), mix=data["mix"], stems=data["stems"]
+            )
+
+        return await _db(run)
+
+    @app.post("/items/{item_id}/render", response_model=schemas.RenderOut)
+    async def render(item_id: int, body: schemas.RenderRequest) -> schemas.RenderOut:  # pyright: ignore[reportUnusedFunction]
+        sources = await _db(lambda: engine().jobs.mix_sources(item_id))
+        if sources is None:
+            raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to mix yet")
+        fmt = body.output_format.value if body.output_format else None
+        try:
+            # Rendering only reads library files, so it runs outside the store lock.
+            target, result = await asyncio.to_thread(
+                render_custom_mix, sources, body.gains, body.residual, fmt
+            )
+        except (RuntimeError, OSError) as exc:
+            raise ApiProblem(500, "render_failed", str(exc)) from exc
+        return schemas.RenderOut(
+            path=str(target), peak_dbfs=max(result.peak_dbfs, -200.0), gain_db=result.gain_db
+        )
+
+    def _asset_path(sha: str) -> Path:
+        # Only files registered in the library can be served (no arbitrary paths).
+        if len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
+            raise ApiProblem(400, "bad_input", "invalid asset id")
+        path = engine().jobs.assets.path_for(sha)
+        if path is None:
+            raise ApiProblem(404, "unknown_asset", f"asset {sha} does not exist")
+        return path
+
+    @app.get("/assets/{sha}", response_class=FileResponse)
+    async def asset(sha: str) -> FileResponse:  # pyright: ignore[reportUnusedFunction]
+        path = await _db(lambda: _asset_path(sha))
+        return FileResponse(path, media_type="audio/wav")
+
+    @app.get("/assets/{sha}/peaks", response_model=schemas.PeaksOut)
+    async def peaks(sha: str, points: int = 1200) -> schemas.PeaksOut:  # pyright: ignore[reportUnusedFunction]
+        points = max(50, min(points, 10_000))
+        path = await _db(lambda: _asset_path(sha))
+        key = f"{sha}:{points}"
+
+        def cached() -> object | None:
+            row = (
+                engine()
+                .conn.execute(
+                    "SELECT output_json FROM step_cache WHERE step = 'peaks' AND cache_key = ?",
+                    (key,),
+                )
+                .fetchone()
+            )
+            return json.loads(row["output_json"]) if row else None
+
+        values = await _db(cached)
+        if values is None:
+            values = await asyncio.to_thread(compute_peaks, path, points)
+            await _db(
+                lambda: engine().conn.execute(
+                    "INSERT OR REPLACE INTO step_cache (step, cache_key, output_json) VALUES ('peaks', ?, ?)",
+                    (key, json.dumps(values)),
+                )
+            )
+        return schemas.PeaksOut(asset=sha, points=points, peaks=values)  # pyright: ignore[reportArgumentType]
 
     @app.put("/library/items/{item_id}/match", status_code=204)
     async def set_match(item_id: int, body: schemas.MatchRequest) -> None:  # pyright: ignore[reportUnusedFunction]

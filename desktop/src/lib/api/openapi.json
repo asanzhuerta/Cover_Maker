@@ -718,6 +718,36 @@
         "title": "OutputFormat",
         "type": "string"
       },
+      "PeaksOut": {
+        "properties": {
+          "asset": {
+            "title": "Asset",
+            "type": "string"
+          },
+          "peaks": {
+            "description": "[min, max] per point of the mono mix-down.",
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Peaks",
+            "type": "array"
+          },
+          "points": {
+            "title": "Points",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "asset",
+          "points",
+          "peaks"
+        ],
+        "title": "PeaksOut",
+        "type": "object"
+      },
       "PlaylistRequest": {
         "properties": {
           "link": {
@@ -729,6 +759,98 @@
           "link"
         ],
         "title": "PlaylistRequest",
+        "type": "object"
+      },
+      "PreviewOut": {
+        "properties": {
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "mix": {
+            "description": "Asset id (SHA-256) of the decoded mix.",
+            "title": "Mix",
+            "type": "string"
+          },
+          "stems": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Stem id -> asset id of every produced stem.",
+            "title": "Stems",
+            "type": "object"
+          },
+          "title": {
+            "default": "",
+            "description": "Track title used for rendered file names.",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "mix",
+          "stems"
+        ],
+        "title": "PreviewOut",
+        "type": "object"
+      },
+      "RenderOut": {
+        "properties": {
+          "gain_db": {
+            "description": "Gain applied to avoid clipping (0 or negative).",
+            "title": "Gain Db",
+            "type": "number"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "peak_dbfs": {
+            "description": "Peak before protection (may be above 0 dBFS).",
+            "title": "Peak Dbfs",
+            "type": "number"
+          }
+        },
+        "required": [
+          "path",
+          "peak_dbfs",
+          "gain_db"
+        ],
+        "title": "RenderOut",
+        "type": "object"
+      },
+      "RenderRequest": {
+        "properties": {
+          "gains": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.",
+            "propertyNames": {
+              "$ref": "#/components/schemas/Stem"
+            },
+            "title": "Gains",
+            "type": "object"
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputFormat"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to the job's format."
+          },
+          "residual": {
+            "$ref": "#/components/schemas/ResidualMode",
+            "default": "keep",
+            "description": "keep: add back what no stem captured; drop: stems only."
+          }
+        },
+        "title": "RenderRequest",
         "type": "object"
       },
       "ResidualMode": {
@@ -939,6 +1061,87 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/assets/{sha}": {
+      "get": {
+        "operationId": "asset_assets__sha__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha",
+            "required": true,
+            "schema": {
+              "title": "Sha",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Asset"
+      }
+    },
+    "/assets/{sha}/peaks": {
+      "get": {
+        "operationId": "peaks_assets__sha__peaks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha",
+            "required": true,
+            "schema": {
+              "title": "Sha",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "points",
+            "required": false,
+            "schema": {
+              "default": 1200,
+              "title": "Points",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeaksOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Peaks"
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health_health_get",
@@ -955,6 +1158,94 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/items/{item_id}/preview": {
+      "get": {
+        "operationId": "preview_items__item_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview"
+      }
+    },
+    "/items/{item_id}/render": {
+      "post": {
+        "operationId": "render_items__item_id__render_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Render"
       }
     },
     "/jobs": {
