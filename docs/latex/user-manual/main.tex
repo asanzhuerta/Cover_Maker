@@ -10,6 +10,7 @@
 
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Document skeleton (M0). \\
+  0.2 & 2026-11-03 & About and credits chapter (M12). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -209,6 +210,25 @@ Nothing is downloaded when you import a playlist file.
 \todoin{M8}
 
 \appendix
+\chapter{About and credits}\label{ch:about}
+The \emph{About} page, at the bottom of the sidebar menu, shows:
+\begin{itemize}
+  \item \textbf{Author}: a photo, the author's name, a short description and
+  contact links (GitHub, email and website). The buttons open the system
+  browser or mail program.
+  \item \textbf{The app}: what \CM{} does and a link to its source code.
+  \item \textbf{Credits}: the main open-source components with their
+  licences, a link to the full third-party notices, and a shortcut to the
+  \emph{Models} page, where each model's licence is shown before you download
+  it (chapter~\ref{ch:models}).
+\end{itemize}
+
+The texts follow the language chosen in \emph{Settings}. Everything on the page
+comes from one file in the source code, \texttt{desktop/src/lib/about.json}; the
+photo is \texttt{desktop/static/about/avatar.svg}. To personalise a build, edit
+those two files: each text that users read has an \texttt{en} and an
+\texttt{es} version.
+
 \chapter{Command-line reference}
 The engine can be used without the desktop application.
 

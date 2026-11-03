@@ -134,6 +134,9 @@ export const ICONS = {
       "M8.5 12l2.5 2.5 4.5-5",
     ],
   },
+  info: {
+    stroke: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z", "M12 11v5", "M12 7.5v.5"],
+  },
   external: {
     stroke: [
       "M14 4h6v6",

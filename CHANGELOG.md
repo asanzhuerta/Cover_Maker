@@ -6,6 +6,15 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added (M12: About and credits)
+- About page (sidebar, EN/ES): author profile with placeholder photo, name,
+  email, website (example.com), bio and contact links (GitHub, email,
+  website); app description and source link; credits for the main
+  open-source components with licences, a link to `THIRD_PARTY_NOTICES.md`
+  and a shortcut to the model licences. All content comes from
+  `desktop/src/lib/about.json` (photo in `desktop/static/about/avatar.svg`).
+- User Manual chapter "About and credits".
+
 ### Added (M9: installer, first run and updates)
 - The per-user NSIS installer bundles `uv.exe`, the engine wheel and three
   `pylock.toml` locks (core, CPU, CUDA cu128) exported from `uv.lock`

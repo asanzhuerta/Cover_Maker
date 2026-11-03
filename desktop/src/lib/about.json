@@ -1,0 +1,80 @@
+{
+  "author": {
+    "name": "Your Name",
+    "photo": "/about/avatar.svg",
+    "email": "author@example.com",
+    "website": "https://example.com",
+    "github": "https://github.com/asanzhuerta",
+    "bio": {
+      "en": "Musician and developer. Replace this placeholder with a short description of yourself in desktop/src/lib/about.json.",
+      "es": "Músico y desarrollador. Sustituye este texto de ejemplo por una breve descripción tuya en desktop/src/lib/about.json."
+    }
+  },
+  "app": {
+    "repository": "https://github.com/asanzhuerta/Cover_Maker",
+    "description": {
+      "en": "Cover_Maker separates your own songs into stems on your PC, with local AI models, so you can practise or record covers without the parts you play. Nothing is uploaded and no model is bundled: you choose each model after reading its licence.",
+      "es": "Cover_Maker separa tus propias canciones en stems en tu PC, con modelos de IA locales, para que practiques o grabes versiones sin las partes que tocas. No se sube nada y no se incluye ningún modelo: eliges cada uno tras leer su licencia."
+    }
+  },
+  "credits": [
+    {
+      "name": "Tauri",
+      "url": "https://tauri.app",
+      "licence": "MIT / Apache-2.0",
+      "role": { "en": "Desktop shell", "es": "Aplicación de escritorio" }
+    },
+    {
+      "name": "Svelte",
+      "url": "https://svelte.dev",
+      "licence": "MIT",
+      "role": { "en": "User interface", "es": "Interfaz" }
+    },
+    {
+      "name": "FastAPI",
+      "url": "https://fastapi.tiangolo.com",
+      "licence": "MIT",
+      "role": { "en": "Local engine API", "es": "API local del motor" }
+    },
+    {
+      "name": "PyTorch",
+      "url": "https://pytorch.org",
+      "licence": "BSD-3-Clause",
+      "role": { "en": "Model inference", "es": "Inferencia de los modelos" }
+    },
+    {
+      "name": "audio-separator",
+      "url": "https://github.com/nomadkaraoke/python-audio-separator",
+      "licence": "MIT",
+      "role": {
+        "en": "Separation models runner",
+        "es": "Ejecución de los modelos de separación"
+      }
+    },
+    {
+      "name": "yt-dlp",
+      "url": "https://github.com/yt-dlp/yt-dlp",
+      "licence": "Unlicense",
+      "role": {
+        "en": "Audio from pasted video links",
+        "es": "Audio de los enlaces de vídeo"
+      }
+    },
+    {
+      "name": "FFmpeg",
+      "url": "https://ffmpeg.org",
+      "licence": "LGPL-2.1-or-later",
+      "role": {
+        "en": "Audio decoding and MP3",
+        "es": "Decodificación de audio y MP3"
+      }
+    },
+    {
+      "name": "uv",
+      "url": "https://github.com/astral-sh/uv",
+      "licence": "MIT / Apache-2.0",
+      "role": { "en": "Runtime installer", "es": "Instalación del runtime" }
+    }
+  ],
+  "notices": "https://github.com/asanzhuerta/Cover_Maker/blob/main/THIRD_PARTY_NOTICES.md"
+}
