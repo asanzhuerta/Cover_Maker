@@ -25,12 +25,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Heavy runtime for the separation worker (PyTorch + audio-separator).
+# Heavy runtime for the separation worker (PyTorch + audio-separator). Pick
+# the PyTorch build with exactly one of the `cpu` / `cu128` extras.
 separation = [
     "audio-separator[cpu]==0.48.0",
     "audioread>=3",
     "torch>=2.8",
 ]
+cpu = ["torch>=2.8"]
+cu128 = ["torch>=2.8"]
 
 [project.scripts]
 cover-maker = "cover_maker.cli:app"
@@ -71,9 +74,18 @@ addopts = "-ra"
 
 [tool.uv]
 environments = ["sys_platform == 'win32'"]
+conflicts = [[{ extra = "cpu" }, { extra = "cu128" }]]
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu128" }
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cu128", extra = "cu128" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [[tool.uv.index]]
 name = "pytorch-cu128"

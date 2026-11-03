@@ -7,6 +7,70 @@
 
   const locales = Object.entries(LOCALES) as [Locale, string][];
 
+  let appVersion = $state("");
+  let appUpdate = $state("");
+  let ytdlp = $state("");
+  let ytdlpNewer = $state(false);
+  let busy = $state(false);
+
+  if (isTauri()) {
+    void import("@tauri-apps/api/app").then(async ({ getVersion }) => {
+      appVersion = await getVersion();
+    });
+  }
+
+  async function checkApp() {
+    busy = true;
+    try {
+      const { check } = await import("@tauri-apps/plugin-updater");
+      const update = await check();
+      if (!update) {
+        appUpdate = t("updates.latest");
+        return;
+      }
+      appUpdate = `${t("updates.installing")} ${update.version}…`;
+      await update.downloadAndInstall();
+      const { relaunch } = await import("@tauri-apps/plugin-process");
+      await relaunch();
+    } catch (error) {
+      appUpdate = String(error);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function checkYtDlp() {
+    busy = true;
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const versions = await invoke<{ installed: string; latest: string }>(
+        "check_ytdlp",
+      );
+      ytdlpNewer = versions.installed !== versions.latest;
+      ytdlp = ytdlpNewer
+        ? `${versions.installed} → ${versions.latest}`
+        : `${versions.installed} · ${t("updates.latest")}`;
+    } catch (error) {
+      ytdlp = String(error);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function updateYtDlp() {
+    busy = true;
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const version = await invoke<string>("update_ytdlp");
+      ytdlp = `${version} · ${t("updates.latest")}`;
+      ytdlpNewer = false;
+    } catch (error) {
+      ytdlp = String(error);
+    } finally {
+      busy = false;
+    }
+  }
+
   async function chooseOutput() {
     const { open } = await import("@tauri-apps/plugin-dialog");
     const chosen = await open({ directory: true });
@@ -84,6 +148,33 @@
   <div><button onclick={showWelcome}>{t("settings.reset")}</button></div>
 </div>
 
+{#if isTauri()}
+  <div class="card form updates" data-testid="updates">
+    <h2>{t("updates.title")}</h2>
+    <div class="line">
+      <span>{t("updates.app")} <span class="muted">{appVersion}</span></span>
+      <button disabled={busy} onclick={checkApp}>{t("updates.check")}</button>
+    </div>
+    {#if appUpdate}<p class="muted">{appUpdate}</p>{/if}
+    <div class="line">
+      <span>yt-dlp</span>
+      <button disabled={busy} onclick={checkYtDlp}
+        >{t("updates.checkYtDlp")}</button
+      >
+    </div>
+    {#if ytdlp}
+      <p class="muted">
+        {ytdlp}
+        {#if ytdlpNewer}<button
+            class="small primary"
+            disabled={busy}
+            onclick={updateYtDlp}>{t("updates.install")}</button
+          >{/if}
+      </p>
+    {/if}
+  </div>
+{/if}
+
 <style>
   .form {
     display: grid;
@@ -94,6 +185,27 @@
   .form label:not(.row) {
     display: grid;
     gap: 0.3rem;
+  }
+
+  .updates {
+    margin-top: 1.2rem;
+  }
+
+  .updates h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .updates p {
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
   .form input[type="text"] {
