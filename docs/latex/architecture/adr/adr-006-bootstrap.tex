@@ -1,8 +1,47 @@
 \section{ADR-006: Runtime bootstrap with uv}
-\textbf{Status:} accepted (M2), implementation in M9. \textbf{Decision:} the
-installer ships \texttt{uv.exe}, the engine wheel and lock files, not Python or
-PyTorch. On first run, uv installs a standalone Python 3.12 and the locked
-dependencies into \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash runtime}.
-The bootstrap has two phases: the core engine first, then PyTorch in the
-background (a CUDA build for NVIDIA GPUs with compute capability 7.5 or higher,
-otherwise the CPU build). Measurements from the spike are in the M2 report.
+\textbf{Status:} accepted (M2), implemented in M9.
+
+\textbf{Context.} A complete Python environment with PyTorch is 0.6~GB (CPU)
+to 4.2~GB (CUDA). Bundling it would make the installer huge and tie it to one
+GPU vendor; installing it from the system Python would break on machines
+without one, or with the wrong one.
+
+\textbf{Decision.} The per-user NSIS installer ships only the shell,
+\texttt{uv.exe} (pinned version and SHA-256), the engine wheel and three lock
+files in \texttt{pylock.toml} format (PEP~751) exported from
+\texttt{engine/uv.lock}: \texttt{core}, \texttt{cpu} and \texttt{cu128}. Each
+lock lists every wheel by URL and hash; they are installed into
+\texttt{bundle\textbackslash} next to the shell. On first run the shell installs into
+\texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash runtime}, with
+uv's cache and Python folders inside it:
+\begin{itemize}
+  \item \textbf{Phase A}, blocking, with a setup screen: \texttt{uv python
+  install 3.12}, a venv, \texttt{uv pip sync pylock.core.toml}, the engine
+  wheel (\texttt{--no-deps}), then ffmpeg (LGPL shared build) and deno
+  (needed by yt-dlp for some sites) from pinned URLs checked against SHA-256.
+  The ffmpeg archive is mirrored on each GitHub release and fetched from the
+  mirror first, because upstream automatic builds expire.
+  \item \textbf{Phase B}, in the background once the engine runs:
+  \texttt{uv pip install -r pylock.<build>.toml}, where the build is
+  \texttt{cu128} when \texttt{nvidia-smi} reports compute capability 7.5 or
+  higher and \texttt{cpu} otherwise (\texttt{COVER\_MAKER\_TORCH} overrides
+  it). \texttt{install} instead of \texttt{sync} keeps the running engine's
+  own package. A failure shows \emph{Retry}; finished downloads stay in the
+  cache, so a retry resumes.
+\end{itemize}
+\texttt{runtime\textbackslash state.json} records the app version of each
+phase. When an update changes the version, phase A runs again and re-syncs the
+venv with \texttt{uv pip sync} against the lock of the installed build (core,
+or the separation lock when phase B had finished), so the venv matches the new
+locks exactly. Development builds (debug, or \texttt{COVER\_MAKER\_ENGINE\_DIR}
+set) skip the bootstrap and run the repository engine with \texttt{uv run}.
+
+The engine's \texttt{pyproject.toml} declares mutually exclusive \texttt{cpu}
+and \texttt{cu128} extras (uv \emph{conflicts}) that select the PyTorch index,
+so one lock file holds both builds.
+
+\textbf{Consequences.} The installer stays small (about 15~MB compressed) and
+the same installer serves CPU and NVIDIA machines. First run needs internet
+access and, on the CUDA path, about 4~GB of downloads. yt-dlp can be upgraded
+on its own from Settings, because video sites change faster than the app is
+released; the next app update re-pins it to the locked version.

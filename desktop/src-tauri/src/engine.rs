@@ -3,6 +3,8 @@
 //! The shell generates a per-session token, starts `cover-maker serve` with the
 //! token and its own PID in the environment, assigns the process to a
 //! kill-on-close Job Object and waits for the handshake line printed on stdout.
+//! Development builds run the repository engine through `uv run`; release
+//! builds run the engine installed in the runtime venv (see `runtime`).
 
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
@@ -14,6 +16,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
 use crate::jobobject::KillOnCloseJob;
+use crate::runtime::Layout;
 
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(60);
 #[cfg(windows)]
@@ -73,14 +76,30 @@ fn dev_engine_dir() -> PathBuf {
         .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../engine"))
 }
 
-fn engine_command(token: &str) -> Command {
-    let mut command = Command::new("uv");
-    // `--inexact` keeps optional extras installed (the separation runtime with
-    // PyTorch); a plain `uv run` would remove them on every start.
+/// True when the shell should run the repository engine instead of the runtime.
+pub fn development() -> bool {
+    cfg!(debug_assertions) || std::env::var_os("COVER_MAKER_ENGINE_DIR").is_some()
+}
+
+fn engine_command(token: &str, runtime: Option<&Layout>) -> Command {
+    let mut command = match runtime {
+        Some(layout) => {
+            let mut command = Command::new(layout.engine_exe());
+            command.arg("serve").env("PATH", layout.path_env());
+            command
+        }
+        None => {
+            let mut command = Command::new("uv");
+            // `--inexact` keeps optional extras installed (the separation
+            // runtime with PyTorch); a plain `uv run` would remove them.
+            command
+                .args(["run", "--inexact", "--project"])
+                .arg(dev_engine_dir())
+                .args(["cover-maker", "serve"]);
+            command
+        }
+    };
     command
-        .args(["run", "--inexact", "--project"])
-        .arg(dev_engine_dir())
-        .args(["cover-maker", "serve"])
         .env("COVER_MAKER_TOKEN", token)
         .env("COVER_MAKER_PARENT_PID", std::process::id().to_string())
         .stdin(Stdio::null())
@@ -95,12 +114,15 @@ fn engine_command(token: &str) -> Command {
 }
 
 /// Start the engine and block until it announces its port.
-pub fn start() -> Result<Engine, String> {
+pub fn start(runtime: Option<&Layout>) -> Result<Engine, String> {
     let job = KillOnCloseJob::new().map_err(|e| format!("cannot create job object: {e}"))?;
     let token = new_token();
-    let mut child = engine_command(&token)
+    let mut child = engine_command(&token, runtime)
         .spawn()
-        .map_err(|e| format!("cannot start engine (is uv installed?): {e}"))?;
+        .map_err(|e| match runtime {
+            Some(_) => format!("cannot start the installed engine: {e}"),
+            None => format!("cannot start engine (is uv installed?): {e}"),
+        })?;
     job.assign(&child)
         .map_err(|e| format!("cannot assign engine to job object: {e}"))?;
 

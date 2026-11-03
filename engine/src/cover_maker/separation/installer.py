@@ -20,9 +20,15 @@ class InstallError(RuntimeError):
 
 
 def separation_available() -> bool:
-    """True when the optional separation dependencies are installed."""
+    """True when the optional separation dependencies are installed.
+
+    The installed app adds them in the background while the engine runs, so
+    the import system's directory caches are refreshed first.
+    """
+    from importlib import invalidate_caches
     from importlib.util import find_spec
 
+    invalidate_caches()
     return find_spec("audio_separator") is not None and find_spec("torch") is not None
 
 
@@ -31,8 +37,9 @@ def install(model: ModelSpec, models_dir: Path, installs: Installs, *, accepted:
         raise InstallError("The licence notice must be accepted before downloading the model.")
     if not separation_available():
         raise InstallError(
-            "Separation support is not installed. In a development checkout run: "
-            "uv sync --extra separation"
+            "Separation support is not installed yet. The app installs it in the "
+            "background after the first start; in a development checkout run: "
+            "uv sync --extra separation --extra cu128 (or --extra cpu)"
         )
     models_dir.mkdir(parents=True, exist_ok=True)
     target = models_dir / model.filename
