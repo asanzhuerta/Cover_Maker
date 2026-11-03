@@ -26,12 +26,11 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building the Cover_Maker shell")
         .run(|app, event| {
-            if let RunEvent::Exit = event {
-                if let Ok(mut guard) = app.state::<EngineState>().0.lock() {
-                    if let Some(engine) = guard.as_mut() {
-                        engine.kill();
-                    }
-                }
+            if let RunEvent::Exit = event
+                && let Ok(mut guard) = app.state::<EngineState>().0.lock()
+                && let Some(engine) = guard.as_mut()
+            {
+                engine.kill();
             }
         });
 }

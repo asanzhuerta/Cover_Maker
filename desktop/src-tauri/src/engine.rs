@@ -7,8 +7,8 @@
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
-use std::sync::mpsc;
 use std::sync::Mutex;
+use std::sync::mpsc;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
@@ -107,11 +107,9 @@ pub fn start() -> Result<Engine, String> {
     std::thread::spawn(move || {
         let mut sent = false;
         for line in BufReader::new(stdout).lines().map_while(Result::ok) {
-            if !sent {
-                if let Some(handshake) = parse_handshake(&line) {
-                    let _ = tx.send(handshake);
-                    sent = true;
-                }
+            if !sent && let Some(handshake) = parse_handshake(&line) {
+                let _ = tx.send(handshake);
+                sent = true;
             }
             // Keep draining stdout so the engine never blocks on a full pipe.
         }
@@ -150,7 +148,9 @@ mod tests {
     #[test]
     fn ignores_other_lines() {
         assert!(parse_handshake("INFO starting").is_none());
-        assert!(parse_handshake(r#"{"event": "log", "port": 1, "pid": 1, "version": "x"}"#).is_none());
+        assert!(
+            parse_handshake(r#"{"event": "log", "port": 1, "pid": 1, "version": "x"}"#).is_none()
+        );
     }
 
     #[test]
