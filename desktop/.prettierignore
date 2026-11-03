@@ -3,3 +3,5 @@ build/
 src-tauri/target/
 src-tauri/gen/
 pnpm-lock.yaml
+src/lib/api/openapi.json
+src/lib/api/schema.d.ts

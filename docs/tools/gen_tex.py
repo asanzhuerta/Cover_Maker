@@ -19,6 +19,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs" / "data"
 OUT = ROOT / "docs" / "latex" / "common" / "generated"
+OPENAPI = ROOT / "desktop" / "src" / "lib" / "api" / "openapi.json"
 
 _ESCAPES = {
     "\\": r"\textbackslash{}",
@@ -103,6 +104,22 @@ def main() -> None:
             ],
         ),
     }
+    if OPENAPI.exists():
+        import json
+
+        spec = json.loads(OPENAPI.read_text(encoding="utf-8"))
+        rows = []
+        for path, methods in sorted(spec["paths"].items()):
+            for method, operation in methods.items():
+                summary = operation.get("summary") or operation.get("operationId", "")
+                rows.append(
+                    [rf"\texttt{{{method.upper()}}}", rf"\texttt{{{tex(path)}}}", tex(summary)]
+                )
+        outputs["api-endpoints.tex"] = longtable(
+            r"@{}P{0.1\linewidth}P{0.42\linewidth}P{0.42\linewidth}@{}",
+            ["Method", "Path", "Operation"],
+            rows,
+        )
     for name, content in outputs.items():
         (OUT / name).write_text(content, encoding="utf-8", newline="\n")
         print(f"wrote {OUT.relative_to(ROOT) / name}")

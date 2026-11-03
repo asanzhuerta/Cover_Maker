@@ -20,19 +20,116 @@ track made from an original recording usually requires permission from the
 rights holders.}
 
 \chapter{Getting started}
-\todoin{M6}
+On the first start \CM{} shows a welcome screen:
+\begin{enumerate}
+  \item Read the notice about rights and tick \emph{I understand and accept these
+        terms}.
+  \item Check the detected hardware. The application shows your processor,
+        memory and NVIDIA graphics card, the hardware tier (CPU, 4, 6, 8 or
+        12+~GB of video memory) and the recommended quality preset.
+  \item Choose the separation models to download (see
+        \autoref{ch:models}), or choose them later from the \emph{Models} page.
+\end{enumerate}
+The window has four pages in the side bar: \emph{New job}, \emph{Queue},
+\emph{Models} and \emph{Settings}. The bottom of the side bar shows whether the
+local engine is ready.
 
-\chapter{Choosing and installing models}
-\todoin{M6}
+The interface is available in English and Spanish; the language follows the
+system and can be changed in \emph{Settings}, together with the light or dark
+theme.
+
+\chapter{Choosing and installing models}\label{ch:models}
+\CM{} does not include any separation model. Each model in the catalogue shows
+the stems it produces, its download size, the video memory it needs and its
+\emph{licence class}:
+\begin{description}
+  \item[permissive] an open licence is published (for example MIT);
+  \item[disputed] the code is open but the status of the weights is unclear;
+  \item[none] no licence has been published: all rights are reserved by default;
+  \item[non-commercial] personal and research use only;
+  \item[copyleft] for example GPL.
+\end{description}
+Models recommended for your hardware are marked. Press \emph{Review licence and
+install}, read the notice, tick \emph{I accept this licence notice} and press
+\emph{Download}. The model is downloaded from its original source; \CM{} never
+hosts model files. You are responsible for respecting each model's licence.
+
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Preset} & \textbf{Models needed} \\
+\midrule
+Fast & HT Demucs 6 stems (recommended without a supported GPU). \\
+Balanced & BS-RoFormer SW (recommended with an NVIDIA GPU of 4~GB or more). \\
+Max quality & BS-RoFormer SW and BS-RoFormer Resurrection. \\
+\bottomrule
+\end{tabularx}
 
 \chapter{Separating stems and making a track without X}
-\todoin{M6}
+\section{Creating a job}
+\begin{enumerate}
+  \item On \emph{New job}, drop audio files or folders on the dashed area, use
+        \emph{Add files} or \emph{Add folder}, or paste a video or playlist link
+        and press \emph{Add link}.
+  \item Select the stems: Vocals, Guitar, Drums, Bass, Piano, Other.
+  \item Choose what to export:
+        \begin{itemize}
+          \item \emph{The selected stems}: one file per stem;
+          \item \emph{The song without them}: one file with the song minus the
+                selected stems, for playing or singing along. Keep \emph{Keep
+                what the models missed} ticked for the most natural result.
+        \end{itemize}
+  \item Choose the quality preset (\emph{Automatic} picks the best one for your
+        hardware), the format (WAV 24-bit, FLAC or MP3 320~kbps) and the output
+        folder.
+  \item If you added links, confirm that you own the content or are allowed to
+        use it.
+  \item Press \emph{Start}. If a required model is missing, the page tells you
+        which one to install.
+\end{enumerate}
+
+\section{The queue}
+\emph{Queue} lists the jobs with a progress bar and the current step of every
+song (download, decode, separation, export). You can pause after the current
+song, resume, cancel, retry failed songs and open the output folder. Jobs that
+were interrupted because the application was closed continue when it starts
+again. Processing a song a second time, or asking for another stem of a song
+already separated, reuses the previous work and finishes in seconds.
+
+\section{File names}
+Stems are saved as \texttt{<song> - <Stem>.<format>} and backing tracks as
+\texttt{<song> - without <stems>.<format>}.
 
 \chapter{The mixer}
 \todoin{M7}
 
 \chapter{Library, folders and playlist import}
-\todoin{M8}
+\todoin{M8} The desktop views come in M8; the engine already supports these
+workflows from the command line.
+
+\section{Video links}
+Paste a video or playlist link instead of a file. Only the audio is downloaded.
+You must confirm that you own the content or are allowed to use it:
+\begin{lstlisting}
+cover-maker separate "https://www.youtube.com/watch?v=..." --stems vocals --mode without --confirm-rights
+\end{lstlisting}
+
+\section{Watched folders and playlists}
+\begin{lstlisting}
+cover-maker library add-folder "D:\Music\Practice"
+cover-maker library add-playlist "https://www.youtube.com/playlist?list=..."
+cover-maker library sync 1        # report what is new, changed or removed
+cover-maker library ls 1          # items and their status
+\end{lstlisting}
+
+\section{Importing a playlist file}
+Export a playlist from another service (for example the JSON files of a personal
+data export, a CSV, JSPF or M3U) and match it against your own files:
+\begin{lstlisting}
+cover-maker library import Playlist1.json --search "D:\Music"
+cover-maker library match 12 "D:\Music\Band - Song.flac"   # fix a match
+cover-maker library match 13 --unavailable
+\end{lstlisting}
+Nothing is downloaded when you import a playlist file.
 
 \chapter{Creative Commons sources}
 \todoin{M8}
