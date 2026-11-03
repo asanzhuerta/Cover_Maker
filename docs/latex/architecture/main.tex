@@ -111,9 +111,11 @@ Separation runs at reduced priority with an efficiency hint and a thread cap. If
 \gls{daw} is running, a low-impact mode with smaller chunks and pauses is offered.
 
 \chapter{Architecture decisions}
-Decisions are recorded as \glspl{adr}. Planned: ADR-001 separation engine and
-presets, ADR-002 \gls{vram} tiers and fallback (M1); ADR-004 transport and
-security, ADR-005 process model, ADR-006 bootstrap, ADR-007 audio preview (M2).
+Decisions are recorded as \glspl{adr}, one per file under
+\texttt{architecture/adr}.
+
+\input{adr/adr-001-separation-engine}
+\input{adr/adr-002-vram-tiers}
 
 \chapter{Compliance}\label{ch:compliance}
 \cmnote{This chapter summarises a risk analysis carried out on 2026-11-02. It is
@@ -181,7 +183,8 @@ Previous v0.1 model (becruily vocals) & about 10.55 & none & audio-separator \\
 \end{tabularx}
 
 \section{Estimated performance per hardware tier}
-Estimates for a 4-minute song (\(\pm 50\%\)), to be replaced by M1 measurements:
+Estimates for a 4-minute song (\(\pm 50\%\)) made before the M1 measurements;
+the 4~GB and CPU rows are superseded by \autoref{sec:benchmarks}:
 
 \begin{tabularx}{\linewidth}{@{}lYYY@{}}
 \toprule
@@ -195,8 +198,60 @@ CPU only & 20--35 min & 20--40 min & 2--4 min \\
 \bottomrule
 \end{tabularx}
 
-\section{Benchmarks}
-\todoin{M1}
+\section{Benchmarks (M1)}\label{sec:benchmarks}
+Reference machine: Intel Core i5-11400H (6 cores), 16~GB RAM, NVIDIA GeForce
+RTX 3050 Laptop GPU with 4~GB \gls{vram} (driver 596.21), PyTorch 2.11 with
+CUDA 12.8, \texttt{audio-separator} 0.48, overlap 2. Input: a deterministic
+synthetic multitrack (60~s on the GPU, 30~s on the CPU). Time is given as
+seconds of processing per minute of audio; the last column is the estimate for
+a 4-minute song. Raw results are in \texttt{docs/data/benchmarks/}.
+
+\begin{longtable}{@{}P{0.33\linewidth}P{0.12\linewidth}P{0.12\linewidth}P{0.12\linewidth}P{0.18\linewidth}@{}}
+\toprule
+\textbf{Model and setting} & \textbf{s / min} & \textbf{VRAM (MB)} & \textbf{RAM (MB)} & \textbf{4-min song} \\
+\midrule
+\endhead
+\multicolumn{5}{@{}l}{\textit{GPU (RTX 3050 Laptop, 4 GB)}} \\
+BS-RoFormer-SW, fp16, default chunk & 19.8 & 2158 & 1879 & 1 min 19 s \\
+BS-RoFormer-SW, fp16, 8 s chunk & 21.7 & 2129 & 1746 & 1 min 27 s \\
+BS-RoFormer-SW, fp16, 4 s chunk & 28.6 & 2042 & 1769 & 1 min 54 s \\
+BS-RoFormer-SW, fp32, default chunk & 30.8 & 2808 & 1650 & 2 min 3 s \\
+BS-RoFormer-SW, autocast, 8 s chunk & 18.2 & 2132 & 1838 & 1 min 13 s \\
+Resurrection (vocals), fp16, default & 16.3 & 1725 & 1550 & 1 min 5 s \\
+Resurrection (vocals), fp32, default & 84.6 & 2930 & 1445 & 5 min 38 s$^{*}$ \\
+Kim Mel-Band (vocals), fp16, default & 13.1 & 3150 & 1763 & 52 s \\
+Kim Mel-Band (vocals), fp32, default & 72.8 & 3514 & 2179 & 4 min 51 s$^{*}$ \\
+HT Demucs (4 stems) & 7.7 & 866 & 1742 & 31 s \\
+HT Demucs 6s (6 stems) & 7.3 & 961 & 1892 & 29 s \\
+\multicolumn{5}{@{}l}{\textit{CPU only (i5-11400H)}} \\
+HT Demucs (4 stems) & 40.8 & -- & 1712 & 2 min 43 s \\
+HT Demucs 6s (6 stems) & 33.5 & -- & 1821 & 2 min 14 s \\
+BS-RoFormer-SW, fp32, 8 s chunk & 259.3 & -- & 2753 & 17 min 17 s \\
+\bottomrule
+\end{longtable}
+
+$^{*}$~Spilled into shared system memory (driver \emph{CUDA Sysmem Fallback}):
+the run did not fail but became several times slower.
+
+\paragraph{Findings.}
+\begin{itemize}
+  \item The best 6-stem model, BS-RoFormer-SW, runs comfortably on the 4~GB
+        minimum tier in fp16 at its default chunk: about 80~s per 4-minute song.
+  \item fp16 is always the fastest setting for RoFormer models and avoids the
+        memory spill seen in fp32; this drives ADR-002.
+  \item Smaller chunks reduce \gls{vram} only slightly for SW and cost time, so
+        they are kept as an out-of-memory fallback.
+  \item On the CPU only Demucs is practical (about 2--3 minutes per song); SW
+        takes about 17 minutes and is offered as an opt-in ``overnight'' mode.
+  \item The Max-quality recipe (SW + Resurrection + a second SW pass) costs
+        about 3.5--4 minutes per song on the reference GPU.
+\end{itemize}
+
+\paragraph{Quality.} The synthetic input only verifies that separation runs: the
+models are trained on real music and ignore some synthetic instruments, so its
+\gls{sdr} values are not comparable with the leaderboard figures above. Quality
+ranking relies on the public leaderboard and on a blind listening test with
+real recordings supplied by the product owner (pending).
 
 \printnoidxglossaries
 \end{document}

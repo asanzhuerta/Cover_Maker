@@ -17,5 +17,9 @@ project follows [Semantic Versioning](https://semver.org/).
   generated from `docs/data/*.yaml`.
 - Scope: user-pasted video and playlist links (audio downloaded with yt-dlp,
   rights confirmation per job) added to v1.0; documented as accepted risk R-08.
+- M1 benchmark spike (`spikes/separation-bench`): separation models measured on
+  an RTX 3050 Laptop (4 GB) and an i5-11400H; ADR-001 and ADR-002; measured
+  performance requirements.
+- M11 (DAW integration: VST3 plugin and REAPER extension) added to the roadmap.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.

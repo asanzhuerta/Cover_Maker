@@ -1,0 +1,17 @@
+\section{ADR-001: Separation engine and presets}
+\textbf{Status:} accepted (M1). \textbf{Context:} the product needs vocals,
+guitar, drums, bass, piano and other stems on mid-range hardware, and the best
+public models are not all available in one package. \textbf{Decision:} use the
+\texttt{audio-separator} package (0.48) as the inference engine inside a
+separate worker process, with three presets expressed as recipe graphs:
+\begin{description}
+  \item[Fast] one HT~Demucs 6-stem pass; the default on CPU-only machines.
+  \item[Balanced] one BS-RoFormer-SW pass for all six stems; the default on
+        NVIDIA GPUs with 4~GB or more.
+  \item[Max quality] the average of two vocal estimates (SW and Resurrection),
+        then a second SW pass on the instrumental (mix minus those vocals).
+\end{description}
+\textbf{Consequences:} BS-RoFormer-SW in half precision fits 4~GB of
+\gls{vram} at its default 13.35~s chunk (2.2~GB peak), so smaller chunks are a
+fallback rather than the default; inference overlap is always set to 2, since
+model defaults of 4--8 multiply the time.

@@ -4,7 +4,8 @@
 \textbf{ID} & \textbf{Requirement} & \textbf{Priority} & \textbf{Milestone} \\
 \midrule
 \endhead
-\texttt{NFR-PERF-01} & \textbf{GPU throughput}. On an NVIDIA GPU with 8 GB VRAM, the Balanced preset should separate a 4-minute song in under 2 minutes (target to be confirmed by the M1 benchmarks). & should & M1 \\
+\texttt{NFR-PERF-01} & \textbf{GPU throughput}. On an NVIDIA GPU with 4 GB VRAM or more, the Balanced preset shall separate a 4-minute song into six stems in under 2 minutes (measured in M1 at about 80 s on an RTX 3050 Laptop 4 GB). & must & M1 \\
+\texttt{NFR-PERF-04} & \textbf{CPU-only operation}. Without a usable GPU, the Fast preset shall separate a 4-minute song in under 5 minutes on a 6-core CPU from 2021 or newer (measured in M1 at about 2.5 minutes). & must & M1 \\
 \texttt{NFR-PERF-02} & \textbf{Low-memory fallback}. On out-of-memory errors the system shall retry with smaller chunks and half precision before asking the user to fall back to CPU. & must & M3 \\
 \texttt{NFR-PERF-03} & \textbf{DAW coexistence}. Separation shall run at reduced priority with a thread cap, and offer a low-impact mode when a DAW is running. & should & M3 \\
 \texttt{NFR-SEC-01} & \textbf{Local API protection}. The local engine shall listen on 127.0.0.1 only and require a per-session token, an exact Host header and an allowed Origin. & must & M5 \\

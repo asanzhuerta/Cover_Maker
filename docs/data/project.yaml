@@ -45,13 +45,17 @@ milestones:
     name: Quality and 1.0
     effort: M
     goal: Hardening, accessibility, test report and the 1.0 release.
+  - id: M11
+    name: DAW integration (VST3 + REAPER)
+    effort: L
+    goal: VST3 plugin as a client of the local engine, plus a REAPER extension that inserts each stem as a new track.
 
 risks:
   - id: R-01
     risk: Best multi-stem model does not fit in 4 GB VRAM or is too slow on CPU
-    likelihood: medium
+    likelihood: low
     impact: high
-    mitigation: M1 benchmark spike, hardware tiers, half precision and smaller chunks, Demucs for CPU.
+    mitigation: Measured in M1 - SW fits 4 GB in fp16 (about 80 s per song); hardware tiers, fp16 first, smaller chunks as fallback, Demucs on CPU.
   - id: R-02
     risk: Licence or provenance problems with model weights
     likelihood: high
