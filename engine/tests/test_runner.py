@@ -10,7 +10,7 @@ from cover_maker.pipeline.runner import JobRunner, ModelNotInstalled
 from cover_maker.separation.backends.fake import WEIGHTS, FakeBackend
 from cover_maker.separation.catalog import Catalog
 from cover_maker.separation.service import InProcessService, NeedsCpuFallback
-from cover_maker.store.db import connect, schema_version
+from cover_maker.store.db import MIGRATIONS, connect, schema_version
 
 
 def spec(song: Path, tmp_path: Path, **kwargs: object) -> JobSpec:
@@ -97,7 +97,9 @@ def test_missing_model_is_reported(paths: Paths, song: Path, tmp_path: Path) -> 
 def test_missing_input_fails_item_not_job(runner: JobRunner, song: Path, tmp_path: Path) -> None:
     job = runner.submit(
         JobSpec(
-            inputs=[tmp_path / "nope.wav", song], stems=[Stem.VOCALS], output_dir=tmp_path / "out"
+            inputs=[str(tmp_path / "nope.wav"), str(song)],
+            stems=[Stem.VOCALS],
+            output_dir=tmp_path / "out",
         )
     )
 
@@ -150,4 +152,4 @@ def test_cpu_fallback_when_allowed(paths: Paths, song: Path, tmp_path: Path) -> 
 
 
 def test_schema_is_migrated(paths: Paths) -> None:
-    assert schema_version(connect(paths.db)) == 1
+    assert schema_version(connect(paths.db)) == len(MIGRATIONS)

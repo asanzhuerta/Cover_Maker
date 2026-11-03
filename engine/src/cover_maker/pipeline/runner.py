@@ -27,6 +27,8 @@ from ..separation.catalog import Catalog, Installs, ModelSpec
 from ..separation.recipes import MINUS, Node, Recipe, Ref
 from ..separation.service import SeparationService, with_ladder
 from ..separation.types import Cancelled, SeparationRequest
+from ..sources import youtube
+from ..sources.links import InputKind, parse_input
 from ..store.assets import AssetStore, sha256_file
 from .events import EventBus
 
@@ -36,6 +38,14 @@ _UNSAFE = re.compile(r'[<>:"/\\|?*\x00-\x1f]+')
 
 class JobCancelled(RuntimeError):
     pass
+
+
+class RightsNotConfirmed(RuntimeError):
+    def __init__(self) -> None:
+        super().__init__(
+            "This job downloads online content. Confirm that you own it or are allowed to "
+            "use it before processing (see DISCLAIMER.md)."
+        )
 
 
 class ModelNotInstalled(RuntimeError):
@@ -84,6 +94,9 @@ class JobRunner:
     # ------------------------------------------------------------ job state
 
     def submit(self, spec: JobSpec) -> int:
+        online = [raw for raw in spec.inputs if raw.lower().startswith(("http://", "https://"))]
+        if online and not spec.rights_confirmed:
+            raise RightsNotConfirmed()
         cursor = self.conn.execute(
             "INSERT INTO jobs (spec_json) VALUES (?)", (spec.model_dump_json(),)
         )
@@ -155,7 +168,7 @@ class JobRunner:
             try:
                 self._set_item(item["id"], status="running", error=None)
                 outputs = self._run_item(
-                    job_id, item["id"], Path(item["input_path"]), spec, recipe, wanted
+                    job_id, item["id"], item["input_path"], spec, recipe, wanted
                 )
                 self._set_item(
                     item["id"], status="done", current_step=None, outputs_json=json.dumps(outputs)
@@ -215,13 +228,22 @@ class JobRunner:
         self,
         job_id: int,
         item_id: int,
-        source: Path,
+        raw_input: str,
         spec: JobSpec,
         recipe: Recipe,
         wanted: set[Stem],
     ) -> dict[str, str]:
-        if not source.exists():
-            raise FileNotFoundError(f"input file not found: {source}")
+        if raw_input.lower().startswith(("http://", "https://")):
+            parsed = parse_input(raw_input)
+            if parsed.kind is not InputKind.VIDEO:
+                raise ValueError(f"expand playlists before submitting a job: {raw_input}")
+            self._step(job_id, item_id, "download")
+            source, title = self._download(job_id, item_id, parsed.value)
+        else:
+            source = Path(raw_input)
+            title = source.stem
+            if not source.exists():
+                raise FileNotFoundError(f"input file not found: {source}")
         self._step(job_id, item_id, "decode")
         mix_sha = self._decode(source)
 
@@ -232,7 +254,34 @@ class JobRunner:
 
         stems = {stem: produced[recipe.output_ref(stem).node][stem] for stem in wanted}
         self._step(job_id, item_id, "export")
-        return self._export(source, mix_sha, stems, spec)
+        return self._export(title, mix_sha, stems, spec)
+
+    def _download(self, job_id: int, item_id: int, video_id: str) -> tuple[Path, str]:
+        """Download a video's audio once; later runs reuse the cached file."""
+        cached = self._cached("download", video_id)
+        meta = self.conn.execute(
+            "SELECT output_json FROM step_cache WHERE step = 'video_title' AND cache_key = ?",
+            (video_id,),
+        ).fetchone()
+        if cached and meta:
+            return self.assets.require(str(cached)), json.loads(meta["output_json"])
+
+        def progress(fraction: float | None) -> None:
+            self.events.emit(
+                "item.progress", job=job_id, item=item_id, step="download", fraction=fraction
+            )
+
+        with tempfile.TemporaryDirectory(dir=self.paths.tmp) as scratch:
+            try:
+                path, info = youtube.download_audio(
+                    video_id, Path(scratch), progress=progress, cancel=self._cancel
+                )
+            except youtube.DownloadCancelled as exc:
+                raise JobCancelled() from exc
+            sha = self.assets.put(path, "download", move=True)
+        self._store("download", video_id, sha)
+        self._store("video_title", video_id, info.title)
+        return self.assets.require(sha), info.title
 
     def _decode(self, source: Path) -> str:
         key = f"{CACHE_VERSION}:{sha256_file(source)}:{io.SAMPLE_RATE}"
@@ -318,9 +367,9 @@ class JobRunner:
         return stored
 
     def _export(
-        self, source: Path, mix_sha: str, stems: dict[Stem, str], spec: JobSpec
+        self, name: str, mix_sha: str, stems: dict[Stem, str], spec: JobSpec
     ) -> dict[str, str]:
-        title = safe_title(source.stem)
+        title = safe_title(name)
         fmt = spec.output_format.value
         spec.output_dir.mkdir(parents=True, exist_ok=True)
         outputs: dict[str, str] = {}

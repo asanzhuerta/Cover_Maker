@@ -30,6 +30,11 @@ project follows [Semantic Versioning](https://semver.org/).
   ladder, mixer for "track without X", cached job runner with crash
   recovery, hardware detection, and the `separate`, `models` and `doctor`
   commands.
+- M4 sources and library: video and playlist links through yt-dlp (download
+  step cached by video id, rights confirmation stored with the job), watched
+  folders, video playlists and imported playlist files (data-export JSON, CSV,
+  JSPF, M3U) matched to local files with review and manual correction, and
+  the `library` commands.
 - M11 (DAW integration: VST3 plugin and REAPER extension) added to the roadmap.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.

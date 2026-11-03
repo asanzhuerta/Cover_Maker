@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from enum import StrEnum
 from pathlib import Path
+from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Stem(StrEnum):
@@ -45,7 +46,7 @@ class OutputFormat(StrEnum):
 class JobSpec(BaseModel):
     """What the user asked for; stored with the job."""
 
-    inputs: list[Path] = Field(min_length=1)
+    inputs: list[str] = Field(min_length=1)  # file paths or video links
     stems: list[Stem] = Field(min_length=1)
     mode: Mode = Mode.EXTRACT
     residual: ResidualMode = ResidualMode.KEEP
@@ -53,3 +54,9 @@ class JobSpec(BaseModel):
     output_dir: Path
     output_format: OutputFormat = OutputFormat.WAV
     allow_cpu_fallback: bool = False
+    rights_confirmed: bool = False  # the user confirmed rights to online inputs (FR-SRC-06)
+
+    @field_validator("inputs", mode="before")
+    @classmethod
+    def _stringify(cls, value: Any) -> Any:
+        return [str(item) for item in value] if isinstance(value, list | tuple) else value  # pyright: ignore[reportUnknownVariableType, reportUnknownArgumentType]

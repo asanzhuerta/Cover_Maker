@@ -51,6 +51,33 @@ MIGRATIONS: tuple[str, ...] = (
         accepted_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
     """,
+    # 2: library collections (watched folders, video playlists, imported playlist files).
+    """
+    CREATE TABLE collections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kind TEXT NOT NULL,
+        source TEXT NOT NULL,
+        title TEXT NOT NULL,
+        extra_json TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        synced_at TEXT,
+        UNIQUE (kind, source)
+    );
+    CREATE TABLE collection_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+        key TEXT NOT NULL,
+        position INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        artist TEXT,
+        duration_s REAL,
+        input TEXT,
+        score REAL,
+        status TEXT NOT NULL,
+        manual INTEGER NOT NULL DEFAULT 0,
+        UNIQUE (collection_id, key)
+    )
+    """,
 )
 
 

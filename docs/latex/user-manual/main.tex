@@ -32,7 +32,33 @@ rights holders.}
 \todoin{M7}
 
 \chapter{Library, folders and playlist import}
-\todoin{M8}
+\todoin{M8} The desktop views come in M8; the engine already supports these
+workflows from the command line.
+
+\section{Video links}
+Paste a video or playlist link instead of a file. Only the audio is downloaded.
+You must confirm that you own the content or are allowed to use it:
+\begin{lstlisting}
+cover-maker separate "https://www.youtube.com/watch?v=..." --stems vocals --mode without --confirm-rights
+\end{lstlisting}
+
+\section{Watched folders and playlists}
+\begin{lstlisting}
+cover-maker library add-folder "D:\Music\Practice"
+cover-maker library add-playlist "https://www.youtube.com/playlist?list=..."
+cover-maker library sync 1        # report what is new, changed or removed
+cover-maker library ls 1          # items and their status
+\end{lstlisting}
+
+\section{Importing a playlist file}
+Export a playlist from another service (for example the JSON files of a personal
+data export, a CSV, JSPF or M3U) and match it against your own files:
+\begin{lstlisting}
+cover-maker library import Playlist1.json --search "D:\Music"
+cover-maker library match 12 "D:\Music\Band - Song.flac"   # fix a match
+cover-maker library match 13 --unavailable
+\end{lstlisting}
+Nothing is downloaded when you import a playlist file.
 
 \chapter{Creative Commons sources}
 \todoin{M8}

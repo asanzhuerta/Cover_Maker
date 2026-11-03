@@ -12,6 +12,7 @@ requires-python = ">=3.12,<3.13"
 authors = [{ name = "asanzhuerta and Cover_Maker contributors" }]
 dependencies = [
     "fastapi>=0.120",
+    "mutagen>=1.47",
     "numpy>=2",
     "psutil>=7",
     "pydantic>=2.11",
@@ -20,6 +21,7 @@ dependencies = [
     "soundfile>=0.13",
     "typer>=0.16",
     "uvicorn>=0.38",
+    "yt-dlp[default]>=2026.10.26",
 ]
 
 [project.optional-dependencies]
@@ -53,6 +55,8 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# Layout is owned by `ruff format`; long string literals (SQL, messages) stay on one line.
+ignore = ["E501"]
 
 [tool.pyright]
 include = ["src", "tests"]

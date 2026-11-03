@@ -156,6 +156,36 @@ job. On start-up, items left \emph{running} by a crash return to \emph{pending}.
 A job ends as \emph{done}, \emph{failed} (at least one item failed) or
 \emph{cancelled}.
 
+\section{Sources and library (M4)}
+\paragraph{Inputs.} A job input is a file path or a video link. The
+\texttt{sources.links} module accepts local audio files, folders (expanded to
+their audio files), video links and playlist links of the supported video
+platform; anything else, including links to streaming services, is rejected.
+Automatic ``radio'' mixes are ignored and a watch link with a playlist is a
+single video unless the user asks for the playlist.
+
+\paragraph{Downloads.} For a video input the runner adds a \textbf{download}
+step before decoding. It calls the unmodified yt-dlp library for the best
+audio-only stream (no re-encoding, no dynamic-range-compressed variants), with
+progress events and cancellation. The download is cached by video id, so
+re-syncing a playlist downloads only new videos. Submitting a job with online
+inputs requires the rights confirmation of FR-SRC-06, which is stored in the
+job specification.
+
+\paragraph{Collections.} The library keeps collections of three kinds: watched
+folders, video playlists and imported playlist files. Syncing a collection
+refreshes its items (added, unchanged, removed) and returns the inputs ready to
+process; because every pipeline step is cached, processing a synced collection
+only does work for new or changed items.
+
+\paragraph{Playlist import.} Imported files (a streaming service's personal data
+export in JSON, CSV, JSPF or M3U) never cause any download. Their entries are
+matched against the user's audio files by title and artist similarity, with a
+duration penalty: a score of 0.85 or more is matched automatically, 0.6--0.85 is
+marked for review and lower scores are unavailable. Manual corrections are kept
+across re-syncs. Migration~2 adds the \texttt{collections} and
+\texttt{collection\_items} tables.
+
 \section{Mixer}
 For a mix $m$, estimated stems $s_k$ and the set $R$ of stems to remove:
 \[
