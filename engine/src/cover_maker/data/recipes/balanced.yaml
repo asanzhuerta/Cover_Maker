@@ -1,0 +1,10 @@
+# Balanced: one BS-RoFormer SW pass gives all six stems.
+nodes:
+  - {id: sw, model: bs-roformer-sw, input: mix}
+outputs:
+  vocals: sw.vocals
+  guitar: sw.guitar
+  drums: sw.drums
+  bass: sw.bass
+  piano: sw.piano
+  other: sw.other

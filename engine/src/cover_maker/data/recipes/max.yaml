@@ -1,0 +1,14 @@
+# Max quality: average two vocal estimates, then separate the rest from the
+# instrumental (mix minus the averaged vocals) with a second SW pass.
+nodes:
+  - {id: sw, model: bs-roformer-sw, input: mix}
+  - {id: res, model: bs-roformer-resurrection, input: mix}
+  - {id: voc, average: [sw.vocals, res.vocals], stem: vocals}
+  - {id: inst, model: bs-roformer-sw, input: "mix-minus:voc.vocals"}
+outputs:
+  vocals: voc.vocals
+  guitar: inst.guitar
+  drums: inst.drums
+  bass: inst.bass
+  piano: inst.piano
+  other: inst.other
