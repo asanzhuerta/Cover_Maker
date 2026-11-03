@@ -86,6 +86,62 @@ Incremental work & Every pipeline step has a cache key; re-sync resubmits everyt
 \bottomrule
 \end{tabularx}
 
+\chapter{Local API (M5)}
+The engine exposes the operations below on 127.0.0.1 (ADR-004). The table is
+generated from the OpenAPI schema; the same schema generates the TypeScript types
+used by the desktop UI, and CI fails if the committed schema is out of date.
+
+\input{generated/api-endpoints}
+
+\section{Events}
+Clients open \texttt{/events} and send \texttt{\{"token": ..., "since": n\}} as
+the first message. The engine answers \texttt{hello}, replays buffered events
+with a sequence number greater than \texttt{n} (the last 1\,000 are kept), then
+streams live events; a heartbeat is sent after 15~s of silence. Event types:
+\texttt{job.submitted}, \texttt{item.step}, \texttt{item.progress} (download
+fraction), \texttt{separation.metrics}, \texttt{separation.retry},
+\texttt{item.done}, \texttt{item.failed}, \texttt{item.cancelled},
+\texttt{job.finished} and \texttt{model.install.started|done|failed}.
+
+\section{Errors}
+Expected failures return \texttt{\{"detail", "code", "models"\}} with a stable
+\texttt{code}: \texttt{bad\_input}, \texttt{no\_audio}, \texttt{rights\_required},
+\texttt{model\_not\_installed} (with the missing model ids),
+\texttt{licence\_not\_accepted}, \texttt{unknown\_job}, \texttt{unknown\_model},
+\texttt{unknown\_collection}, \texttt{playlist\_unavailable} and
+\texttt{sync\_failed}.
+
+\section{Threads and connections}
+API handlers run on the event loop and hand database work to one worker thread
+at a time; jobs run on a separate job thread with its own SQLite connection
+(WAL, 10~s busy timeout). Jobs are queued and executed one at a time; pausing
+stops after the current item, cancelling kills the separation worker, and jobs
+left pending by a closed app are queued again on start-up. \texttt{cover-maker
+serve --demo} uses a fake separator and its own data folder, for UI development
+and end-to-end tests without a GPU.
+
+\chapter{User interface (M6)}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Part} & \textbf{Responsibility} \\
+\midrule
+\texttt{routes/} & Pages: welcome (terms, hardware, model choice), new job, queue, models, settings. \\
+\texttt{lib/connection} & Gets port and token from the shell (\texttt{engine\_info}); creates the typed API client; keeps the event socket open and reconnects with replay. \\
+\texttt{lib/jobs} & Pure functions deriving item progress from events (unit-tested). \\
+\texttt{lib/i18n} & English and Spanish dictionaries with a reactive locale. \\
+\texttt{lib/settings} & Preferences in local storage: language, theme, output folder, format, CPU fallback. \\
+\texttt{lib/components} & Stem picker and model list with the licence dialog. \\
+\bottomrule
+\end{tabularx}
+
+Files and folders come from native dialogs (\texttt{tauri-plugin-dialog}) or from
+the window's drag-and-drop event, which provides real paths. For development the
+UI can run in a normal browser against \texttt{cover-maker serve --demo} by
+setting \texttt{VITE\_ENGINE\_PORT} and \texttt{VITE\_ENGINE\_TOKEN}; the
+engine's Origin allowlist includes the development server. The whole flow
+(welcome, model list, job creation, live queue progress, language and theme
+switches) was verified this way against the demo engine.
+
 \chapter{Runtime view}
 \section{Engine start-up (M2)}
 \begin{enumerate}
@@ -118,6 +174,85 @@ Multi-stem playback & Six 4-minute stereo stems in one \texttt{AudioContext}: ab
 \texttt{start(t)} for sample alignment. \\
 \bottomrule
 \end{tabularx}
+
+\section{Separation job (M3)}
+A job is a \texttt{JobSpec} (inputs, stems, mode, residual mode, preset, output
+folder and format) stored as JSON, with one item per input. For each item the
+runner executes these steps and records the current step in SQLite:
+\begin{enumerate}
+  \item \textbf{decode} -- the input is decoded to a canonical WAV (44.1~kHz,
+        stereo, float32) and stored in the content-addressed asset store;
+  \item \textbf{separate:\textit{node}} -- the recipe graph of the preset is
+        pruned to the stems the job needs and each node runs once: a model run
+        through the GPU worker, with the out-of-memory ladder of ADR-002, or an
+        average of stems produced by earlier nodes;
+  \item \textbf{export} -- selected stems are written as files, or the
+        ``track without X'' is rendered by the mixer.
+\end{enumerate}
+Every step has a cache key built from content hashes (input, model, recipe node,
+mode and format). Running a job again, or asking for another stem of a song that
+was already separated, reuses the cached results and runs no model.
+
+\section{Data model}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Table} & \textbf{Contents} \\
+\midrule
+\texttt{assets} & Files of the library by SHA-256: decoded mixes, stems, downloads. \\
+\texttt{step\_cache} & Step name and cache key $\rightarrow$ produced asset(s). \\
+\texttt{jobs}, \texttt{job\_items} & Job specification, status, current step, outputs and errors. \\
+\texttt{model\_installs} & Installed models and the SHA-256 of the licence notice the user accepted. \\
+\bottomrule
+\end{tabularx}
+
+\section{Job and item states}
+Items move from \emph{pending} to \emph{running} and end as \emph{done},
+\emph{failed} or \emph{cancelled}; a failed item does not stop the rest of the
+job. On start-up, items left \emph{running} by a crash return to \emph{pending}.
+A job ends as \emph{done}, \emph{failed} (at least one item failed) or
+\emph{cancelled}.
+
+\section{Sources and library (M4)}
+\paragraph{Inputs.} A job input is a file path or a video link. The
+\texttt{sources.links} module accepts local audio files, folders (expanded to
+their audio files), video links and playlist links of the supported video
+platform; anything else, including links to streaming services, is rejected.
+Automatic ``radio'' mixes are ignored and a watch link with a playlist is a
+single video unless the user asks for the playlist.
+
+\paragraph{Downloads.} For a video input the runner adds a \textbf{download}
+step before decoding. It calls the unmodified yt-dlp library for the best
+audio-only stream (no re-encoding, no dynamic-range-compressed variants), with
+progress events and cancellation. The download is cached by video id, so
+re-syncing a playlist downloads only new videos. Submitting a job with online
+inputs requires the rights confirmation of FR-SRC-06, which is stored in the
+job specification.
+
+\paragraph{Collections.} The library keeps collections of three kinds: watched
+folders, video playlists and imported playlist files. Syncing a collection
+refreshes its items (added, unchanged, removed) and returns the inputs ready to
+process; because every pipeline step is cached, processing a synced collection
+only does work for new or changed items.
+
+\paragraph{Playlist import.} Imported files (a streaming service's personal data
+export in JSON, CSV, JSPF or M3U) never cause any download. Their entries are
+matched against the user's audio files by title and artist similarity, with a
+duration penalty: a score of 0.85 or more is matched automatically, 0.6--0.85 is
+marked for review and lower scores are unavailable. Manual corrections are kept
+across re-syncs. Migration~2 adds the \texttt{collections} and
+\texttt{collection\_items} tables.
+
+\section{Mixer}
+For a mix $m$, estimated stems $s_k$ and the set $R$ of stems to remove:
+\[
+\textit{keep residual:}\quad y = m - \sum_{k \in R} s_k
+\qquad\qquad
+\textit{drop residual:}\quad y = \sum_{k \notin R} s_k
+\]
+With \emph{keep} nothing that the models missed is lost; with \emph{drop} the
+result is cleaner but loses whatever no stem captured. Stems are padded or
+trimmed to the mix length, all arithmetic is float32, and the gain is reduced
+only when the result would clip (never silent clipping).
 
 \chapter{Deployment view}
 \todoin{M9}

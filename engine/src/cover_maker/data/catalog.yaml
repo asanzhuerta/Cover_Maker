@@ -1,0 +1,73 @@
+# Separation model catalogue. Weights are never bundled or hosted by this
+# project: they are downloaded from their original sources (through the
+# audio-separator package) only after the user accepts the licence notice.
+#
+# licence_class: permissive | disputed | none | non-commercial | copyleft
+# stems: model output label -> Cover_Maker stem id
+# sha256: pinned hash of the main weight file (null = recorded on first install)
+
+models:
+  - id: bs-roformer-sw
+    name: BS-RoFormer SW (6 stems)
+    filename: BS-Roformer-SW.ckpt
+    architecture: bs-roformer
+    stems: {Vocals: vocals, Guitar: guitar, Drums: drums, Bass: bass, Piano: piano, Other: other}
+    size_mb: 667
+    vram_mb_fp16: 2200
+    sha256: 24e7d35ee9c64415673d3fd33e06a67cac2c103c5df6267ba1576459c775916e
+    licence_class: none
+    licence: No licence published. The original uploader's account no longer exists and the model's provenance is disputed.
+    source: Community release, distributed through the audio-separator model mirror.
+    recommended_for: [balanced, max]
+
+  - id: bs-roformer-resurrection
+    name: BS-RoFormer Resurrection (vocals, unwa)
+    filename: bs_roformer_vocals_resurrection_unwa.ckpt
+    architecture: bs-roformer
+    stems: {Vocals: vocals}
+    size_mb: 195
+    vram_mb_fp16: 1500
+    sha256: 9dbfe5cb572e4ed32a15ec727d7bd06c8d7aba97509e6fda5bc008bb1e0b2dd5
+    licence_class: none
+    licence: No licence published by the author (unwa).
+    source: https://huggingface.co/pcunwa
+    recommended_for: [max]
+
+  - id: mel-roformer-kim
+    name: Mel-Band RoFormer vocals (Kimberley Jensen)
+    filename: vocals_mel_band_roformer.ckpt
+    architecture: mel-roformer
+    stems: {Vocals: vocals}
+    size_mb: 871
+    vram_mb_fp16: 2000
+    sha256: null
+    licence_class: permissive
+    licence: Listed as MIT on the author's model page (not confirmed in a licence file).
+    source: https://huggingface.co/KimberleyJSN/melbandroformer
+    recommended_for: [max]
+
+  - id: htdemucs
+    name: Hybrid Transformer Demucs (4 stems)
+    filename: htdemucs.yaml
+    architecture: demucs
+    stems: {Vocals: vocals, Drums: drums, Bass: bass, Other: other}
+    size_mb: 81
+    vram_mb_fp16: 800
+    sha256: null
+    licence_class: disputed
+    licence: Code is MIT; the author stated in 2022 that the weights are provided for research purposes.
+    source: https://github.com/facebookresearch/demucs
+    recommended_for: [fast]
+
+  - id: htdemucs-6s
+    name: Hybrid Transformer Demucs (6 stems)
+    filename: htdemucs_6s.yaml
+    architecture: demucs
+    stems: {Vocals: vocals, Drums: drums, Bass: bass, Guitar: guitar, Piano: piano, Other: other}
+    size_mb: 53
+    vram_mb_fp16: 900
+    sha256: null
+    licence_class: disputed
+    licence: Code is MIT; the author stated in 2022 that the weights are provided for research purposes.
+    source: https://github.com/facebookresearch/demucs
+    recommended_for: [fast]

@@ -14,14 +14,18 @@ import json
 import os
 import socket
 import sys
+import tempfile
 import threading
 import time
+from pathlib import Path
 
 import psutil
 import uvicorn
 
 from .. import __version__
+from ..paths import Paths
 from .app import create_app
+from .engine import EngineService
 from .security import AccessPolicy
 
 TOKEN_ENV = "COVER_MAKER_TOKEN"
@@ -34,7 +38,21 @@ def _watch_parent(parent_pid: int, server: uvicorn.Server) -> None:
     server.should_exit = True
 
 
-def serve(host: str = "127.0.0.1") -> None:
+def build_service(demo: bool) -> EngineService:
+    """Real engine, or a demo engine with a fake separator and its own data folder."""
+    if not demo:
+        return EngineService(Paths.default())
+    from ..separation.backends.fake import FakeBackend
+    from ..separation.service import InProcessService
+
+    paths = Paths(Path(tempfile.gettempdir()) / "cover_maker_demo").ensure()
+    service = EngineService(paths, separation=InProcessService(FakeBackend()), demo=True)
+    for model in service.catalog.models.values():
+        service.installs.record(model, None)
+    return service
+
+
+def serve(host: str = "127.0.0.1", *, demo: bool = False) -> None:
     token = os.environ.get(TOKEN_ENV)
     if not token or len(token) < 32:
         raise SystemExit(f"{TOKEN_ENV} must be set to a token of at least 32 characters.")
@@ -44,7 +62,9 @@ def serve(host: str = "127.0.0.1") -> None:
     port: int = sock.getsockname()[1]
 
     policy = AccessPolicy(token=token, host=f"{host}:{port}")
-    config = uvicorn.Config(create_app(policy), log_level="warning", access_log=False)
+    service = build_service(demo)
+    service.start()
+    config = uvicorn.Config(create_app(policy, service), log_level="warning", access_log=False)
     server = uvicorn.Server(config)
 
     parent = os.environ.get(PARENT_ENV)
@@ -54,4 +74,7 @@ def serve(host: str = "127.0.0.1") -> None:
     handshake = {"event": "ready", "port": port, "pid": os.getpid(), "version": __version__}
     sys.stdout.write(json.dumps(handshake) + "\n")
     sys.stdout.flush()
-    server.run(sockets=[sock])
+    try:
+        server.run(sockets=[sock])
+    finally:
+        service.stop()
