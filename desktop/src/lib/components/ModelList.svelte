@@ -276,7 +276,6 @@
     gap: 0.3rem;
   }
 
-
   .meters {
     display: grid;
     gap: 0.45rem;
