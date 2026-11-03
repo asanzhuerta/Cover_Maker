@@ -1,5 +1,5 @@
 # pyright: basic
-# (This module reads untyped tags through mutagen.)
+# (This module reads tags through tinytag, whose attributes are loosely typed.)
 """Match imported playlist entries to audio files the user already has."""
 
 from __future__ import annotations
@@ -81,20 +81,17 @@ def best_match(entry: PlaylistEntry, tracks: Iterable[LocalTrack]) -> Match:
 
 
 def read_track(path: Path) -> LocalTrack:
-    """Read tags with mutagen; fall back to 'Artist - Title' in the file name."""
+    """Read tags with tinytag (MIT); fall back to 'Artist - Title' in the file name."""
     title, artist, album, duration = "", "", "", None
     try:
-        import mutagen  # pyright: ignore[reportMissingTypeStubs]
+        from tinytag import TinyTag
 
-        audio = mutagen.File(str(path), easy=True)  # pyright: ignore[reportUnknownMemberType, reportPrivateImportUsage]
-        if audio is not None:
-            tags = audio.tags or {}  # pyright: ignore[reportUnknownMemberType]
-            title = str((tags.get("title") or [""])[0])  # pyright: ignore[reportUnknownMemberType]
-            artist = str((tags.get("artist") or [""])[0])  # pyright: ignore[reportUnknownMemberType]
-            album = str((tags.get("album") or [""])[0])  # pyright: ignore[reportUnknownMemberType]
-            length = getattr(audio.info, "length", None)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-            duration = float(length) if length else None  # pyright: ignore[reportUnknownArgumentType]
-    except Exception:  # unreadable tags must not break the scan
+        tag = TinyTag.get(str(path))
+        title = str(tag.title or "")
+        artist = str(tag.artist or "")
+        album = str(tag.album or "")
+        duration = float(tag.duration) if tag.duration else None
+    except Exception:  # unreadable or unsupported tags must not break the scan
         pass
     if not title:
         stem = re.sub(r"^\d+[\s._-]+", "", path.stem)  # drop track numbers

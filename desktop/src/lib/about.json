@@ -1,13 +1,13 @@
 {
   "author": {
-    "name": "Your Name",
+    "name": "Alejandro Sanz Huerta",
     "photo": "/about/avatar.svg",
-    "email": "author@example.com",
-    "website": "https://example.com",
+    "email": "alejandro.sanzhuerta.dev@gmail.com",
+    "website": "https://asanzhuerta.netlify.app",
     "github": "https://github.com/asanzhuerta",
     "bio": {
-      "en": "Musician and developer. Replace this placeholder with a short description of yourself in desktop/src/lib/about.json.",
-      "es": "Músico y desarrollador. Sustituye este texto de ejemplo por una breve descripción tuya en desktop/src/lib/about.json."
+      "en": "Musician and developer.",
+      "es": "Músico y desarrollador."
     }
   },
   "app": {
@@ -63,7 +63,7 @@
     {
       "name": "FFmpeg",
       "url": "https://ffmpeg.org",
-      "licence": "LGPL-2.1-or-later",
+      "licence": "LGPL-3.0-or-later",
       "role": {
         "en": "Audio decoding and MP3",
         "es": "Decodificación de audio y MP3"

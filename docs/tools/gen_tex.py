@@ -88,7 +88,8 @@ def main() -> None:
             requirement_rows(requirements["non_functional"], with_meta=True),
         ),
         "milestones.tex": longtable(
-            r"@{}P{0.06\linewidth}P{0.3\linewidth}P{0.08\linewidth}P{0.5\linewidth}@{}",
+            # Widths leave room for the column separation (6 x \tabcolsep).
+            r"@{}P{0.07\linewidth}P{0.29\linewidth}P{0.08\linewidth}P{0.48\linewidth}@{}",
             ["ID", "Milestone", "Effort", "Goal"],
             [
                 [tex(m["id"]), tex(m["name"]), tex(m["effort"]), tex(m["goal"])]
@@ -96,7 +97,7 @@ def main() -> None:
             ],
         ),
         "risks.tex": longtable(
-            r"@{}P{0.06\linewidth}P{0.28\linewidth}P{0.1\linewidth}P{0.08\linewidth}P{0.38\linewidth}@{}",
+            r"@{}P{0.06\linewidth}P{0.28\linewidth}P{0.1\linewidth}P{0.08\linewidth}P{0.36\linewidth}@{}",
             ["ID", "Risk", "Likelihood", "Impact", "Mitigation"],
             [
                 [tex(r["id"]), tex(r["risk"]), tex(r["likelihood"]), tex(r["impact"]), tex(r["mitigation"])]

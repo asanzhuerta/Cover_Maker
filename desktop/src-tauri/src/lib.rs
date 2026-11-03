@@ -4,6 +4,7 @@
 
 mod engine;
 mod jobobject;
+mod locale;
 mod runtime;
 
 use std::sync::Arc;
@@ -123,6 +124,12 @@ async fn update_ytdlp(app: AppHandle, runtime: State<'_, Runtime>) -> Result<Str
     Ok(version)
 }
 
+/// Language picked in the installer (`en` or `es`), used as the first default.
+#[tauri::command]
+fn installer_locale() -> Option<&'static str> {
+    locale::installer_locale()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -159,7 +166,8 @@ pub fn run() {
             bootstrap_retry,
             restart_engine,
             check_ytdlp,
-            update_ytdlp
+            update_ytdlp,
+            installer_locale
         ])
         .build(tauri::generate_context!())
         .expect("error while building the Cover_Maker shell")

@@ -24,16 +24,46 @@ const defaults: Settings = {
   welcomed: false,
 };
 
-function load(): Settings {
+function stored(): string | null {
   try {
-    const raw = localStorage.getItem(KEY);
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+}
+
+function load(raw: string | null): Settings {
+  try {
     return raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
   } catch {
     return { ...defaults };
   }
 }
 
-export const settings = $state<Settings>(load());
+const initial = stored();
+
+/** True on the very first start: nothing has been saved yet. */
+export const firstStart = initial === null;
+
+export const settings = $state<Settings>(load(initial));
+
+/**
+ * On the first start of an installed app, use the language picked in the
+ * installer as the default; Settings can change it later.
+ */
+export async function applyInstallerLocale(): Promise<void> {
+  if (!firstStart) return;
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const locale = await invoke<Locale | null>("installer_locale");
+    if (locale === "en" || locale === "es") {
+      settings.locale = locale;
+      saveSettings();
+    }
+  } catch {
+    // Not installed with the NSIS installer (development): keep the default.
+  }
+}
 
 export function saveSettings(): void {
   i18n.locale = settings.locale;

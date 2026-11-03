@@ -15,7 +15,12 @@
   import { connect, connection, isTauri } from "$lib/connection.svelte";
   import type { IconName } from "$lib/icons";
   import { t, type MessageKey } from "$lib/i18n.svelte";
-  import { applyTheme, settings, saveSettings } from "$lib/settings.svelte";
+  import {
+    applyInstallerLocale,
+    applyTheme,
+    settings,
+    saveSettings,
+  } from "$lib/settings.svelte";
 
   let { children }: { children: Snippet } = $props();
 
@@ -36,7 +41,10 @@
   onMount(() => {
     saveSettings();
     applyTheme(settings.theme);
-    if (isTauri()) void startBootstrapWatch();
+    if (isTauri()) {
+      void startBootstrapWatch();
+      void applyInstallerLocale();
+    }
     void connect();
     if (!settings.welcomed && page.url.pathname !== "/welcome") {
       void goto(resolve("/welcome"));
@@ -171,7 +179,7 @@
 
   .shell {
     display: grid;
-    grid-template-columns: 232px 1fr;
+    grid-template-columns: 264px 1fr;
     min-height: 100vh;
   }
 
@@ -182,7 +190,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.8rem;
-    padding: 1.3rem 0.9rem;
+    padding: 1.4rem 1.1rem;
     border-right: 1px solid var(--border);
     background: color-mix(in srgb, var(--surface) 82%, transparent);
     backdrop-filter: blur(12px);
@@ -287,8 +295,11 @@
 
   main {
     padding: 2rem 2.4rem 3rem;
-    max-width: 1040px;
+    max-width: 1120px;
     width: 100%;
+    /* Centre the page column in the space next to the sidebar. */
+    justify-self: center;
+    min-width: 0;
   }
 
   .bare main {

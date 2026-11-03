@@ -352,6 +352,36 @@ provenance, and records the exact licence text each user accepted (CON-03).
 Third-party names appear only as plain text describing formats or compatibility
 (CON-05).
 
+\section{Third-party licences (M9.2 review)}
+On 2026-11-03 every component that the installer ships or the first run
+downloads was checked against its declared licence (the Python list is
+produced by \texttt{docs/tools/python\_licences.py} from the lock file). The
+result is recorded in \texttt{THIRD\_PARTY\_NOTICES.md}; this is an
+engineering review, not legal advice.
+\begin{itemize}
+  \item \textbf{mutagen} (GPL-2.0-or-later) was a direct dependency for tag
+  reading and also came with \texttt{yt-dlp[default]}. It was replaced by
+  tinytag (MIT), and yt-dlp is installed with the \texttt{default} extra's
+  packages except mutagen, which only embeds metadata in post-processing.
+  \item The FFmpeg build is \textbf{LGPL-3.0-or-later}, not 2.1 as first
+  noted. Its licence text is now kept in \texttt{runtime\textbackslash
+  licenses\textbackslash ffmpeg}; the mirror on our releases is the unmodified
+  archive, with a pointer to the sources.
+  \item \texttt{uv.exe} is the only third-party binary inside the installer;
+  its MIT and Apache-2.0 texts, the app's licence and the notices are bundled
+  in \texttt{bundle\textbackslash licenses}.
+  \item \textbf{diffq-fixed} (CC BY-NC 4.0) is required by the Demucs backend
+  of audio-separator and cannot be removed without dropping Demucs. It is
+  disclosed as a restriction on commercial use, consistent with the
+  non-commercial class of the HT Demucs models in the catalogue.
+  \item soxr and the libsndfile inside soundfile are LGPL libraries used
+  unmodified; the CUDA build of PyTorch includes NVIDIA's redistributable CUDA
+  libraries under NVIDIA's licence.
+  \item Still open for M10: the generated list of the Rust crates and
+  JavaScript packages compiled into the shell, whose MIT/Apache notices must
+  accompany the installer.
+\end{itemize}
+
 \chapter{AI model evaluation}
 \section{Survey (2026-11)}
 Signal-to-distortion ratios (\gls{sdr}, higher is better) from the public MVSep

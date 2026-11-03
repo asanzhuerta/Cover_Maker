@@ -12,16 +12,25 @@ requires-python = ">=3.12,<3.13"
 authors = [{ name = "asanzhuerta and Cover_Maker contributors" }]
 dependencies = [
     "fastapi>=0.120",
-    "mutagen>=1.47",
     "numpy>=2",
     "psutil>=7",
     "pydantic>=2.11",
     "pyyaml>=6",
     "rich>=14.0",
     "soundfile>=0.13",
+    "tinytag>=2.1",
     "typer>=0.16",
     "uvicorn>=0.38",
-    "yt-dlp[default]>=2026.10.26",
+    # yt-dlp's `default` extra without mutagen (GPL), which only embeds
+    # metadata in post-processing; the engine keeps the original audio stream.
+    "yt-dlp>=2026.10.26",
+    "yt-dlp-ejs",
+    "brotli",
+    "certifi",
+    "pycryptodomex",
+    "requests",
+    "urllib3",
+    "websockets",
 ]
 
 [project.optional-dependencies]

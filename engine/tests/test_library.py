@@ -109,3 +109,15 @@ def test_imported_playlist_matching_and_review(library: Library, tmp_path: Path)
     resynced = library.sync(collection)
 
     assert len(resynced.ready) == 2  # the manual correction survives re-sync
+
+
+def test_tags_are_read_from_the_file(tmp_path: Path) -> None:
+    path = tmp_path / "01 - untitled.flac"
+    with sf.SoundFile(path, "w", samplerate=44100, channels=2, format="FLAC") as f:
+        f.title = "Night Drive"
+        f.artist = "The Testers"
+        f.album = "Demo Tapes"
+        f.write(tone(1.0))
+    track = read_track(path)
+    assert (track.title, track.artist, track.album) == ("Night Drive", "The Testers", "Demo Tapes")
+    assert track.duration_s == pytest.approx(1.0, abs=0.05)

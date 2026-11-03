@@ -6,6 +6,26 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added (M9.2: first-run guide and polish)
+- Welcome: step 2 "Preparing your PC" explains the background separation
+  runtime with its live status and where to watch it; step 3 shows an
+  illustrative preview of the Models page and what happens next (#34).
+- The installer asks for the language (English or Spanish); the app starts in
+  it on first run (#35).
+- Model downloads show a green progress bar with the percentage (engine event
+  `model.install.progress`) (#36).
+- About: the author's real profile (#39).
+
+### Changed (M9.2)
+- Wider sidebar; page content is centred next to it (#38).
+- Licence review (#37): mutagen (GPL) replaced by tinytag (MIT) and dropped
+  from yt-dlp's extras; FFmpeg's licence corrected to LGPL-3.0-or-later and
+  its text kept in `runtime\licenses`; uv's licence texts, the app licence and
+  the notices are bundled with the installer; `THIRD_PARTY_NOTICES.md` lists
+  every Python package of the runtime and the non-commercial diffq-fixed.
+- Docs: tables and long code names no longer run past the page edge; the
+  Project Plan's milestone table includes M9.2 and M12.
+
 ## [0.2.0] - 2026-11-03
 
 First installable build, published for testing. Earlier work is listed

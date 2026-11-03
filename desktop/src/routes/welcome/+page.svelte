@@ -3,7 +3,8 @@
   import { resolve } from "$app/paths";
   import type { Schemas } from "$lib/api/client";
   import Icon from "$lib/components/Icon.svelte";
-  import ModelList from "$lib/components/ModelList.svelte";
+  import ModelPreview from "$lib/components/ModelPreview.svelte";
+  import RuntimeStatus from "$lib/components/RuntimeStatus.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
   import { connection } from "$lib/connection.svelte";
   import { t, type MessageKey } from "$lib/i18n.svelte";
@@ -12,7 +13,7 @@
 
   const STEPS: MessageKey[] = [
     "welcome.step.terms",
-    "welcome.step.hardware",
+    "welcome.step.engine",
     "welcome.step.models",
   ];
 
@@ -97,7 +98,11 @@
         </div>
       </div>
     {:else if step === 1}
-      <h3>{t("welcome.hardware")}</h3>
+      <h3>{t("tour.engineTitle")}</h3>
+      <p class="lead">{t("tour.engineIntro")}</p>
+      <RuntimeStatus />
+      <p class="muted">{t("tour.engineSidebar")}</p>
+      <h4>{t("welcome.hardware")}</h4>
       {#if system}
         <div class="hw">
           <div class="card tile">
@@ -130,12 +135,18 @@
           </div>
         </div>
       {:else}
-        <p class="muted">{t("engine.starting")}</p>
+        <p class="muted">{t("tour.scanning")}</p>
       {/if}
     {:else}
       <h3>{t("welcome.models")}</h3>
-      <p class="muted">{t("welcome.modelsHint")}</p>
-      <ModelList recommendedPreset={system?.recommended_preset ?? ""} />
+      <p class="lead">{t("tour.modelsIntro")}</p>
+      <ModelPreview />
+      <h4>{t("tour.nextTitle")}</h4>
+      <ol class="next">
+        <li>{t("tour.next1")}</li>
+        <li>{t("tour.next2")}</li>
+        <li>{t("tour.next3")}</li>
+      </ol>
     {/if}
 
     <div class="row nav">
@@ -281,6 +292,30 @@
   .steps li.done .num {
     background: var(--ok);
     color: #0a0a10;
+  }
+
+  .panel h4 {
+    margin: 1.4rem 0 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .lead {
+    margin: 0 0 1rem;
+    max-width: 46rem;
+    line-height: 1.5;
+  }
+
+  .panel > .muted {
+    font-size: 0.88rem;
+    max-width: 46rem;
+  }
+
+  .next {
+    margin: 0;
+    padding-left: 1.3rem;
+    display: grid;
+    gap: 0.45rem;
+    line-height: 1.45;
   }
 
   .panel h3 {
