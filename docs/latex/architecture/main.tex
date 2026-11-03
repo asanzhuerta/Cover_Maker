@@ -120,19 +120,34 @@ left pending by a closed app are queued again on start-up. \texttt{cover-maker
 serve --demo} uses a fake separator and its own data folder, for UI development
 and end-to-end tests without a GPU.
 
-\chapter{User interface (M6)}
+\chapter{User interface (M6, redesigned in M6.1)}
 \begin{tabularx}{\linewidth}{@{}lY@{}}
 \toprule
 \textbf{Part} & \textbf{Responsibility} \\
 \midrule
-\texttt{routes/} & Pages: welcome (terms, hardware, model choice), new job, queue, models, settings. \\
+\texttt{routes/} & Pages: welcome (hero and a three-step wizard: terms, hardware, model choice; shown without the side bar), new job, queue, models, settings. \\
 \texttt{lib/connection} & Gets port and token from the shell (\texttt{engine\_info}); creates the typed API client; keeps the event socket open and reconnects with replay. \\
-\texttt{lib/jobs} & Pure functions deriving item progress from events (unit-tested). \\
+\texttt{lib/jobs} & Pure functions deriving item progress, step names and the file to reveal from events (unit-tested). \\
+\texttt{lib/stems}, \texttt{lib/icons}, \texttt{lib/wave} & Stem colours, hand-drawn SVG icons (no icon package) and deterministic decorative waveform shapes (unit-tested). \\
 \texttt{lib/i18n} & English and Spanish dictionaries with a reactive locale. \\
 \texttt{lib/settings} & Preferences in local storage: language, theme, output folder, format, CPU fallback. \\
-\texttt{lib/components} & Stem picker and model list with the licence dialog. \\
+\texttt{lib/components} & Icon, Waveform (decorative bars, also used as the progress bar), stem picker and model list with the licence dialog (licence link and verification date). \\
 \bottomrule
 \end{tabularx}
+
+\paragraph{Visual design.} The dark theme is the primary look and the default
+(light and system remain in Settings). Colours are CSS custom properties in
+\texttt{app.css} (surfaces, borders, a violet-to-pink accent gradient, status
+colours); each stem has a signature colour used for its card, icon, tags and
+progress waveform. Waveforms are decorative: their bar heights come from a hash
+of the file name, so no audio is analysed in the UI. Motion respects
+\texttt{prefers-reduced-motion}.
+
+\paragraph{Opening the output folder.} The queue reveals the first exported
+file (or the output folder) with \texttt{revealItemInDir}, which the default
+opener permission already allows. \texttt{openPath} would need a path scope
+wide enough for any folder the user picks, and could also launch executables,
+so it is not granted.
 
 Files and folders come from native dialogs (\texttt{tauri-plugin-dialog}) or from
 the window's drag-and-drop event, which provides real paths. For development the
@@ -140,7 +155,8 @@ UI can run in a normal browser against \texttt{cover-maker serve --demo} by
 setting \texttt{VITE\_ENGINE\_PORT} and \texttt{VITE\_ENGINE\_TOKEN}; the
 engine's Origin allowlist includes the development server. The whole flow
 (welcome, model list, job creation, live queue progress, language and theme
-switches) was verified this way against the demo engine.
+switches) was verified this way against the demo engine; the M6.1 redesign and
+the \texttt{both} export mode were verified the same way.
 
 \chapter{Runtime view}
 \section{Engine start-up (M2)}
@@ -186,8 +202,10 @@ runner executes these steps and records the current step in SQLite:
         pruned to the stems the job needs and each node runs once: a model run
         through the GPU worker, with the out-of-memory ladder of ADR-002, or an
         average of stems produced by earlier nodes;
-  \item \textbf{export} -- selected stems are written as files, or the
-        ``track without X'' is rendered by the mixer.
+  \item \textbf{export} -- selected stems are written as files
+        (\texttt{extract}), the ``track without X'' is rendered by the mixer
+        (\texttt{without}), or both are written from the same separation
+        (\texttt{both}).
 \end{enumerate}
 Every step has a cache key built from content hashes (input, model, recipe node,
 mode and format). Running a job again, or asking for another stem of a song that
@@ -345,8 +363,8 @@ multisong leaderboard:
 BS-Roformer-SW (6 stems) & vocals 11.30, bass 14.62, drums 14.11, guitar 9.01, piano 7.80, other 8.72 & none / unclear & audio-separator \\
 unwa Resurrection (vocals) & 11.34 & none & audio-separator \\
 unwa Leap Xe (vocals) & 11.79 & none & MSST \\
-Kim Mel-Band (vocals) & about 11.0 & MIT (unconfirmed) & audio-separator \\
-HT Demucs / 6s & drums 10.9, bass 11.8, guitar 5.25 & disputed & audio-separator \\
+Kim Mel-Band (vocals) & about 11.0 & MIT (model card) & audio-separator \\
+HT Demucs / 6s & drums 10.9, bass 11.8, guitar 5.25 & non-commercial weights & audio-separator \\
 Previous v0.1 model (becruily vocals) & about 10.55 & none & audio-separator \\
 \bottomrule
 \end{tabularx}

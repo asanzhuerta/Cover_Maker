@@ -28,6 +28,31 @@ export function itemProgress(item: ItemView): number {
   return at;
 }
 
+/** Coarse step name of an item step id, e.g. "separate:sw" -> "separate". */
+export function stepName(
+  step: string,
+): "download" | "decode" | "separate" | "export" | null {
+  const base = step.split(":")[0];
+  return base === "download" ||
+    base === "decode" ||
+    base === "separate" ||
+    base === "export"
+    ? base
+    : null;
+}
+
+/**
+ * What "Open folder" reveals: the first exported file, so Explorer opens the
+ * output folder with it selected; the output folder itself until then.
+ */
+export function revealTarget(outputDir: string, items: ItemView[]): string {
+  for (const item of items) {
+    const first = Object.values(item.outputs)[0];
+    if (first) return first;
+  }
+  return outputDir;
+}
+
 export function displayName(input: string): string {
   if (/^https?:\/\//i.test(input)) return input;
   return input.split(/[\\/]/).pop() ?? input;

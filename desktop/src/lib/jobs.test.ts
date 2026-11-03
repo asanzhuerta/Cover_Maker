@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { applyEvent, displayName, itemProgress, type ItemView } from "./jobs";
+import {
+  applyEvent,
+  displayName,
+  itemProgress,
+  revealTarget,
+  stepName,
+  type ItemView,
+} from "./jobs";
 import { detectLocale, translate } from "./i18n.svelte";
 
 const item: ItemView = {
@@ -56,6 +63,20 @@ describe("job progress", () => {
       error: "x",
     });
     expect(items[0]).toBe(item);
+  });
+
+  it("names coarse steps", () => {
+    expect(stepName("separate:sw")).toBe("separate");
+    expect(stepName("export")).toBe("export");
+    expect(stepName("mystery")).toBeNull();
+  });
+
+  it("reveals the first output file, or the folder before any exists", () => {
+    expect(revealTarget("D:/Out", [item])).toBe("D:/Out");
+    const done = { ...item, outputs: { Vocals: "D:/Out/Song - Vocals.wav" } };
+    expect(revealTarget("D:/Out", [item, done])).toBe(
+      "D:/Out/Song - Vocals.wav",
+    );
   });
 
   it("shows file names and keeps links", () => {

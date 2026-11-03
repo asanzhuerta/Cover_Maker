@@ -15,6 +15,10 @@
   });
 </script>
 
-<h1>{t("models.title")}</h1>
-<p class="muted">{t("welcome.modelsHint")}</p>
+<header class="page-head">
+  <div>
+    <h1>{t("models.title")}</h1>
+    <p>{t("welcome.modelsHint")}</p>
+  </div>
+</header>
 <ModelList recommendedPreset={system?.recommended_preset ?? ""} />

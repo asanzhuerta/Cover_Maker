@@ -48,6 +48,8 @@ def test_catalogue_has_licence_and_notice_for_every_model() -> None:
     for model in catalog.models.values():
         assert model.licence_class in LicenceClass
         assert model.licence and model.source
+        assert model.licence_url.startswith("https://")
+        assert model.verified_on.year >= 2026
         assert len(model.notice_sha256()) == 64
 
 

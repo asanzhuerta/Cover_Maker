@@ -178,10 +178,10 @@ def separate(
         str, typer.Option(help="Comma-separated stems, e.g. vocals,guitar.")
     ] = "vocals",
     mode: Annotated[
-        Mode, typer.Option(help="extract the stems, or render the song without them.")
+        Mode, typer.Option(help="extract the stems, render the song without them, or both.")
     ] = Mode.EXTRACT,
     residual: Annotated[
-        ResidualMode, typer.Option(help="For 'without': keep or drop the residual.")
+        ResidualMode, typer.Option(help="For 'without' and 'both': keep or drop the residual.")
     ] = ResidualMode.KEEP,
     preset: Annotated[str, typer.Option(help="auto, fast, balanced or max.")] = "auto",
     output: Annotated[Path, typer.Option("--output", "-o", help="Output folder.")] = Path("stems"),

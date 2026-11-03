@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import numpy as np
@@ -50,6 +51,43 @@ def test_without_drop_residual_needs_all_stems(
     runner.run(job)
 
     assert (tmp_path / "out" / "My Song - without drums.wav").exists()
+    assert set(backend.calls[0].stems.values()) == set(Stem)
+
+
+def test_both_exports_stems_and_song_without_them(
+    runner: JobRunner, song: Path, tmp_path: Path
+) -> None:
+    job = runner.submit(spec(song, tmp_path, mode=Mode.BOTH, stems=[Stem.VOCALS, Stem.GUITAR]))
+
+    assert runner.run(job) == "done"
+
+    out = tmp_path / "out"
+    assert sorted(p.name for p in out.iterdir()) == [
+        "My Song - Guitar.wav",
+        "My Song - Vocals.wav",
+        "My Song - without vocals, guitar.wav",
+    ]
+    outputs = runner.items(job)[0]["outputs_json"]
+    assert sorted(json.loads(outputs)) == ["Guitar", "Vocals", "without vocals, guitar"]
+    mix = io.read(song)
+    removed = WEIGHTS[Stem.VOCALS] + WEIGHTS[Stem.GUITAR]
+    np.testing.assert_allclose(
+        io.read(out / "My Song - without vocals, guitar.wav"), mix * (1 - removed), atol=1e-4
+    )
+
+
+def test_both_with_drop_residual_needs_all_stems(
+    runner: JobRunner, song: Path, tmp_path: Path, backend: FakeBackend
+) -> None:
+    job = runner.submit(
+        spec(song, tmp_path, mode=Mode.BOTH, residual=ResidualMode.DROP, stems=[Stem.DRUMS])
+    )
+
+    runner.run(job)
+
+    out = tmp_path / "out"
+    assert (out / "My Song - Drums.wav").exists()
+    assert (out / "My Song - without drums.wav").exists()
     assert set(backend.calls[0].stems.values()) == set(Stem)
 
 

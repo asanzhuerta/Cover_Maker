@@ -52,6 +52,27 @@ project follows [Semantic Versioning](https://semver.org/).
   residual, preset, format, output folder, rights confirmation); live queue
   with pause/resume/cancel/retry; models page with licence dialog; settings
   (language EN/ES, theme, defaults); typed API client and event reconnection.
+- Export mode `both` (#21): one job writes the selected stems and the song
+  without them from a single separation (engine, CLI `--mode both`, API and
+  the New job page).
+- Producer-oriented redesign (#23, #24): dark theme as the default look,
+  per-stem colours and hand-drawn SVG icons, stem cards, mode cards, waveform
+  progress bars in the queue, richer model cards with size/VRAM meters, and a
+  welcome hero with a three-step wizard (terms → hardware → models).
+- Model catalogue entries now record `licence_url` and `verified_on`, shown in
+  the licence dialog (#25).
 - M11 (DAW integration: VST3 plugin and REAPER extension) added to the roadmap.
 - Contribution guide, security policy, code of conduct, issue/PR templates and
   Dependabot configuration.
+
+### Changed
+- Model licence data re-verified at the original sources on 2026-11-03 (#25):
+  HT Demucs weights reclassified from `disputed` to `non-commercial` (the
+  author limits them to personal or research use), Kim Mel-Band's MIT licence
+  confirmed in its model card, and more precise sources for BS-RoFormer SW and
+  Resurrection. Changed notices must be accepted again.
+
+### Fixed
+- The queue's *Open folder* button did nothing: it now reveals the first
+  exported file (or the output folder) in Explorer with `revealItemInDir`,
+  which the default opener permission allows (#22).

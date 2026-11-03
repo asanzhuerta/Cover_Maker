@@ -538,7 +538,7 @@ export interface components {
          * Mode
          * @enum {string}
          */
-        Mode: "extract" | "without";
+        Mode: "extract" | "without" | "both";
         /** ModelOut */
         ModelOut: {
             /** Id */
@@ -549,6 +549,8 @@ export interface components {
             licence: string;
             /** Licence Class */
             licence_class: string;
+            /** Licence Url */
+            licence_url: string;
             /** Name */
             name: string;
             /** Notice */
@@ -561,6 +563,11 @@ export interface components {
             source: string;
             /** Stems */
             stems: components["schemas"]["Stem"][];
+            /**
+             * Verified On
+             * Format: date
+             */
+            verified_on: string;
             /** Vram Mb Fp16 */
             vram_mb_fp16: number;
         };

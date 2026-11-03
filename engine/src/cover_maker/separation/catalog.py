@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+from datetime import date
 from enum import StrEnum
 from importlib import resources
 from pathlib import Path
@@ -33,6 +34,8 @@ class ModelSpec(BaseModel):
     sha256: str | None = None
     licence_class: LicenceClass
     licence: str
+    licence_url: str  # where the user can read the licence (or see that none exists)
+    verified_on: date  # when licence and provenance were last checked at the source
     source: str
     recommended_for: list[str] = []
 
@@ -46,6 +49,7 @@ class ModelSpec(BaseModel):
             f"{self.name} ({self.filename})\n"
             f"Licence class: {self.licence_class.value}\n"
             f"Licence: {self.licence}\n"
+            f"Licence URL: {self.licence_url}\n"
             f"Source: {self.source}\n"
             "Cover_Maker does not host or distribute these weights. You are responsible "
             "for complying with their licence and terms."

@@ -1,19 +1,26 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import type { Schemas } from "$lib/api/client";
+  import Icon from "$lib/components/Icon.svelte";
+  import Waveform from "$lib/components/Waveform.svelte";
   import { connection, isTauri, onEvent } from "$lib/connection.svelte";
   import { t, type MessageKey } from "$lib/i18n.svelte";
+  import type { IconName } from "$lib/icons";
   import {
     applyEvent,
     displayName,
     itemProgress,
+    revealTarget,
+    stepName,
     type ItemView,
   } from "$lib/jobs";
+  import { stemColor } from "$lib/stems";
 
   type Job = Schemas["JobOut"];
 
   let jobs = $state<Job[]>([]);
   let items = $state<Record<number, ItemView[]>>({});
+  let revealErrors = $state<Record<number, string>>({});
   let reloading = false;
 
   async function loadJob(id: number) {
@@ -77,78 +84,141 @@
     await load();
   }
 
-  async function openFolder(path: string) {
-    const { openPath } = await import("@tauri-apps/plugin-opener");
-    await openPath(path);
+  // Revealing in Explorer needs no path scope and never runs the file
+  // (unlike openPath), so any output folder the user picked works.
+  async function openFolder(job: Job) {
+    const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+    try {
+      revealErrors = { ...revealErrors, [job.id]: "" };
+      await revealItemInDir(revealTarget(job.output_dir, items[job.id] ?? []));
+    } catch (error) {
+      revealErrors = {
+        ...revealErrors,
+        [job.id]: `${t("queue.openFailed")} ${String(error)}`,
+      };
+    }
   }
 
   function statusKey(status: string): MessageKey {
     return `status.${status}` as MessageKey;
   }
 
+  function stepLabel(item: ItemView): string {
+    if (!item.step) return t(statusKey(item.status));
+    const name = stepName(item.step);
+    return name ? t(`step.${name}`) : item.step;
+  }
+
   const tone: Record<string, string> = {
     done: "ok",
     failed: "danger",
     cancelled: "warn",
+    running: "accent",
+  };
+
+  const modeIcon: Record<string, IconName> = {
+    extract: "scissors",
+    without: "mix",
+    both: "download",
   };
 </script>
 
-<h1>{t("queue.title")}</h1>
+<header class="page-head">
+  <div>
+    <h1>{t("queue.title")}</h1>
+    <p>{t("queue.subtitle")}</p>
+  </div>
+</header>
 
 {#if jobs.length === 0}
-  <p class="muted">{t("queue.empty")}</p>
+  <div class="card empty">
+    <Waveform seed="empty-queue" bars={40} height={40} progress={0} />
+    <p class="muted">{t("queue.empty")}</p>
+  </div>
 {/if}
 
 <ul class="jobs">
   {#each jobs as job (job.id)}
-    <li class="card" data-testid="job">
+    {@const color = stemColor(job.stems[0] ?? "other")}
+    <li class="card job {job.status}" style="--job: {color}" data-testid="job">
       <div class="head">
-        <strong>#{job.id}</strong>
-        <span class="badge {tone[job.status] ?? ''}"
-          >{t(statusKey(job.status))}</span
+        <span class="mode-icon" title={t(`new.mode.${job.mode}`)}
+          ><Icon name={modeIcon[job.mode] ?? "scissors"} size={18} /></span
         >
-        <span class="muted">
-          {job.mode === "without"
-            ? t("new.mode.without")
-            : t("new.mode.extract")}:
-          {job.stems.map((s) => t(`stem.${s}`)).join(", ")} · {t(
-            `preset.${job.preset as "fast"}`,
-          )}
-        </span>
+        <div class="title">
+          <div class="row">
+            <strong>#{job.id}</strong>
+            <span class="muted">{t(`new.mode.${job.mode}`)}</span>
+            <span class="badge {tone[job.status] ?? ''}"
+              >{t(statusKey(job.status))}</span
+            >
+          </div>
+          <div class="row tags">
+            {#each job.stems as stem (stem)}
+              <span class="stem-tag" style="--stem: {stemColor(stem)}"
+                ><Icon name={stem} size={12} />{t(`stem.${stem}`)}</span
+              >
+            {/each}
+            <span class="badge">{t(`preset.${job.preset as "fast"}`)}</span>
+            <span class="muted count">{job.done}/{job.items}</span>
+          </div>
+        </div>
         <span class="spacer"></span>
-        {#if job.status === "running" || job.status === "pending"}
-          <button onclick={() => action(job, "pause")}
-            >{t("queue.pause")}</button
-          >
-          <button onclick={() => action(job, "cancel")}
-            >{t("queue.cancel")}</button
-          >
-        {:else if job.status === "paused"}
-          <button onclick={() => action(job, "resume")}
-            >{t("queue.resume")}</button
-          >
-        {:else if job.status === "failed" || job.status === "cancelled"}
-          <button onclick={() => action(job, "retry")}
-            >{t("queue.retry")}</button
-          >
-        {/if}
-        {#if isTauri()}
-          <button onclick={() => openFolder(job.output_dir)}
-            >{t("queue.open")}</button
-          >
-        {/if}
+        <div class="row actions">
+          {#if job.status === "running" || job.status === "pending"}
+            <button class="small" onclick={() => action(job, "pause")}
+              ><Icon name="pause" size={14} />{t("queue.pause")}</button
+            >
+            <button class="small" onclick={() => action(job, "cancel")}
+              ><Icon name="x" size={14} />{t("queue.cancel")}</button
+            >
+          {:else if job.status === "paused"}
+            <button class="small" onclick={() => action(job, "resume")}
+              ><Icon name="play" size={14} />{t("queue.resume")}</button
+            >
+          {:else if job.status === "failed" || job.status === "cancelled"}
+            <button class="small" onclick={() => action(job, "retry")}
+              ><Icon name="retry" size={14} />{t("queue.retry")}</button
+            >
+          {/if}
+          {#if isTauri()}
+            <button
+              class="small"
+              onclick={() => openFolder(job)}
+              data-testid="open-folder"
+              ><Icon name="folder" size={14} />{t("queue.open")}</button
+            >
+          {/if}
+        </div>
       </div>
+      {#if revealErrors[job.id]}
+        <p class="error reveal-error">{revealErrors[job.id]}</p>
+      {/if}
       <ul class="items">
         {#each items[job.id] ?? [] as item (item.id)}
-          <li>
-            <div class="name" title={item.input}>{displayName(item.input)}</div>
-            <div class="progress">
-              <div style="width: {itemProgress(item) * 100}%"></div>
+          {@const progress = itemProgress(item)}
+          <li class={item.status}>
+            <div class="name" title={item.input}>
+              {#if item.status === "done"}<span class="ok-mark"
+                  ><Icon name="check" size={12} strokeWidth={3} /></span
+                >{/if}
+              {displayName(item.input)}
             </div>
-            <div class="state muted">
-              {item.step ?? t(statusKey(item.status))}
-              {#if item.error}<span class="error">{item.error}</span>{/if}
+            <Waveform
+              seed={item.input}
+              bars={56}
+              height={26}
+              {progress}
+              {color}
+              live={item.status === "running"}
+            />
+            <div class="state">
+              <span class="step">{stepLabel(item)}</span>
+              <span class="pct">{Math.round(progress * 100)}%</span>
             </div>
+            {#if item.error}<div class="error item-error">
+                {item.error}
+              </div>{/if}
           </li>
         {/each}
       </ul>
@@ -157,6 +227,18 @@
 </ul>
 
 <style>
+  .empty {
+    display: grid;
+    gap: 0.6rem;
+    justify-items: center;
+    padding: 2rem;
+    opacity: 0.9;
+  }
+
+  .empty p {
+    margin: 0;
+  }
+
   .jobs {
     display: grid;
     gap: 0.9rem;
@@ -165,40 +247,130 @@
     list-style: none;
   }
 
+  .job {
+    position: relative;
+    overflow: hidden;
+    padding-left: 1.45rem;
+  }
+
+  .job::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--job);
+    opacity: 0.85;
+  }
+
+  .job.running {
+    border-color: color-mix(in srgb, var(--job) 45%, var(--border));
+    box-shadow:
+      var(--shadow),
+      0 0 32px color-mix(in srgb, var(--job) 14%, transparent);
+  }
+
   .head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.8rem;
+  }
+
+  .mode-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    color: var(--job);
+    background: color-mix(in srgb, var(--job) 14%, transparent);
+  }
+
+  .title {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .tags {
+    gap: 0.3rem;
+  }
+
+  .count {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
   }
 
   .spacer {
     flex: 1;
   }
 
+  .actions {
+    gap: 0.35rem;
+  }
+
+  .reveal-error {
+    margin: 0.6rem 0 0;
+    font-size: 0.85rem;
+  }
+
   .items {
     display: grid;
-    gap: 0.6rem;
+    gap: 0.35rem;
     padding: 0;
-    margin: 0.9rem 0 0;
+    margin: 1rem 0 0;
     list-style: none;
   }
 
   .items li {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) 1fr minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.2fr) 150px;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.9rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
   }
 
   .name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .state {
-    font-size: 0.85rem;
+  .ok-mark {
     display: grid;
+    place-items: center;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ok);
+    color: #0a0a10;
+  }
+
+  .state {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .pct {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .running .pct {
+    color: var(--job);
+  }
+
+  .item-error {
+    grid-column: 1 / -1;
+    font-size: 0.82rem;
   }
 </style>

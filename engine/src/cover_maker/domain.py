@@ -24,6 +24,7 @@ ALL_STEMS: tuple[Stem, ...] = tuple(Stem)
 class Mode(StrEnum):
     EXTRACT = "extract"  # export the selected stems
     WITHOUT = "without"  # export the song without the selected stems
+    BOTH = "both"  # export the selected stems and the song without them
 
 
 class ResidualMode(StrEnum):

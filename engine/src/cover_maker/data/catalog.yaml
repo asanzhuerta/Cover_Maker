@@ -16,8 +16,10 @@ models:
     vram_mb_fp16: 2200
     sha256: 24e7d35ee9c64415673d3fd33e06a67cac2c103c5df6267ba1576459c775916e
     licence_class: none
-    licence: No licence published. The original uploader's account no longer exists and the model's provenance is disputed.
-    source: Community release, distributed through the audio-separator model mirror.
+    licence: No licence published. It was rehosted by jarredou, who says he did not train it and has no provenance information; his account no longer exists.
+    licence_url: https://huggingface.co/elicwhite/bs-roformer-sw-6stem-onnx
+    verified_on: 2026-11-03
+    source: https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.ckpt
     recommended_for: [balanced, max]
 
   - id: bs-roformer-resurrection
@@ -29,8 +31,10 @@ models:
     vram_mb_fp16: 1500
     sha256: 9dbfe5cb572e4ed32a15ec727d7bd06c8d7aba97509e6fda5bc008bb1e0b2dd5
     licence_class: none
-    licence: No licence published by the author (unwa).
-    source: https://huggingface.co/pcunwa
+    licence: No licence published by the author (unwa); the repository has no licence tag, model card or licence file.
+    licence_url: https://huggingface.co/pcunwa/BS-Roformer-Resurrection
+    verified_on: 2026-11-03
+    source: https://huggingface.co/pcunwa/BS-Roformer-Resurrection
     recommended_for: [max]
 
   - id: mel-roformer-kim
@@ -42,7 +46,9 @@ models:
     vram_mb_fp16: 2000
     sha256: null
     licence_class: permissive
-    licence: Listed as MIT on the author's model page (not confirmed in a licence file).
+    licence: MIT, declared in the author's model card metadata; the repository has no separate licence file.
+    licence_url: https://huggingface.co/KimberleyJSN/melbandroformer/blob/main/README.md
+    verified_on: 2026-11-03
     source: https://huggingface.co/KimberleyJSN/melbandroformer
     recommended_for: [max]
 
@@ -54,8 +60,10 @@ models:
     size_mb: 81
     vram_mb_fp16: 800
     sha256: null
-    licence_class: disputed
-    licence: Code is MIT; the author stated in 2022 that the weights are provided for research purposes.
+    licence_class: non-commercial
+    licence: Code is MIT; the author stated in 2022 that the weights are not covered by the MIT licence and are for personal or research use only (trained on research-only data).
+    licence_url: https://github.com/facebookresearch/demucs/issues/327#issuecomment-1134828611
+    verified_on: 2026-11-03
     source: https://github.com/facebookresearch/demucs
     recommended_for: [fast]
 
@@ -67,7 +75,9 @@ models:
     size_mb: 53
     vram_mb_fp16: 900
     sha256: null
-    licence_class: disputed
-    licence: Code is MIT; the author stated in 2022 that the weights are provided for research purposes.
+    licence_class: non-commercial
+    licence: Code is MIT; the author stated in 2022 that the weights are not covered by the MIT licence and are for personal or research use only (trained on research-only data).
+    licence_url: https://github.com/facebookresearch/demucs/issues/327#issuecomment-1134828611
+    verified_on: 2026-11-03
     source: https://github.com/facebookresearch/demucs
     recommended_for: [fast]
