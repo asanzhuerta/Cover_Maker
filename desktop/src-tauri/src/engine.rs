@@ -75,8 +75,10 @@ fn dev_engine_dir() -> PathBuf {
 
 fn engine_command(token: &str) -> Command {
     let mut command = Command::new("uv");
+    // `--inexact` keeps optional extras installed (the separation runtime with
+    // PyTorch); a plain `uv run` would remove them on every start.
     command
-        .args(["run", "--project"])
+        .args(["run", "--inexact", "--project"])
         .arg(dev_engine_dir())
         .args(["cover-maker", "serve"])
         .env("COVER_MAKER_TOKEN", token)

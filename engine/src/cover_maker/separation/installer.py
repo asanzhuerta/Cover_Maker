@@ -37,14 +37,19 @@ def install(model: ModelSpec, models_dir: Path, installs: Installs, *, accepted:
     models_dir.mkdir(parents=True, exist_ok=True)
     target = models_dir / model.filename
     if not target.exists():
+        # audio_separator.utils.cli has no __main__ guard, so `python -m` would do
+        # nothing; call its entry point explicitly.
         command = [
-            sys.executable, "-m", "audio_separator.utils.cli", "--download_model_only",
-            "--model_filename", model.filename, "--model_file_dir", str(models_dir),
-            "--log_level", "warning",
+            sys.executable, "-c", "from audio_separator.utils.cli import main; main()",
+            "--download_model_only", "--model_filename", model.filename,
+            "--model_file_dir", str(models_dir), "--log_level", "warning",
         ]  # fmt: skip
-        completed = subprocess.run(command, capture_output=True, text=True, check=False)
+        completed = subprocess.run(
+            command, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+        )
         if completed.returncode != 0 or not target.exists():
-            detail = (completed.stderr or completed.stdout).strip()[-500:]
+            output = (completed.stderr or completed.stdout).strip()[-500:]
+            detail = output or f"exit code {completed.returncode}, no file was downloaded"
             raise InstallError(f"download of {model.filename} failed: {detail}")
 
     digest = sha256_file(target) if target.stat().st_size > 1024 else None

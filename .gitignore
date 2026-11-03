@@ -67,3 +67,4 @@ Thumbs.db
 
 # latexmk-generated version stamp
 docs/latex/*/version.tex
+.claude/launch.json
