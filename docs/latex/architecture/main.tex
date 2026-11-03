@@ -18,8 +18,9 @@
 \CM{} turns local audio files into selectable \glspl{stem} and
 \glspl{backingtrack}. The main quality goals are:
 \begin{enumerate}
-  \item \textbf{Compliance by design}: no acquisition of audio from streaming
-        platforms; transparent model licences.
+  \item \textbf{Compliance by design}: no automatic discovery of music, online
+        audio only from links the user pastes and declares rights to,
+        transparent model licences.
   \item \textbf{Robustness}: long batch jobs survive crashes, out-of-memory
         errors and restarts.
   \item \textbf{Adaptivity}: good results from CPU-only machines up to large
@@ -40,18 +41,20 @@
   \node[ext,right=of app] (cc) {Creative Commons\\catalogues};
   \node[ext,below right=0.6cm and 2.2cm of app] (gh) {GitHub Releases\\(updates)};
   \node[ext,below=of app] (fs) {Local files\\and folders};
+  \node[ext,below=of user] (yt) {Video platform\\(pasted links)};
+  \draw[arr] (app) -- node[sloped,below,font=\small]{audio via yt-dlp} (yt);
   \draw[arr] (user) -- node[above,font=\small]{uses} (app);
   \draw[arr] (app) -- node[sloped,above,font=\small]{download weights} (models);
   \draw[arr] (app) -- node[above,font=\small]{licensed items} (cc);
   \draw[arr] (app) -- node[sloped,above,font=\small]{updates} (gh);
-  \draw[arr,{Stealth[length=2.5mm]}-{Stealth[length=2.5mm]}] (fs) -- node[left,font=\small]{audio in / stems out} (app);
+  \draw[arr,{Stealth[length=2.5mm]}-{Stealth[length=2.5mm]}] (fs) -- node[right,font=\small]{audio in / stems out} (app);
 \end{tikzpicture}
 \end{center}
 
-All audio processing happens on the user's machine. The only outbound
-connections are to model hosts chosen by the user, to optional Creative Commons
-catalogues and to GitHub Releases for updates. No streaming platform is
-contacted.
+All audio processing happens on the user's machine. Outbound connections go to
+model hosts chosen by the user, to optional Creative Commons catalogues, to
+GitHub Releases for updates and, only for links the user pastes, to the video
+platform through yt-dlp. No music is searched for or matched automatically.
 
 \chapter{Solution strategy}
 \begin{tabularx}{\linewidth}{@{}lY@{}}
@@ -74,7 +77,7 @@ Incremental work & Every pipeline step has a cache key; re-sync resubmits everyt
 \midrule
 \texttt{domain}, \texttt{config} & Data models, paths under \texttt{\%LOCALAPPDATA\%}, secrets in the Windows credential store. \\
 \texttt{store} & SQLite access, migrations, asset store. \\
-\texttt{sources} & Local files, watched folders, playlist-file import, Creative Commons catalogues. \\
+\texttt{sources} & Local files, watched folders, playlist-file import, user-pasted video links (yt-dlp), Creative Commons catalogues. \\
 \texttt{library} & Collections, matching of imported entries to local files, re-sync, exports. \\
 \texttt{audio} & Decoding and encoding via ffmpeg, mixer with \gls{residual}, waveform peaks. \\
 \texttt{separation} & Model catalogue and installer, recipe graphs, GPU worker supervisor, hardware detection. \\
@@ -130,8 +133,19 @@ not legal advice. Jurisdiction-dependent points are marked as such.}
         metadata to obtain the same music from another service; in October 2026
         a project following that pattern was removed from GitHub.
 \end{itemize}
-\textbf{Decision:} \CM{} does not acquire audio from streaming platforms and does
-not use their \glspl{api} or web pages (constraints CON-01 and CON-02).
+\textbf{Decisions.}
+\begin{itemize}
+  \item \CM{} does not search, scrape or match music on streaming services and
+        does not use their \glspl{api} (CON-01).
+  \item On 2026-11-03 the product owner decided to support audio download from
+        video links pasted by the user, through the unmodified yt-dlp project
+        used as a library. Mitigations: links only from the user, no built-in
+        search, a rights confirmation per job (CON-02, FR-SRC-06), a
+        disclaimer, and yt-dlp updated independently. The residual risk of a
+        takedown notice is accepted (R-08); the response would follow the
+        yt-dlp project's approach, with the option of moving the feature into
+        a separate plugin.
+\end{itemize}
 
 \section{Stems and publication}
 Separating lawfully obtained audio for private practice carries very low risk.

@@ -2,8 +2,9 @@
 
 **Local AI stem separation for musicians and producers, on Windows.**
 
-Cover_Maker splits *your own* audio files into the stems you choose — vocals,
-guitar, drums, bass, piano and other — or renders a "track without X" (for
+Cover_Maker splits your audio files, or the audio of a video or playlist link
+you paste, into the stems you choose (vocals, guitar, drums, bass, piano and
+other), or renders a "track without X" (for
 example, the song without vocals and guitar) so you can practise, rehearse or
 record a cover on top of it. Everything runs locally on your machine.
 
@@ -16,6 +17,8 @@ record a cover on top of it. Everything runs locally on your machine.
 - Pick the stems to extract, or the stems to remove ("track without X").
 - Drag and drop local files or whole folders; watched folders are processed
   incrementally.
+- Paste a video or playlist link: only the audio is downloaded (via
+  [yt-dlp](https://github.com/yt-dlp/yt-dlp)) and separated.
 - Preview mixer with synced waveforms and per-stem mute, solo and volume.
 - Job queue with per-song progress, pause and cancel.
 - Library with re-sync: only new or changed files are processed again.
@@ -28,9 +31,9 @@ record a cover on top of it. Everything runs locally on your machine.
 
 ## Legal by design
 
-Cover_Maker does **not** download audio from streaming platforms and does not
-integrate with their APIs. It only processes files you provide or content from
-catalogues with an explicit Creative Commons licence. AI model weights are never
+Cover_Maker never searches for, scrapes or matches music on streaming
+services. Online audio is fetched only from links you paste yourself, after you
+confirm you have the right to use that content. AI model weights are never
 bundled or hosted by this project; each model's licence is shown before you
 download it. Read [DISCLAIMER.md](DISCLAIMER.md).
 
@@ -47,7 +50,7 @@ download it. Read [DISCLAIMER.md](DISCLAIMER.md).
 ## Tech stack
 
 Tauri 2 + Svelte 5 (TypeScript) desktop shell, Python engine (FastAPI, PyTorch,
-`audio-separator`) managed with `uv`, SQLite storage.
+`audio-separator`, `yt-dlp`) managed with `uv`, SQLite storage.
 
 ## Documentation
 
