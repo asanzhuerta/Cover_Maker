@@ -280,8 +280,21 @@ class JobRunner:
             produced[node.id] = self._run_node(node, mix_sha, produced, spec)
 
         stems = {stem: produced[recipe.output_ref(stem).node][stem] for stem in wanted}
+        self._record_preview(item_id, mix_sha, recipe, produced)
         self._step(job_id, item_id, "export")
         return self._export(title, mix_sha, stems, spec)
+
+    def _record_preview(
+        self, item_id: int, mix_sha: str, recipe: Recipe, produced: dict[str, dict[Stem, str]]
+    ) -> None:
+        """Remember the mix and every final stem produced, for the preview mixer."""
+        available: dict[str, str] = {}
+        for stem in recipe.outputs:
+            ref = recipe.output_ref(stem)
+            sha = produced.get(ref.node, {}).get(ref.stem)
+            if sha:
+                available[stem.value] = sha
+        self._set_item(item_id, preview_json=json.dumps({"mix": mix_sha, "stems": available}))
 
     def _download(self, job_id: int, item_id: int, video_id: str) -> tuple[Path, str]:
         """Download a video's audio once; later runs reuse the cached file."""

@@ -164,3 +164,15 @@ class MatchRequest(BaseModel):
 
 class Created(BaseModel):
     id: int
+
+
+class PreviewOut(BaseModel):
+    item_id: int
+    mix: str = Field(description="Asset id (SHA-256) of the decoded mix.")
+    stems: dict[str, str] = Field(description="Stem id -> asset id of every produced stem.")
+
+
+class PeaksOut(BaseModel):
+    asset: str
+    points: int
+    peaks: list[list[float]] = Field(description="[min, max] per point of the mono mix-down.")

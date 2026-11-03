@@ -14,10 +14,11 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from .. import __version__
 from ..audio.io import ffmpeg_path
+from ..audio.peaks import compute_peaks
 from ..domain import JobSpec
 from ..pipeline.runner import RightsNotConfirmed, resolve_preset, stems_to_separate
 from ..separation import recipes
@@ -287,6 +288,65 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             ]
 
         return await _db(run)
+
+    # ------------------------------------------------------------ preview audio
+
+    @app.get("/items/{item_id}/preview", response_model=schemas.PreviewOut)
+    async def preview(item_id: int) -> schemas.PreviewOut:  # pyright: ignore[reportUnusedFunction]
+        def run() -> schemas.PreviewOut:
+            row = (
+                engine()
+                .conn.execute("SELECT preview_json FROM job_items WHERE id = ?", (item_id,))
+                .fetchone()
+            )
+            if row is None or not row["preview_json"]:
+                raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to preview yet")
+            data = json.loads(row["preview_json"])
+            return schemas.PreviewOut(item_id=item_id, mix=data["mix"], stems=data["stems"])
+
+        return await _db(run)
+
+    def _asset_path(sha: str) -> Path:
+        # Only files registered in the library can be served (no arbitrary paths).
+        if len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
+            raise ApiProblem(400, "bad_input", "invalid asset id")
+        path = engine().jobs.assets.path_for(sha)
+        if path is None:
+            raise ApiProblem(404, "unknown_asset", f"asset {sha} does not exist")
+        return path
+
+    @app.get("/assets/{sha}", response_class=FileResponse)
+    async def asset(sha: str) -> FileResponse:  # pyright: ignore[reportUnusedFunction]
+        path = await _db(lambda: _asset_path(sha))
+        return FileResponse(path, media_type="audio/wav")
+
+    @app.get("/assets/{sha}/peaks", response_model=schemas.PeaksOut)
+    async def peaks(sha: str, points: int = 1200) -> schemas.PeaksOut:  # pyright: ignore[reportUnusedFunction]
+        points = max(50, min(points, 10_000))
+        path = await _db(lambda: _asset_path(sha))
+        key = f"{sha}:{points}"
+
+        def cached() -> object | None:
+            row = (
+                engine()
+                .conn.execute(
+                    "SELECT output_json FROM step_cache WHERE step = 'peaks' AND cache_key = ?",
+                    (key,),
+                )
+                .fetchone()
+            )
+            return json.loads(row["output_json"]) if row else None
+
+        values = await _db(cached)
+        if values is None:
+            values = await asyncio.to_thread(compute_peaks, path, points)
+            await _db(
+                lambda: engine().conn.execute(
+                    "INSERT OR REPLACE INTO step_cache (step, cache_key, output_json) VALUES ('peaks', ?, ?)",
+                    (key, json.dumps(values)),
+                )
+            )
+        return schemas.PeaksOut(asset=sha, points=points, peaks=values)  # pyright: ignore[reportArgumentType]
 
     @app.put("/library/items/{item_id}/match", status_code=204)
     async def set_match(item_id: int, body: schemas.MatchRequest) -> None:  # pyright: ignore[reportUnusedFunction]

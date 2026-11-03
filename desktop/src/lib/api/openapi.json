@@ -706,6 +706,36 @@
         "title": "OutputFormat",
         "type": "string"
       },
+      "PeaksOut": {
+        "properties": {
+          "asset": {
+            "title": "Asset",
+            "type": "string"
+          },
+          "peaks": {
+            "description": "[min, max] per point of the mono mix-down.",
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Peaks",
+            "type": "array"
+          },
+          "points": {
+            "title": "Points",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "asset",
+          "points",
+          "peaks"
+        ],
+        "title": "PeaksOut",
+        "type": "object"
+      },
       "PlaylistRequest": {
         "properties": {
           "link": {
@@ -717,6 +747,34 @@
           "link"
         ],
         "title": "PlaylistRequest",
+        "type": "object"
+      },
+      "PreviewOut": {
+        "properties": {
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "mix": {
+            "description": "Asset id (SHA-256) of the decoded mix.",
+            "title": "Mix",
+            "type": "string"
+          },
+          "stems": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Stem id -> asset id of every produced stem.",
+            "title": "Stems",
+            "type": "object"
+          }
+        },
+        "required": [
+          "item_id",
+          "mix",
+          "stems"
+        ],
+        "title": "PreviewOut",
         "type": "object"
       },
       "ResidualMode": {
@@ -927,6 +985,87 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/assets/{sha}": {
+      "get": {
+        "operationId": "asset_assets__sha__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha",
+            "required": true,
+            "schema": {
+              "title": "Sha",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Asset"
+      }
+    },
+    "/assets/{sha}/peaks": {
+      "get": {
+        "operationId": "peaks_assets__sha__peaks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha",
+            "required": true,
+            "schema": {
+              "title": "Sha",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "points",
+            "required": false,
+            "schema": {
+              "default": 1200,
+              "title": "Points",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeaksOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Peaks"
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health_health_get",
@@ -943,6 +1082,45 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/items/{item_id}/preview": {
+      "get": {
+        "operationId": "preview_items__item_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview"
       }
     },
     "/jobs": {
