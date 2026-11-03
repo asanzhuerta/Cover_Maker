@@ -6,6 +6,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed (branding)
+- Official logo in `branding/logo.svg` (the sidebar's gradient waveform mark)
+  with a 1024 px PNG export; the app, installer and taskbar icons and the UI
+  favicon are generated from it instead of the Tauri and Svelte defaults.
+
 ### Changed (M9.1)
 - While the separation runtime is still installing, the Models and New job
   pages show a notice (EN/ES) and model installs are disabled; the sidebar box
