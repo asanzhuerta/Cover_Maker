@@ -1,5 +1,33 @@
 <script lang="ts">
+  import { onDestroy, onMount } from "svelte";
+  import {
+    connectEvents,
+    engineInfo,
+    health,
+    type EngineInfo,
+  } from "$lib/engine";
+  import { resolve } from "$app/paths";
   import { STEMS, stemLabel } from "$lib/stems";
+
+  let info = $state<EngineInfo | null>(null);
+  let status = $state("starting engine…");
+  let heartbeats = $state(0);
+  let socket: WebSocket | null = null;
+
+  onMount(async () => {
+    try {
+      info = await engineInfo();
+      const reply = await health(info);
+      status = `engine ${reply.version} ready on port ${info.port}`;
+      socket = connectEvents(info, (event) => {
+        if (event.type === "heartbeat") heartbeats = event.seq;
+      });
+    } catch (error) {
+      status = `engine error: ${error}`;
+    }
+  });
+
+  onDestroy(() => socket?.close());
 </script>
 
 <main>
@@ -10,7 +38,11 @@
       <li>{stemLabel(stem)}</li>
     {/each}
   </ul>
-  <p class="status">v2 is under construction.</p>
+  <p class="status" data-testid="engine-status">{status}</p>
+  {#if info}
+    <p class="status">events received: {heartbeats} · engine PID {info.pid}</p>
+  {/if}
+  <p><a href={resolve("/spike/audio")}>Multi-stem playback spike</a></p>
 </main>
 
 <style>
@@ -49,6 +81,10 @@
 
   h1 {
     margin: 0;
+    color: var(--accent);
+  }
+
+  a {
     color: var(--accent);
   }
 

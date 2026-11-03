@@ -37,6 +37,14 @@ def main(
 
 
 @app.command()
+def serve() -> None:
+    """Run the local API for the desktop app (token from COVER_MAKER_TOKEN)."""
+    from .api.server import serve as run_server
+
+    run_server()
+
+
+@app.command()
 def doctor() -> None:
     """Check the local environment (placeholder until M3)."""
     console.print("[green]Engine installed.[/green] Hardware checks arrive in M3.")

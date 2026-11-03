@@ -1,0 +1,8 @@
+\section{ADR-006: Runtime bootstrap with uv}
+\textbf{Status:} accepted (M2), implementation in M9. \textbf{Decision:} the
+installer ships \texttt{uv.exe}, the engine wheel and lock files, not Python or
+PyTorch. On first run, uv installs a standalone Python 3.12 and the locked
+dependencies into \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash runtime}.
+The bootstrap has two phases: the core engine first, then PyTorch in the
+background (a CUDA build for NVIDIA GPUs with compute capability 7.5 or higher,
+otherwise the CPU build). Measurements from the spike are in the M2 report.
