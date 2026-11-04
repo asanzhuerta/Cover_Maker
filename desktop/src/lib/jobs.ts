@@ -4,6 +4,9 @@ import type { EngineEvent } from "./connection.svelte";
 export interface ItemView {
   id: number;
   input: string;
+  /** From the file's tags or the video's metadata; null until known. */
+  title: string | null;
+  artist: string | null;
   status: string;
   step: string | null;
   fraction: number | null;
@@ -53,6 +56,14 @@ export function revealTarget(outputDir: string, items: ItemView[]): string {
   return outputDir;
 }
 
+/** What the queue shows for an item: its title, else the file name or link. */
+export function itemLabel(item: ItemView): { title: string; artist: string } {
+  return {
+    title: item.title || displayName(item.input),
+    artist: item.artist ?? "",
+  };
+}
+
 export function displayName(input: string): string {
   if (/^https?:\/\//i.test(input)) return input;
   return input.split(/[\\/]/).pop() ?? input;
@@ -71,6 +82,12 @@ export function applyEvent(items: ItemView[], event: EngineEvent): ItemView[] {
           status: "running",
           step: String(event.step),
           fraction: null,
+        };
+      case "item.meta":
+        return {
+          ...item,
+          title: (event.title as string | null) || null,
+          artist: (event.artist as string | null) || null,
         };
       case "item.progress":
         return { ...item, fraction: (event.fraction as number | null) ?? null };

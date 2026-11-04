@@ -6,6 +6,13 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- The queue shows each song's title and artist instead of only the file name
+  or link: from the file's tags (or an "Artist - Title" file name) when the
+  job is submitted, and from the video's metadata (track and artist, else
+  title and channel) before a link downloads. The engine stores them per item
+  (migration 4) and sends `item.meta` events.
+
 ## [0.2.1] - 2026-11-04
 
 Second test build: the guided first run, the installer language, model

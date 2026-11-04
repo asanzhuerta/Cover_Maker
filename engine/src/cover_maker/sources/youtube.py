@@ -26,6 +26,42 @@ class VideoInfo:
     title: str
     uploader: str | None
     duration_s: float | None
+    # Music metadata, when the site provides it (e.g. auto-generated music videos).
+    track: str | None = None
+    artist: str | None = None
+
+    @property
+    def display_title(self) -> str:
+        return self.track or self.title
+
+    @property
+    def display_artist(self) -> str | None:
+        return self.artist or self.uploader
+
+
+def _info(video_id: str, info: dict[str, Any]) -> VideoInfo:
+    artists = info.get("artists")
+    artist = info.get("artist") or (", ".join(artists) if artists else None)
+    return VideoInfo(
+        video_id=video_id,
+        title=str(info.get("title") or video_id),
+        uploader=info.get("uploader") or info.get("channel"),
+        duration_s=info.get("duration"),
+        track=info.get("track"),
+        artist=artist,
+    )
+
+
+def video_info(video_id: str) -> VideoInfo:
+    """Title and artist of one video, without downloading it."""
+    try:
+        with _ydl({"skip_download": True, "noplaylist": True}) as ydl:
+            info: dict[str, Any] = ydl.extract_info(
+                f"https://www.youtube.com/watch?v={video_id}", download=False
+            )
+    except Exception as exc:
+        raise DownloadError(f"could not read {video_id}: {exc}") from exc
+    return _info(video_id, info)
 
 
 class DownloadError(RuntimeError):
@@ -106,10 +142,4 @@ def download_audio(
         if not candidates:
             raise DownloadError(f"yt-dlp finished but no audio file was found for {video_id}")
         path = candidates[0]
-    meta = VideoInfo(
-        video_id=video_id,
-        title=str(info.get("title") or video_id),
-        uploader=info.get("uploader") or info.get("channel"),
-        duration_s=info.get("duration"),
-    )
-    return path, meta
+    return path, _info(video_id, info)

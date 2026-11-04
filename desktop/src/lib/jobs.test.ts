@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyEvent,
   displayName,
+  itemLabel,
   itemProgress,
   revealTarget,
   stepName,
@@ -12,6 +13,8 @@ import { detectLocale, translate } from "./i18n.svelte";
 const item: ItemView = {
   id: 7,
   input: "C:\\Music\\Song.flac",
+  title: null,
+  artist: null,
   status: "pending",
   step: null,
   fraction: null,
@@ -94,5 +97,33 @@ describe("i18n", () => {
   it("has every key translated", () => {
     expect(translate("es", "stem.guitar")).toBe("Guitarra");
     expect(translate("en", "stem.guitar")).toBe("Guitar");
+  });
+});
+
+describe("item names", () => {
+  it("shows the file name until title and artist arrive", () => {
+    expect(itemLabel(item)).toEqual({ title: "Song.flac", artist: "" });
+    const named = applyEvent([item], {
+      seq: 1,
+      type: "item.meta",
+      item: 7,
+      title: "Night Drive",
+      artist: "The Testers",
+    })[0];
+    expect(itemLabel(named)).toEqual({
+      title: "Night Drive",
+      artist: "The Testers",
+    });
+  });
+
+  it("ignores empty metadata", () => {
+    const named = applyEvent([item], {
+      seq: 1,
+      type: "item.meta",
+      item: 7,
+      title: "",
+      artist: null,
+    })[0];
+    expect(itemLabel(named).title).toBe("Song.flac");
   });
 });

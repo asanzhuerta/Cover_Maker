@@ -477,6 +477,8 @@ export interface components {
         };
         /** ItemOut */
         ItemOut: {
+            /** Artist */
+            artist?: string | null;
             /** Current Step */
             current_step: string | null;
             /** Error */
@@ -493,6 +495,8 @@ export interface components {
             };
             /** Status */
             status: string;
+            /** Title */
+            title?: string | null;
         };
         /** JobCreated */
         JobCreated: {

@@ -82,6 +82,11 @@ MIGRATIONS: tuple[str, ...] = (
     """
     ALTER TABLE job_items ADD COLUMN preview_json TEXT
     """,
+    # 4: title and artist shown in the queue (from tags or video metadata).
+    """
+    ALTER TABLE job_items ADD COLUMN title TEXT;
+    ALTER TABLE job_items ADD COLUMN artist TEXT
+    """,
 )
 
 

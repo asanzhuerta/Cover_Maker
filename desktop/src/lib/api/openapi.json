@@ -297,6 +297,17 @@
       },
       "ItemOut": {
         "properties": {
+          "artist": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artist"
+          },
           "current_step": {
             "anyOf": [
               {
@@ -341,6 +352,17 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
           }
         },
         "required": [

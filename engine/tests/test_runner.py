@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import soundfile as sf
 
 from cover_maker.audio import io
 from cover_maker.domain import JobSpec, Mode, Preset, ResidualMode, Stem
@@ -12,6 +13,8 @@ from cover_maker.separation.backends.fake import WEIGHTS, FakeBackend
 from cover_maker.separation.catalog import Catalog
 from cover_maker.separation.service import InProcessService, NeedsCpuFallback
 from cover_maker.store.db import MIGRATIONS, connect, schema_version
+
+from .conftest import tone
 
 
 def spec(song: Path, tmp_path: Path, **kwargs: object) -> JobSpec:
@@ -191,3 +194,23 @@ def test_cpu_fallback_when_allowed(paths: Paths, song: Path, tmp_path: Path) -> 
 
 def test_schema_is_migrated(paths: Paths) -> None:
     assert schema_version(connect(paths.db)) == len(MIGRATIONS)
+
+
+def test_file_items_are_named_from_tags_or_file_name(runner: JobRunner, tmp_path: Path) -> None:
+    tagged = tmp_path / "track01.flac"
+    with sf.SoundFile(tagged, "w", samplerate=44_100, channels=2, format="FLAC") as f:
+        f.title = "Night Drive"
+        f.artist = "The Testers"
+        f.write(tone(0.5))
+    named = tmp_path / "Band - Great Song.wav"
+    sf.write(str(named), tone(0.5), 44_100)
+
+    job = runner.submit(
+        JobSpec(inputs=[str(tagged), str(named)], stems=[Stem.VOCALS], output_dir=tmp_path)
+    )
+
+    items = runner.items(job)
+    assert [(i["title"], i["artist"]) for i in items] == [
+        ("Night Drive", "The Testers"),
+        ("Great Song", "Band"),
+    ]
