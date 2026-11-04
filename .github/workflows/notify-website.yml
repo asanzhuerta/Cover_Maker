@@ -1,0 +1,34 @@
+name: Notify website
+
+# When a release is published (the draft from release.yml made public, or a
+# pre-release promoted), rebuild asanzhuerta.netlify.app so its download button
+# points at the new installer straight away instead of after its hourly refresh.
+#
+# Needs the repository secret NETLIFY_BUILD_HOOK: the build hook URL created in
+# Netlify (Site configuration > Build & deploy > Build hooks). Without it the
+# job only leaves a notice.
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  rebuild:
+    name: Rebuild the website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the Netlify build hook
+        env:
+          HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+          TAG: ${{ github.event.release.tag_name || 'manual' }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::notice::NETLIFY_BUILD_HOOK is not set; the website will pick up $TAG on its next refresh."
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST -d '{}' \
+            "$HOOK?trigger_title=Cover_Maker+${TAG}+published"
+          echo "Website rebuild requested for $TAG."
