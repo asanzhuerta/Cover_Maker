@@ -22,9 +22,21 @@ def fake_download(monkeypatch: pytest.MonkeyPatch) -> list[str]:
         calls.append(video_id)
         path = target_dir / f"{video_id}.wav"
         sf.write(str(path), tone(), 44_100, subtype="FLOAT")
-        return path, youtube.VideoInfo(video_id, "Some Artist - Some Song", "Channel", 1.0)
+        return path, youtube.VideoInfo(
+            video_id,
+            "Some Artist - Some Song",
+            "Channel",
+            1.0,
+            track="Some Song",
+            artist="Some Artist",
+        )
+
+    def video_info(video_id: str) -> youtube.VideoInfo:
+        calls.append(f"info:{video_id}")
+        return youtube.VideoInfo(video_id, "Some Artist - Some Song", "Channel", 1.0)
 
     monkeypatch.setattr(youtube, "download_audio", download_audio)
+    monkeypatch.setattr(youtube, "video_info", video_info)
     return calls
 
 
@@ -43,7 +55,31 @@ def test_video_link_is_downloaded_once(
     assert runner.run(runner.submit(spec)) == "done"
     assert runner.run(runner.submit(spec)) == "done"
 
-    assert fake_download == ["dQw4w9WgXcQ"]
+    # Metadata is read before the first download; the second run uses the cache.
+    assert fake_download == ["info:dQw4w9WgXcQ", "dQw4w9WgXcQ"]
     assert (tmp_path / "out" / "Some Artist - Some Song - Vocals.wav").exists()
     stored = runner.job_spec(1)
     assert stored.rights_confirmed  # the confirmation is recorded with the job
+
+
+def test_video_items_get_title_and_artist(
+    runner: JobRunner, tmp_path: Path, fake_download: list[str]
+) -> None:
+    seen: list[dict[str, object]] = []
+    runner.events.subscribe(lambda event: seen.append(event))  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
+    spec = JobSpec(
+        inputs=[LINK], stems=[Stem.VOCALS], output_dir=tmp_path / "out", rights_confirmed=True
+    )
+    job = runner.submit(spec)
+    assert runner.items(job)[0]["title"] is None  # links are named when they start
+
+    runner.run(job)
+
+    item = runner.items(job)[0]
+    # The music metadata from the download wins over the channel name.
+    assert (item["title"], item["artist"]) == ("Some Song", "Some Artist")
+    metas = [e for e in seen if e.get("type") == "item.meta"]
+    assert [(e["title"], e["artist"]) for e in metas] == [
+        ("Some Artist - Some Song", "Channel"),
+        ("Some Song", "Some Artist"),
+    ]

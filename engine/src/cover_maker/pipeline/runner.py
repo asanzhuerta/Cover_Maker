@@ -22,6 +22,7 @@ import numpy as np
 
 from ..audio import io, mixer
 from ..domain import ALL_STEMS, JobSpec, Mode, Preset, ResidualMode, Stem
+from ..library.matching import read_track
 from ..paths import Paths
 from ..separation import recipes
 from ..separation.catalog import Catalog, Installs, ModelSpec
@@ -88,6 +89,14 @@ def render_custom_mix(
     return target, result
 
 
+def file_meta(raw_input: str) -> tuple[str | None, str | None]:
+    """Title and artist of a local file from its tags or its name; links get theirs later."""
+    if raw_input.lower().startswith(("http://", "https://")):
+        return None, None
+    track = read_track(Path(raw_input))
+    return track.title or None, track.artist or None
+
+
 def safe_title(name: str) -> str:
     cleaned = _UNSAFE.sub(" ", name).strip(" .")
     return re.sub(r"\s+", " ", cleaned)[:120] or "track"
@@ -134,9 +143,11 @@ class JobRunner:
         )
         job_id = int(cursor.lastrowid or 0)
         for ordinal, path in enumerate(spec.inputs):
+            title, artist = file_meta(str(path))
             self.conn.execute(
-                "INSERT INTO job_items (job_id, ordinal, input_path) VALUES (?, ?, ?)",
-                (job_id, ordinal, str(path)),
+                "INSERT INTO job_items (job_id, ordinal, input_path, title, artist) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (job_id, ordinal, str(path), title, artist),
             )
         self.events.emit("job.submitted", job=job_id, items=len(spec.inputs))
         return job_id
@@ -251,6 +262,11 @@ class JobRunner:
         self.events.emit("job.finished", job=job_id, status=status)
         return status
 
+    def _set_meta(self, job_id: int, item_id: int, title: str, artist: str | None) -> None:
+        """Record what an item is, for the queue (tags or video metadata)."""
+        self._set_item(item_id, title=title, artist=artist)
+        self.events.emit("item.meta", job=job_id, item=item_id, title=title, artist=artist)
+
     def _step(self, job_id: int, item_id: int, step: str) -> None:
         if self._cancel.is_set():
             raise JobCancelled()
@@ -258,6 +274,13 @@ class JobRunner:
         self.events.emit("item.step", job=job_id, item=item_id, step=step)
 
     # ------------------------------------------------------------ cache
+
+    def _remembered(self, step: str, key: str) -> Any | None:
+        """A cached plain value (not asset references), or None."""
+        row = self.conn.execute(
+            "SELECT output_json FROM step_cache WHERE step = ? AND cache_key = ?", (step, key)
+        ).fetchone()
+        return json.loads(row["output_json"]) if row else None
 
     def _cached(self, step: str, key: str) -> Any | None:
         row = self.conn.execute(
@@ -355,12 +378,19 @@ class JobRunner:
     def _download(self, job_id: int, item_id: int, video_id: str) -> tuple[Path, str]:
         """Download a video's audio once; later runs reuse the cached file."""
         cached = self._cached("download", video_id)
-        meta = self.conn.execute(
-            "SELECT output_json FROM step_cache WHERE step = 'video_title' AND cache_key = ?",
-            (video_id,),
-        ).fetchone()
-        if cached and meta:
-            return self.assets.require(str(cached)), json.loads(meta["output_json"])
+        title = self._remembered("video_title", video_id)
+        known = self._remembered("video_meta", video_id)
+        if isinstance(known, dict):
+            self._set_meta(job_id, item_id, str(known.get("title") or ""), known.get("artist"))  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+        else:
+            # Name the item before the (possibly long) download starts.
+            try:
+                info = youtube.video_info(video_id)
+                self._set_meta(job_id, item_id, info.display_title, info.display_artist)
+            except youtube.DownloadError:
+                pass  # the download below reports the real problem
+        if cached and title is not None:
+            return self.assets.require(str(cached)), str(title)
 
         def progress(fraction: float | None) -> None:
             self.events.emit(
@@ -377,6 +407,10 @@ class JobRunner:
             sha = self.assets.put(path, "download", move=True)
         self._store("download", video_id, sha)
         self._store("video_title", video_id, info.title)
+        self._store(
+            "video_meta", video_id, {"title": info.display_title, "artist": info.display_artist}
+        )
+        self._set_meta(job_id, item_id, info.display_title, info.display_artist)
         return self.assets.require(sha), info.title
 
     def _decode(self, source: Path) -> str:

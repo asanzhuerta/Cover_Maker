@@ -128,7 +128,13 @@ Max quality & BS-RoFormer SW and BS-RoFormer Resurrection. \\
 
 \section{The queue}
 \emph{Queue} lists the jobs as cards with their stems, mode and preset. Every
-song has a waveform-style progress bar that fills in the colour of the first
+song is shown by its title and artist, so you can tell which audio is which.
+For a file they come from its tags, or from a name such as
+\texttt{Artist - Title.wav} when it has none. For a video link they come from
+the video's information (the track and artist of music videos, otherwise the
+title and channel) as soon as the song starts. Until then, and for files
+without either, the file name or the link is shown. Every song has a
+waveform-style progress bar that fills in the colour of the first
 stem, the current step (downloading, decoding, separating, exporting) and a
 percentage. You can pause after the current song, resume, cancel and retry
 failed songs. \emph{Open folder} opens the output folder in Explorer with the

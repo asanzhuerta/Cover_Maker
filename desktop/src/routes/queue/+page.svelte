@@ -9,7 +9,7 @@
   import type { IconName } from "$lib/icons";
   import {
     applyEvent,
-    displayName,
+    itemLabel,
     itemProgress,
     revealTarget,
     stepName,
@@ -33,6 +33,8 @@
     items[id] = data.item_list.map((item) => ({
       id: item.id,
       input: item.input,
+      title: item.title ?? null,
+      artist: item.artist ?? null,
       status: item.status,
       step: item.current_step ?? null,
       fraction: null,
@@ -198,12 +200,17 @@
       <ul class="items">
         {#each items[job.id] ?? [] as item (item.id)}
           {@const progress = itemProgress(item)}
+          {@const label = itemLabel(item)}
           <li class={item.status}>
             <div class="name" title={item.input}>
               {#if item.status === "done"}<span class="ok-mark"
                   ><Icon name="check" size={12} strokeWidth={3} /></span
                 >{/if}
-              {displayName(item.input)}
+              <span class="label">
+                <span class="title">{label.title}</span>
+                {#if label.artist}<span class="artist">{label.artist}</span
+                  >{/if}
+              </span>
             </div>
             <Waveform
               seed={item.input}
@@ -347,8 +354,24 @@
     align-items: center;
     gap: 0.4rem;
     overflow: hidden;
+  }
+
+  .label {
+    display: grid;
+    min-width: 0;
+    line-height: 1.25;
+  }
+
+  .label .title,
+  .label .artist {
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .label .artist {
+    color: var(--muted);
+    font-size: 0.8em;
   }
 
   .ok-mark {

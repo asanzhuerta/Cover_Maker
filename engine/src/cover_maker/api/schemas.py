@@ -82,6 +82,8 @@ class ItemOut(BaseModel):
     id: int
     ordinal: int
     input: str
+    title: str | None = None
+    artist: str | None = None
     status: str
     current_step: str | None
     outputs: dict[str, str]
