@@ -6,6 +6,12 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-04
+
+Library page, Creative Commons sources, title and artist in the queue,
+actionable errors, diagnostic reports, complete third-party notices and the
+test report (M8, M10).
+
 ### Added (M10: quality)
 - Actionable errors: failed songs in the queue show a translated hint with
   the next step (memory, missing model, ffmpeg, downloads, moved files…).
