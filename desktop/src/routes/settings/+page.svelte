@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
-  import { isTauri } from "$lib/connection.svelte";
+  import { connection, isTauri } from "$lib/connection.svelte";
   import { LOCALES, t, type Locale } from "$lib/i18n.svelte";
   import { saveSettings, settings } from "$lib/settings.svelte";
 
@@ -37,6 +37,21 @@
     } finally {
       busy = false;
     }
+  }
+
+  let report = $state("");
+
+  async function diagnose() {
+    if (!connection.api) return;
+    busy = true;
+    const { data } = await connection.api.POST("/diagnostics");
+    busy = false;
+    report = data?.path ?? "";
+  }
+
+  async function revealReport() {
+    const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+    await revealItemInDir(report);
   }
 
   async function checkYtDlp() {
@@ -146,6 +161,20 @@
   </label>
 
   <div><button onclick={showWelcome}>{t("settings.reset")}</button></div>
+</div>
+
+<div class="card form updates" data-testid="diagnostics">
+  <h2>{t("diag.title")}</h2>
+  <p class="muted">{t("diag.hint")}</p>
+  <div class="line">
+    <button disabled={busy || connection.status !== "ready"} onclick={diagnose}
+      >{t("diag.create")}</button
+    >
+    {#if report && isTauri()}<button class="ghost" onclick={revealReport}
+        >{t("diag.open")}</button
+      >{/if}
+  </div>
+  {#if report}<p class="muted" data-testid="diag-path">{report}</p>{/if}
 </div>
 
 {#if isTauri()}

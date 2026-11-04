@@ -72,6 +72,7 @@
 {#if needsSetup(bootstrap.status)}
   <Setup />
 {:else}
+  <a class="skip" href="#content">{t("nav.skip")}</a>
   <div class="shell" class:bare={page.url.pathname === "/welcome"}>
     <aside>
       <div class="brand">
@@ -96,11 +97,12 @@
         </svg>
         <span>Cover<span class="muted">_</span>Maker</span>
       </div>
-      <nav>
+      <nav aria-label={t("nav.label")}>
         {#each nav as item (item.href)}
           <a
             href={resolve(item.href)}
             class:active={page.url.pathname === item.href}
+            aria-current={page.url.pathname === item.href ? "page" : undefined}
             ><Icon name={item.icon} />{t(item.label)}</a
           >
         {/each}
@@ -132,6 +134,8 @@
       <div
         class="engine {connection.status}"
         data-testid="engine-status"
+        role="status"
+        aria-live="polite"
         title={connection.error}
       >
         <span class="dot"></span>
@@ -140,13 +144,32 @@
           >{/if}
       </div>
     </aside>
-    <main>
+    <main id="content" tabindex="-1">
       {@render children()}
     </main>
   </div>
 {/if}
 
 <style>
+  .skip {
+    position: absolute;
+    left: 0.6rem;
+    top: -3rem;
+    z-index: 10;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  .skip:focus {
+    top: 0.6rem;
+  }
+
+  main:focus {
+    outline: none;
+  }
+
   .runtime {
     margin-top: auto;
     display: flex;

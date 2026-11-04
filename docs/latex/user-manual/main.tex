@@ -145,6 +145,12 @@ were interrupted because the application was closed continue when it starts
 again. Processing a song a second time, or asking for another stem of a song
 already separated, reuses the previous work and finishes in seconds.
 
+When a song fails, its error is shown under it together with a hint about
+what to do: for example choosing the \emph{Fast} preset or allowing the CPU
+fallback when the graphics card runs out of memory, installing a missing
+model, or checking for a yt-dlp update when a video link stops working.
+Fix the cause and press \emph{Retry}.
+
 \section{File names}
 Stems are saved as \texttt{<song> - <Stem>.<format>} and backing tracks as
 \texttt{<song> - without <stems>.<format>}; the \emph{Both} mode writes both

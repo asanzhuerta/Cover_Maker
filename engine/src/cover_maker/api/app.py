@@ -16,7 +16,7 @@ from typing import Any, TypeVar
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 
-from .. import __version__
+from .. import __version__, diagnostics
 from ..audio.io import ffmpeg_path
 from ..audio.peaks import compute_peaks
 from ..domain import JobSpec
@@ -90,6 +90,14 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             ffmpeg=ffmpeg_path() is not None,
             separation_available=svc.demo or separation_available(), demo=svc.demo,
         )  # fmt: skip
+
+    @app.post("/diagnostics", response_model=schemas.DiagnosticsOut)
+    async def create_diagnostics() -> schemas.DiagnosticsOut:  # pyright: ignore[reportUnusedFunction]
+        """Write a redacted diagnostic zip into the logs folder."""
+        svc = engine()
+        info = (await system()).model_dump()
+        path = await _db(lambda: diagnostics.build(svc.conn, svc.paths, info))
+        return schemas.DiagnosticsOut(path=str(path))
 
     # ------------------------------------------------------------ models
 
