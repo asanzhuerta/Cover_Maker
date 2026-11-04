@@ -337,6 +337,30 @@ not legal advice. Jurisdiction-dependent points are marked as such.}
         a separate plugin.
 \end{itemize}
 
+\section{Creative Commons catalogues (M8)}
+The \emph{CC sources} page searches two catalogues whose content is published
+under open licences; neither is a streaming service, so CON-01 is unaffected.
+\begin{itemize}
+  \item Only results with a Creative Commons or public-domain licence URL are
+        shown; the licence, its NC (non-commercial) and ND (no derivatives)
+        terms and the source page are displayed. ND results carry a warning
+        that stems and backing tracks made from them must not be shared.
+  \item The engine downloads directly only from the Internet Archive, over
+        HTTPS and only from its hosts, so the local API cannot be used as a
+        general downloader. ccMixter blocks automated downloads of its files;
+        the app respects that and lets the user download on ccMixter's site
+        and attach the file, keeping the credits.
+  \item Every file keeps a \texttt{.credits.json} sidecar, and every export
+        made from it writes \texttt{CREDITS.txt} (title, artist, source,
+        licence), which covers the attribution required by all CC licences.
+  \item Licences are declared by uploaders and can be wrong (for example
+        well-known songs marked as public domain on the Internet Archive). The
+        page and the User Manual warn about this; the publication rules of
+        section ``Stems and publication'' still apply.
+  \item Jamendo is not integrated: its API needs a registered client id and a
+        review of its terms, a decision left to the product owner.
+\end{itemize}
+
 \section{Stems and publication}
 Separating lawfully obtained audio for private practice carries very low risk.
 Publishing a \gls{backingtrack} made from an original recording requires rights to

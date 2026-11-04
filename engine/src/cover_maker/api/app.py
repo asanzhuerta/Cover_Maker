@@ -29,9 +29,11 @@ from ..pipeline.runner import (
 from ..separation import recipes
 from ..separation.hardware import Tier
 from ..separation.installer import InstallError, install, separation_available
+from ..sources import catalogs
 from ..sources.expand import expand_inputs
 from ..sources.links import InputKind, UnsupportedInput, parse_input
 from ..sources.youtube import DownloadError
+from ..store import storage
 from . import schemas
 from .engine import EngineService
 from .security import AccessMiddleware, AccessPolicy
@@ -232,6 +234,110 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
     async def retry_job(job_id: int) -> schemas.Count:  # pyright: ignore[reportUnusedFunction]
         return schemas.Count(count=await _db(lambda: engine().retry(job_id)))
 
+    @app.delete("/jobs/{job_id}", status_code=204)
+    async def delete_job(job_id: int) -> None:  # pyright: ignore[reportUnusedFunction]
+        """Remove a finished job from the history (its exported files stay)."""
+
+        def run() -> None:
+            conn = engine().conn
+            row = conn.execute("SELECT status FROM jobs WHERE id = ?", (job_id,)).fetchone()
+            if row is None:
+                raise ApiProblem(404, "unknown_job", f"job {job_id} does not exist")
+            if row["status"] in ("pending", "running"):
+                raise ApiProblem(409, "job_active", "pause or cancel the job first")
+            conn.execute("DELETE FROM job_items WHERE job_id = ?", (job_id,))
+            conn.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+
+        await _db(run)
+
+    # ------------------------------------------------------------ storage
+
+    @app.get("/storage", response_model=schemas.StorageOut)
+    async def storage_usage() -> schemas.StorageOut:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        result = await _db(lambda: storage.usage(svc.conn, svc.paths))
+        return schemas.StorageOut(**result.__dict__)
+
+    @app.post("/storage/cleanup", response_model=schemas.CleanupOut)
+    async def storage_cleanup() -> schemas.CleanupOut:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        if svc.busy:
+            raise ApiProblem(409, "job_active", "wait until the queue is idle")
+        return schemas.CleanupOut(
+            freed_bytes=await _db(lambda: storage.clean_up(svc.conn, svc.paths))
+        )
+
+    # ------------------------------------------------------------ catalogues
+
+    def _entry_out(entry: catalogs.CatalogEntry) -> schemas.CatalogEntryOut:
+        return schemas.CatalogEntryOut(
+            source=entry.source, id=entry.id, title=entry.title, artist=entry.artist,
+            licence_name=entry.licence_name, licence_url=entry.licence_url,
+            page_url=entry.page_url, restrictions=entry.restrictions,
+            files=[schemas.CatalogFileOut(**f.__dict__) for f in entry.files],
+        )  # fmt: skip
+
+    @app.get("/catalog/search", response_model=list[schemas.CatalogEntryOut])
+    async def catalog_search(source: str, q: str) -> list[schemas.CatalogEntryOut]:  # pyright: ignore[reportUnusedFunction]
+        if source not in catalogs.SOURCES:
+            raise ApiProblem(400, "bad_input", f"unknown catalogue: {source}")
+        try:
+            entries = await asyncio.to_thread(catalogs.search, source, q)
+        except catalogs.CatalogError as exc:
+            raise ApiProblem(502, "catalog_unavailable", str(exc)) from exc
+        return [_entry_out(e) for e in entries]
+
+    @app.get("/catalog/archive/{identifier}/files", response_model=list[schemas.CatalogFileOut])
+    async def catalog_archive_files(identifier: str) -> list[schemas.CatalogFileOut]:  # pyright: ignore[reportUnusedFunction]
+        try:
+            files = await asyncio.to_thread(catalogs.archive_files, identifier)
+        except catalogs.CatalogError as exc:
+            raise ApiProblem(502, "catalog_unavailable", str(exc)) from exc
+        return [schemas.CatalogFileOut(**f.__dict__) for f in files]
+
+    @app.post("/catalog/attach", response_model=schemas.CatalogAttachOut)
+    async def catalog_attach(body: schemas.CatalogAttachRequest) -> schemas.CatalogAttachOut:  # pyright: ignore[reportUnusedFunction]
+        """Add a file downloaded on the catalogue's site, keeping its credits."""
+        if body.source not in catalogs.SOURCES:
+            raise ApiProblem(400, "bad_input", f"unknown catalogue: {body.source}")
+        svc = engine()
+        credits = catalogs.Credits(
+            title=body.title, artist=body.artist, licence_name=body.licence_name,
+            licence_url=body.licence_url, page_url=body.page_url, source=body.source,
+        )  # fmt: skip
+        target_dir = svc.paths.home / "library" / "cc" / body.source
+        try:
+            path = await asyncio.to_thread(catalogs.attach, body.path, credits, target_dir)
+        except catalogs.CatalogError as exc:
+            raise ApiProblem(400, "bad_input", str(exc)) from exc
+        return schemas.CatalogAttachOut(path=str(path))
+
+    @app.post("/catalog/download", status_code=202)
+    async def catalog_download(body: schemas.CatalogDownloadRequest) -> dict[str, str]:  # pyright: ignore[reportUnusedFunction]
+        """Download a CC track into the library's `cc` folder, in the background."""
+        if not catalogs.allowed_download(body.file.url):
+            raise ApiProblem(400, "bad_input", "the app downloads only from the Internet Archive")
+        if not catalogs.is_open_licence(body.licence_url):
+            raise ApiProblem(400, "bad_input", "not a Creative Commons or public-domain licence")
+        svc = engine()
+        file = catalogs.CatalogFile(**body.file.model_dump())
+        credits = catalogs.Credits(
+            title=body.title, artist=body.artist, licence_name=body.licence_name,
+            licence_url=body.licence_url, page_url=body.page_url, source=body.source,
+        )  # fmt: skip
+        target_dir = svc.paths.home / "library" / "cc" / body.source
+
+        def run() -> None:
+            svc.bus.emit("catalog.download.started", url=file.url)
+            try:
+                path = catalogs.download(file, credits, target_dir)
+                svc.bus.emit("catalog.download.done", url=file.url, path=str(path))
+            except catalogs.CatalogError as exc:
+                svc.bus.emit("catalog.download.failed", url=file.url, error=str(exc))
+
+        threading.Thread(target=run, daemon=True).start()
+        return {"status": "started"}
+
     # ------------------------------------------------------------ library
 
     def _collection_out(row: Any) -> schemas.CollectionOut:
@@ -268,6 +374,37 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             raise ApiProblem(400, "bad_input", f"file not found: {body.file}")
         ids = await _db(lambda: engine().library.import_playlist_file(body.file, body.search))
         return [schemas.Created(id=i) for i in ids]
+
+    @app.delete("/library/{collection_id}", status_code=204)
+    async def delete_collection(collection_id: int) -> None:  # pyright: ignore[reportUnusedFunction]
+        """Forget a collection (the audio files themselves are not touched)."""
+
+        def run() -> None:
+            conn = engine().conn
+            conn.execute("DELETE FROM collection_items WHERE collection_id = ?", (collection_id,))
+            if conn.execute("DELETE FROM collections WHERE id = ?", (collection_id,)).rowcount == 0:
+                raise ApiProblem(
+                    404, "unknown_collection", f"collection {collection_id} does not exist"
+                )
+
+        await _db(run)
+
+    @app.get("/library/{collection_id}/state", response_model=list[schemas.CollectionItemState])
+    async def collection_state(collection_id: int) -> list[schemas.CollectionItemState]:  # pyright: ignore[reportUnusedFunction]
+        """For each item already separated, the files of its latest finished job."""
+
+        def run() -> list[schemas.CollectionItemState]:
+            conn = engine().conn
+            rows = conn.execute(
+                "SELECT ci.id AS item_id, ji.outputs_json FROM collection_items ci "
+                "JOIN job_items ji ON ji.input_path = ci.input AND ji.status = 'done' "
+                "WHERE ci.collection_id = ? ORDER BY ji.id",
+                (collection_id,),
+            ).fetchall()
+            latest = {int(r["item_id"]): json.loads(r["outputs_json"] or "{}") for r in rows}
+            return [schemas.CollectionItemState(item_id=k, outputs=v) for k, v in latest.items()]
+
+        return await _db(run)
 
     @app.post("/library/{collection_id}/sync", response_model=schemas.SyncOut)
     async def sync(collection_id: int) -> schemas.SyncOut:  # pyright: ignore[reportUnusedFunction]

@@ -162,6 +162,11 @@ class EngineService:
         if self._active:
             self._active.pause()
 
+    @property
+    def busy(self) -> bool:
+        """True while a job runs or waits in the queue."""
+        return self._active is not None or not self._queue.empty()
+
     def resume(self, job_id: int) -> None:
         self._queue.put(job_id)
 

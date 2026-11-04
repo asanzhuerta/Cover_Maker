@@ -153,6 +153,69 @@ class CollectionItemOut(BaseModel):
     manual: bool
 
 
+class CollectionItemState(BaseModel):
+    """Stems already exported for a collection item (latest finished job)."""
+
+    item_id: int
+    outputs: dict[str, str]
+
+
+class StorageOut(BaseModel):
+    library_bytes: int
+    library_files: int
+    reclaimable_bytes: int = Field(description="Cached files no preview needs.")
+    reclaimable_files: int
+    models_bytes: int
+    tmp_bytes: int
+
+
+class CleanupOut(BaseModel):
+    freed_bytes: int
+
+
+class CatalogFileOut(BaseModel):
+    name: str
+    url: str
+    title: str
+    size_bytes: int | None
+
+
+class CatalogEntryOut(BaseModel):
+    source: str
+    id: str
+    title: str
+    artist: str
+    licence_name: str
+    licence_url: str
+    page_url: str
+    restrictions: list[str] = Field(description="NC (non-commercial) and/or ND (no derivatives).")
+    files: list[CatalogFileOut]
+
+
+class CatalogAttachRequest(BaseModel):
+    source: str
+    path: Path = Field(description="Audio file the user downloaded from the catalogue's site.")
+    title: str
+    artist: str
+    licence_name: str
+    licence_url: str
+    page_url: str
+
+
+class CatalogAttachOut(BaseModel):
+    path: str
+
+
+class CatalogDownloadRequest(BaseModel):
+    source: str
+    file: CatalogFileOut
+    title: str
+    artist: str
+    licence_name: str
+    licence_url: str
+    page_url: str
+
+
 class SyncOut(BaseModel):
     collection_id: int
     added: int

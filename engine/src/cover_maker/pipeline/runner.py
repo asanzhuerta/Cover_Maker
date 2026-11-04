@@ -29,7 +29,7 @@ from ..separation.catalog import Catalog, Installs, ModelSpec
 from ..separation.recipes import MINUS, Node, Recipe, Ref
 from ..separation.service import SeparationService, with_ladder
 from ..separation.types import Cancelled, SeparationRequest
-from ..sources import youtube
+from ..sources import catalogs, youtube
 from ..sources.links import InputKind, parse_input
 from ..store.assets import AssetStore, sha256_file
 from .events import EventBus
@@ -336,7 +336,12 @@ class JobRunner:
         stems = {stem: produced[recipe.output_ref(stem).node][stem] for stem in wanted}
         self._record_preview(item_id, title, mix_sha, recipe, produced)
         self._step(job_id, item_id, "export")
-        return self._export(title, mix_sha, stems, spec)
+        outputs = self._export(title, mix_sha, stems, spec)
+        if not raw_input.lower().startswith(("http://", "https://")):
+            credits = catalogs.read_credits(Path(raw_input))
+            if credits is not None:  # Creative Commons audio: keep the attribution
+                catalogs.write_credits(spec.output_dir, credits)
+        return outputs
 
     def _record_preview(
         self,

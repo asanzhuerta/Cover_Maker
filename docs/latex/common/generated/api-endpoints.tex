@@ -6,11 +6,16 @@
 \endhead
 \texttt{GET} & \texttt{/assets/\{sha\}} & Asset \\
 \texttt{GET} & \texttt{/assets/\{sha\}/peaks} & Peaks \\
+\texttt{GET} & \texttt{/catalog/archive/\{identifier\}/files} & Catalog Archive Files \\
+\texttt{POST} & \texttt{/catalog/attach} & Catalog Attach \\
+\texttt{POST} & \texttt{/catalog/download} & Catalog Download \\
+\texttt{GET} & \texttt{/catalog/search} & Catalog Search \\
 \texttt{GET} & \texttt{/health} & Health \\
 \texttt{GET} & \texttt{/items/\{item\_id\}/preview} & Preview \\
 \texttt{POST} & \texttt{/items/\{item\_id\}/render} & Render \\
 \texttt{GET} & \texttt{/jobs} & List Jobs \\
 \texttt{POST} & \texttt{/jobs} & Create Job \\
+\texttt{DELETE} & \texttt{/jobs/\{job\_id\}} & Delete Job \\
 \texttt{GET} & \texttt{/jobs/\{job\_id\}} & Get Job \\
 \texttt{POST} & \texttt{/jobs/\{job\_id\}/cancel} & Cancel Job \\
 \texttt{POST} & \texttt{/jobs/\{job\_id\}/pause} & Pause Job \\
@@ -21,10 +26,14 @@
 \texttt{POST} & \texttt{/library/imports} & Import Playlist \\
 \texttt{PUT} & \texttt{/library/items/\{item\_id\}/match} & Set Match \\
 \texttt{POST} & \texttt{/library/playlists} & Add Playlist \\
+\texttt{DELETE} & \texttt{/library/\{collection\_id\}} & Delete Collection \\
 \texttt{GET} & \texttt{/library/\{collection\_id\}/items} & Collection Items \\
+\texttt{GET} & \texttt{/library/\{collection\_id\}/state} & Collection State \\
 \texttt{POST} & \texttt{/library/\{collection\_id\}/sync} & Sync \\
 \texttt{GET} & \texttt{/models} & Models \\
 \texttt{POST} & \texttt{/models/\{model\_id\}/install} & Install Model \\
+\texttt{GET} & \texttt{/storage} & Storage Usage \\
+\texttt{POST} & \texttt{/storage/cleanup} & Storage Cleanup \\
 \texttt{GET} & \texttt{/system} & System \\
 \bottomrule
 \end{longtable}
