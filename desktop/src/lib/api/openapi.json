@@ -27,6 +27,214 @@
         "title": "ApiError",
         "type": "object"
       },
+      "CatalogAttachOut": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "CatalogAttachOut",
+        "type": "object"
+      },
+      "CatalogAttachRequest": {
+        "properties": {
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "licence_name": {
+            "title": "Licence Name",
+            "type": "string"
+          },
+          "licence_url": {
+            "title": "Licence Url",
+            "type": "string"
+          },
+          "page_url": {
+            "title": "Page Url",
+            "type": "string"
+          },
+          "path": {
+            "description": "Audio file the user downloaded from the catalogue's site.",
+            "format": "path",
+            "title": "Path",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "path",
+          "title",
+          "artist",
+          "licence_name",
+          "licence_url",
+          "page_url"
+        ],
+        "title": "CatalogAttachRequest",
+        "type": "object"
+      },
+      "CatalogDownloadRequest": {
+        "properties": {
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/CatalogFileOut"
+          },
+          "licence_name": {
+            "title": "Licence Name",
+            "type": "string"
+          },
+          "licence_url": {
+            "title": "Licence Url",
+            "type": "string"
+          },
+          "page_url": {
+            "title": "Page Url",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "file",
+          "title",
+          "artist",
+          "licence_name",
+          "licence_url",
+          "page_url"
+        ],
+        "title": "CatalogDownloadRequest",
+        "type": "object"
+      },
+      "CatalogEntryOut": {
+        "properties": {
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogFileOut"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "licence_name": {
+            "title": "Licence Name",
+            "type": "string"
+          },
+          "licence_url": {
+            "title": "Licence Url",
+            "type": "string"
+          },
+          "page_url": {
+            "title": "Page Url",
+            "type": "string"
+          },
+          "restrictions": {
+            "description": "NC (non-commercial) and/or ND (no derivatives).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Restrictions",
+            "type": "array"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "id",
+          "title",
+          "artist",
+          "licence_name",
+          "licence_url",
+          "page_url",
+          "restrictions",
+          "files"
+        ],
+        "title": "CatalogEntryOut",
+        "type": "object"
+      },
+      "CatalogFileOut": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "title",
+          "size_bytes"
+        ],
+        "title": "CatalogFileOut",
+        "type": "object"
+      },
+      "CleanupOut": {
+        "properties": {
+          "freed_bytes": {
+            "title": "Freed Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "freed_bytes"
+        ],
+        "title": "CleanupOut",
+        "type": "object"
+      },
       "CollectionItemOut": {
         "properties": {
           "artist": {
@@ -106,6 +314,28 @@
           "manual"
         ],
         "title": "CollectionItemOut",
+        "type": "object"
+      },
+      "CollectionItemState": {
+        "description": "Stems already exported for a collection item (latest finished job).",
+        "properties": {
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "outputs": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Outputs",
+            "type": "object"
+          }
+        },
+        "required": [
+          "item_id",
+          "outputs"
+        ],
+        "title": "CollectionItemState",
         "type": "object"
       },
       "CollectionOut": {
@@ -895,6 +1125,45 @@
         "title": "Stem",
         "type": "string"
       },
+      "StorageOut": {
+        "properties": {
+          "library_bytes": {
+            "title": "Library Bytes",
+            "type": "integer"
+          },
+          "library_files": {
+            "title": "Library Files",
+            "type": "integer"
+          },
+          "models_bytes": {
+            "title": "Models Bytes",
+            "type": "integer"
+          },
+          "reclaimable_bytes": {
+            "description": "Cached files no preview needs.",
+            "title": "Reclaimable Bytes",
+            "type": "integer"
+          },
+          "reclaimable_files": {
+            "title": "Reclaimable Files",
+            "type": "integer"
+          },
+          "tmp_bytes": {
+            "title": "Tmp Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "library_bytes",
+          "library_files",
+          "reclaimable_bytes",
+          "reclaimable_files",
+          "models_bytes",
+          "tmp_bytes"
+        ],
+        "title": "StorageOut",
+        "type": "object"
+      },
       "SyncOut": {
         "properties": {
           "added": {
@@ -1164,6 +1433,183 @@
         "summary": "Peaks"
       }
     },
+    "/catalog/archive/{identifier}/files": {
+      "get": {
+        "operationId": "catalog_archive_files_catalog_archive__identifier__files_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identifier",
+            "required": true,
+            "schema": {
+              "title": "Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogFileOut"
+                  },
+                  "title": "Response Catalog Archive Files Catalog Archive  Identifier  Files Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Catalog Archive Files"
+      }
+    },
+    "/catalog/attach": {
+      "post": {
+        "description": "Add a file downloaded on the catalogue's site, keeping its credits.",
+        "operationId": "catalog_attach_catalog_attach_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogAttachRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogAttachOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Catalog Attach"
+      }
+    },
+    "/catalog/download": {
+      "post": {
+        "description": "Download a CC track into the library's `cc` folder, in the background.",
+        "operationId": "catalog_download_catalog_download_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogDownloadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Catalog Download Catalog Download Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Catalog Download"
+      }
+    },
+    "/catalog/search": {
+      "get": {
+        "operationId": "catalog_search_catalog_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "source",
+            "required": true,
+            "schema": {
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryOut"
+                  },
+                  "title": "Response Catalog Search Catalog Search Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Catalog Search"
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health_health_get",
@@ -1371,6 +1817,37 @@
       }
     },
     "/jobs/{job_id}": {
+      "delete": {
+        "description": "Remove a finished job from the history (its exported files stay).",
+        "operationId": "delete_job_jobs__job_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Job"
+      },
       "get": {
         "operationId": "get_job_jobs__job_id__get",
         "parameters": [
@@ -1759,6 +2236,39 @@
         "summary": "Add Playlist"
       }
     },
+    "/library/{collection_id}": {
+      "delete": {
+        "description": "Forget a collection (the audio files themselves are not touched).",
+        "operationId": "delete_collection_library__collection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Collection"
+      }
+    },
     "/library/{collection_id}/items": {
       "get": {
         "operationId": "collection_items_library__collection_id__items_get",
@@ -1800,6 +2310,50 @@
           }
         },
         "summary": "Collection Items"
+      }
+    },
+    "/library/{collection_id}/state": {
+      "get": {
+        "description": "For each item already separated, the files of its latest finished job.",
+        "operationId": "collection_state_library__collection_id__state_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CollectionItemState"
+                  },
+                  "title": "Response Collection State Library  Collection Id  State Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Collection State"
       }
     },
     "/library/{collection_id}/sync": {
@@ -1910,6 +2464,42 @@
           }
         },
         "summary": "Install Model"
+      }
+    },
+    "/storage": {
+      "get": {
+        "operationId": "storage_usage_storage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Storage Usage"
+      }
+    },
+    "/storage/cleanup": {
+      "post": {
+        "operationId": "storage_cleanup_storage_cleanup_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Storage Cleanup"
       }
     },
     "/system": {

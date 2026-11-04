@@ -6,6 +6,24 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added (M8: library UI, matching and CC catalogues)
+- Library page: watched folders, video playlists and imported playlist files
+  as collections, with re-sync, removal, each song's match state, the stems
+  already exported for it, match review (choose file, not available) and
+  "Separate selected", which opens the songs on the New job page.
+- Disk space: library, freeable cache, models and temporary files, with a
+  "Free space" clean-up that keeps what the mixer needs (`GET /storage`,
+  `POST /storage/cleanup`); finished jobs can be removed from the history
+  (`DELETE /jobs/{id}`).
+- CC sources page: search ccMixter and the Internet Archive (Creative Commons
+  and public-domain results only), with licence, NC/ND badges and a warning
+  for no-derivatives licences. Internet Archive tracks download into the
+  library; ccMixter files are downloaded on its site and attached, since it
+  blocks automated downloads. Every file keeps a `.credits.json`, and exports
+  made from it write `CREDITS.txt`.
+- Docs: User Manual chapters on the library, match review, disk space, your
+  own videos and CC sources; Compliance section on the CC catalogues.
+
 ### Added
 - The queue shows each song's title and artist instead of only the file name
   or link: from the file's tags (or an "Artist - Title" file name) when the

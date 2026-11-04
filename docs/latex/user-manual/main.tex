@@ -11,6 +11,7 @@
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Document skeleton (M0). \\
   0.2 & 2026-11-03 & About and credits chapter (M12). \\
+  0.3 & 2026-11-04 & Library, match review, disk space and Creative Commons sources (M8). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -197,36 +198,94 @@ Songs processed before the mixer existed have no preview data; process them
 again (this reuses the previous separation and takes seconds).
 
 \chapter{Library, folders and playlist import}
-\todoin{M8} The desktop views come in M8; the engine already supports these
-workflows from the command line.
+The \emph{Library} page keeps the music you work with in \emph{collections}:
+\begin{description}
+  \item[Folder] a folder of your songs, watched for new, changed and removed
+  files (\emph{Watch a folder});
+  \item[Video playlist] a playlist link that you paste (\emph{Add playlist});
+  \item[Playlist file] a playlist exported from another application (M3U or
+  CSV, \emph{Import playlist file}), matched against the songs in your watched
+  folders. Nothing is downloaded when you import a playlist file.
+\end{description}
+Each collection shows its number of songs and when it was last synced;
+\emph{Re-sync} looks for changes again, and the bin icon removes the collection
+from the library (your audio files are never deleted). Open a collection to see
+its songs, with title and artist, the match state, the file and, in
+\emph{Separated}, the stems already exported for it.
+
+\section{Reviewing matches}
+Entries of an imported playlist are matched by artist, title and duration.
+\emph{Ready} means a file was found; \emph{Check} means the best candidate is
+uncertain (its score is shown); \emph{Not available} means nothing was found.
+\emph{Choose file} picks the right song by hand and \emph{Not available} marks
+an entry you do not have. Manual choices are kept on the next re-sync.
+
+Tick the songs you want and press \emph{Separate selected}: they open on the
+\emph{New job} page, where you choose the stems and the export as usual.
+
+\section{Disk space}
+The bottom of the page shows the space used by the library files, the cache
+that can be freed, the models and the temporary files. \emph{Free space} keeps
+everything the mixer needs for the songs in the queue and deletes cached
+downloads and intermediate results; running a song again then takes longer.
+It is available while no job runs, and your exported files are never touched.
+Removing a finished job from the history lets \emph{Free space} reclaim its
+files too.
 
 \section{Video links}
 Paste a video or playlist link instead of a file. Only the audio is downloaded.
-You must confirm that you own the content or are allowed to use it:
-\begin{lstlisting}
-cover-maker separate "https://www.youtube.com/watch?v=..." --stems vocals --mode without --confirm-rights
-\end{lstlisting}
+You must confirm that you own the content or are allowed to use it.
 
-\section{Watched folders and playlists}
+\section{Your own videos}
+If you publish your own performances, you do not need a link at all: download
+the original file of each video from your channel's management studio (in
+YouTube Studio: \emph{Content}, the video's \emph{Options} menu,
+\emph{Download}) and add the files or their folder as usual. The original
+upload usually has better audio than a stream.
+
+\section{Command line}
+The same workflows are available from the command line:
 \begin{lstlisting}
 cover-maker library add-folder "D:\Music\Practice"
 cover-maker library add-playlist "https://www.youtube.com/playlist?list=..."
+cover-maker library import Playlist1.json --search "D:\Music"
 cover-maker library sync 1        # report what is new, changed or removed
 cover-maker library ls 1          # items and their status
-\end{lstlisting}
-
-\section{Importing a playlist file}
-Export a playlist from another service (for example the JSON files of a personal
-data export, a CSV, JSPF or M3U) and match it against your own files:
-\begin{lstlisting}
-cover-maker library import Playlist1.json --search "D:\Music"
 cover-maker library match 12 "D:\Music\Band - Song.flac"   # fix a match
 cover-maker library match 13 --unavailable
 \end{lstlisting}
-Nothing is downloaded when you import a playlist file.
 
 \chapter{Creative Commons sources}
-\todoin{M8}
+The \emph{CC sources} page finds openly licensed music to practise with. Choose
+a catalogue, type a title, artist or style and press \emph{Search}:
+\begin{description}
+  \item[ccMixter] stems, a cappellas and remixes shared by musicians. ccMixter
+  only allows downloads from its own website: press \emph{Download on
+  ccMixter}, save the file, then \emph{Add the downloaded file} so that it is
+  copied into the library together with its credits.
+  \item[Internet Archive] recordings with a Creative Commons or public-domain
+  licence. \emph{Show tracks} lists the item's songs in the best available
+  format, and \emph{Download} saves one into the library.
+\end{description}
+Only Creative Commons and public-domain results are shown. Each result shows
+its licence (the badge opens the licence text) and a link to its source page.
+Two badges call for attention:
+\begin{description}
+  \item[Non-commercial] the audio, and what you make from it, may not be used
+  commercially.
+  \item[No derivatives] the licence does not allow sharing adapted versions.
+  Separating it for private practice is fine, but do not share stems or
+  backing tracks made from it.
+\end{description}
+Downloaded and added files are stored in the \texttt{library\textbackslash cc}
+folder with a small \texttt{.credits.json} file. \emph{Use in a new job} opens
+them on the \emph{New job} page, and every job made from them writes a
+\texttt{CREDITS.txt} next to the stems with the title, artist, source and
+licence, ready to quote when you share your work.
+
+The licence of a result is declared by whoever uploaded it. Be wary of
+well-known songs, film or game music marked as free: the uploader may not own
+those rights.
 
 \appendix
 \chapter{About and credits}\label{ch:about}

@@ -38,6 +38,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/catalog/archive/{identifier}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog Archive Files */
+        get: operations["catalog_archive_files_catalog_archive__identifier__files_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/attach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Catalog Attach
+         * @description Add a file downloaded on the catalogue's site, keeping its credits.
+         */
+        post: operations["catalog_attach_catalog_attach_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Catalog Download
+         * @description Download a CC track into the library's `cc` folder, in the background.
+         */
+        post: operations["catalog_download_catalog_download_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog Search */
+        get: operations["catalog_search_catalog_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -118,7 +192,11 @@ export interface paths {
         get: operations["get_job_jobs__job_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Job
+         * @description Remove a finished job from the history (its exported files stay).
+         */
+        delete: operations["delete_job_jobs__job_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -277,6 +355,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/library/{collection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Collection
+         * @description Forget a collection (the audio files themselves are not touched).
+         */
+        delete: operations["delete_collection_library__collection_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/library/{collection_id}/items": {
         parameters: {
             query?: never;
@@ -286,6 +384,26 @@ export interface paths {
         };
         /** Collection Items */
         get: operations["collection_items_library__collection_id__items_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/library/{collection_id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Collection State
+         * @description For each item already separated, the files of its latest finished job.
+         */
+        get: operations["collection_state_library__collection_id__state_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -345,6 +463,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Storage Usage */
+        get: operations["storage_usage_storage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/cleanup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Storage Cleanup */
+        post: operations["storage_cleanup_storage_cleanup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/system": {
         parameters: {
             query?: never;
@@ -378,6 +530,88 @@ export interface components {
              */
             models: string[];
         };
+        /** CatalogAttachOut */
+        CatalogAttachOut: {
+            /** Path */
+            path: string;
+        };
+        /** CatalogAttachRequest */
+        CatalogAttachRequest: {
+            /** Artist */
+            artist: string;
+            /** Licence Name */
+            licence_name: string;
+            /** Licence Url */
+            licence_url: string;
+            /** Page Url */
+            page_url: string;
+            /**
+             * Path
+             * Format: path
+             * @description Audio file the user downloaded from the catalogue's site.
+             */
+            path: string;
+            /** Source */
+            source: string;
+            /** Title */
+            title: string;
+        };
+        /** CatalogDownloadRequest */
+        CatalogDownloadRequest: {
+            /** Artist */
+            artist: string;
+            file: components["schemas"]["CatalogFileOut"];
+            /** Licence Name */
+            licence_name: string;
+            /** Licence Url */
+            licence_url: string;
+            /** Page Url */
+            page_url: string;
+            /** Source */
+            source: string;
+            /** Title */
+            title: string;
+        };
+        /** CatalogEntryOut */
+        CatalogEntryOut: {
+            /** Artist */
+            artist: string;
+            /** Files */
+            files: components["schemas"]["CatalogFileOut"][];
+            /** Id */
+            id: string;
+            /** Licence Name */
+            licence_name: string;
+            /** Licence Url */
+            licence_url: string;
+            /** Page Url */
+            page_url: string;
+            /**
+             * Restrictions
+             * @description NC (non-commercial) and/or ND (no derivatives).
+             */
+            restrictions: string[];
+            /** Source */
+            source: string;
+            /** Title */
+            title: string;
+        };
+        /** CatalogFileOut */
+        CatalogFileOut: {
+            /** Name */
+            name: string;
+            /** Size Bytes */
+            size_bytes: number | null;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
+        };
+        /** CleanupOut */
+        CleanupOut: {
+            /** Freed Bytes */
+            freed_bytes: number;
+        };
         /** CollectionItemOut */
         CollectionItemOut: {
             /** Artist */
@@ -398,6 +632,18 @@ export interface components {
             status: string;
             /** Title */
             title: string;
+        };
+        /**
+         * CollectionItemState
+         * @description Stems already exported for a collection item (latest finished job).
+         */
+        CollectionItemState: {
+            /** Item Id */
+            item_id: number;
+            /** Outputs */
+            outputs: {
+                [key: string]: string;
+            };
         };
         /** CollectionOut */
         CollectionOut: {
@@ -730,6 +976,24 @@ export interface components {
          * @enum {string}
          */
         Stem: "vocals" | "guitar" | "drums" | "bass" | "piano" | "other";
+        /** StorageOut */
+        StorageOut: {
+            /** Library Bytes */
+            library_bytes: number;
+            /** Library Files */
+            library_files: number;
+            /** Models Bytes */
+            models_bytes: number;
+            /**
+             * Reclaimable Bytes
+             * @description Cached files no preview needs.
+             */
+            reclaimable_bytes: number;
+            /** Reclaimable Files */
+            reclaimable_files: number;
+            /** Tmp Bytes */
+            tmp_bytes: number;
+        };
         /** SyncOut */
         SyncOut: {
             /** Added */
@@ -848,6 +1112,137 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PeaksOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_archive_files_catalog_archive__identifier__files_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogFileOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_attach_catalog_attach_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogAttachRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogAttachOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_download_catalog_download_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogDownloadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_search_catalog_search_get: {
+        parameters: {
+            query: {
+                source: string;
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogEntryOut"][];
                 };
             };
             /** @description Validation Error */
@@ -1048,6 +1443,35 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["JobDetail"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_job_jobs__job_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -1342,6 +1766,35 @@ export interface operations {
             };
         };
     };
+    delete_collection_library__collection_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     collection_items_library__collection_id__items_get: {
         parameters: {
             query?: never;
@@ -1360,6 +1813,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CollectionItemOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    collection_state_library__collection_id__state_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionItemState"][];
                 };
             };
             /** @description Validation Error */
@@ -1455,6 +1939,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    storage_usage_storage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorageOut"];
+                };
+            };
+        };
+    };
+    storage_cleanup_storage_cleanup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CleanupOut"];
                 };
             };
         };

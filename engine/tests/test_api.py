@@ -184,3 +184,46 @@ def test_openapi_offers_every_export_mode(client: TestClient) -> None:
     schemas = client.get("/openapi.json").json()["components"]["schemas"]
 
     assert schemas["Mode"]["enum"] == ["extract", "without", "both"]
+
+
+def test_collection_delete_and_state(client: TestClient, song: Path) -> None:
+    collection = client.post("/library/folders", json={"path": str(song.parent)}).json()["id"]
+    client.post(f"/library/{collection}/sync")
+
+    assert client.get(f"/library/{collection}/state").json() == []
+    assert client.delete(f"/library/{collection}").status_code == 204
+    assert client.get("/library").json() == []
+    assert client.delete(f"/library/{collection}").status_code == 404
+
+
+def test_storage_and_history(client: TestClient, service: EngineService) -> None:
+    usage = client.get("/storage").json()
+    assert usage["library_files"] == 0
+    assert client.post("/storage/cleanup").json() == {"freed_bytes": 0}
+    assert client.delete("/jobs/999").status_code == 404
+
+
+def test_catalog_search_and_download_rules(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from cover_maker.sources import catalogs
+
+    entry = catalogs.CatalogEntry(
+        "ccmixter", "1", "Reverie", "Ghost", "CC BY-NC-ND 4.0",
+        "https://creativecommons.org/licenses/by-nc-nd/4.0/", "https://ccmixter.org/files/g/1",
+        [catalogs.CatalogFile("r.mp3", "https://archive.org/download/x/r.mp3", "Reverie", 10)],
+    )  # fmt: skip
+    monkeypatch.setattr(catalogs, "search", lambda source, q: [entry])
+
+    [found] = client.get("/catalog/search", params={"source": "ccmixter", "q": "x"}).json()
+    assert found["restrictions"] == ["NC", "ND"]
+    assert client.get("/catalog/search", params={"source": "other", "q": "x"}).status_code == 400
+
+    request = {
+        "source": "ccmixter", "file": found["files"][0], "title": "Reverie", "artist": "Ghost",
+        "licence_name": "x", "licence_url": found["licence_url"], "page_url": found["page_url"],
+    }  # fmt: skip
+    bad_host = {**request, "file": {**found["files"][0], "url": "https://example.com/r.mp3"}}
+    assert client.post("/catalog/download", json=bad_host).status_code == 400
+    closed = {**request, "licence_url": "https://example.com/licence"}
+    assert client.post("/catalog/download", json=closed).status_code == 400

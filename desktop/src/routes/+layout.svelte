@@ -25,12 +25,21 @@
   let { children }: { children: Snippet } = $props();
 
   const nav: {
-    href: "/" | "/queue" | "/models" | "/settings" | "/about";
+    href:
+      | "/"
+      | "/queue"
+      | "/library"
+      | "/catalog"
+      | "/models"
+      | "/settings"
+      | "/about";
     label: MessageKey;
     icon: IconName;
   }[] = [
     { href: "/", label: "nav.new", icon: "plus" },
     { href: "/queue", label: "nav.queue", icon: "queue" },
+    { href: "/library", label: "nav.library", icon: "folder" },
+    { href: "/catalog", label: "nav.catalog", icon: "cc" },
     { href: "/models", label: "nav.models", icon: "models" },
     { href: "/settings", label: "nav.settings", icon: "settings" },
     { href: "/about", label: "nav.about", icon: "info" },

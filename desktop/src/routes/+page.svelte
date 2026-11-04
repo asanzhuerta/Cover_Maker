@@ -9,6 +9,7 @@
   import { connection, isTauri } from "$lib/connection.svelte";
   import { t } from "$lib/i18n.svelte";
   import type { IconName } from "$lib/icons";
+  import { takeHandoff } from "$lib/handoff.svelte";
   import { displayName } from "$lib/jobs";
   import { settings } from "$lib/settings.svelte";
   import { stemColor, type Stem } from "$lib/stems";
@@ -123,6 +124,8 @@
   }
 
   onMount(async () => {
+    const handed = takeHandoff();
+    if (handed.length) add(handed);
     if (!isTauri()) return;
     const { getCurrentWebview } = await import("@tauri-apps/api/webview");
     unlisten = await getCurrentWebview().onDragDropEvent((event) => {
