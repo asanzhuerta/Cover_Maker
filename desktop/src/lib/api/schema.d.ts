@@ -112,6 +112,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Diagnostics
+         * @description Write a redacted diagnostic zip into the logs folder.
+         */
+        post: operations["create_diagnostics_diagnostics_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -669,6 +689,14 @@ export interface components {
         Created: {
             /** Id */
             id: number;
+        };
+        /** DiagnosticsOut */
+        DiagnosticsOut: {
+            /**
+             * Path
+             * @description The zip written into the logs folder.
+             */
+            path: string;
         };
         /** FolderRequest */
         FolderRequest: {
@@ -1252,6 +1280,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_diagnostics_diagnostics_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticsOut"];
                 };
             };
         };

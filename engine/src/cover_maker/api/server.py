@@ -11,18 +11,21 @@ exits when that process disappears.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import socket
 import sys
 import tempfile
 import threading
 import time
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Any
 
 import psutil
 import uvicorn
 
-from .. import __version__
+from .. import __version__, diagnostics
 from ..paths import Paths
 from .app import create_app
 from .engine import EngineService
@@ -52,6 +55,30 @@ def build_service(demo: bool) -> EngineService:
     return service
 
 
+def _log_failures(service: EngineService) -> None:
+    """Keep failures in logs/engine.log: the installed app has no console."""
+    service.paths.logs.mkdir(parents=True, exist_ok=True)
+    handler = RotatingFileHandler(
+        service.paths.logs / diagnostics.LOG_FILE, maxBytes=1_000_000, backupCount=2,
+        encoding="utf-8",
+    )  # fmt: skip
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    root = logging.getLogger()
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
+    log = logging.getLogger("cover_maker")
+    log.info("engine %s starting", __version__)
+
+    def record(event: dict[str, Any]) -> None:
+        kind = str(event.get("type", ""))
+        if kind.endswith(".failed") or kind in ("job.finished", "separation.retry"):
+            details = {k: v for k, v in event.items() if k not in ("seq", "type")}
+            level = logging.WARNING if kind.endswith(".failed") else logging.INFO
+            log.log(level, "%s %s", kind, details)
+
+    service.bus.subscribe(record)
+
+
 def serve(host: str = "127.0.0.1", *, demo: bool = False) -> None:
     token = os.environ.get(TOKEN_ENV)
     if not token or len(token) < 32:
@@ -63,6 +90,7 @@ def serve(host: str = "127.0.0.1", *, demo: bool = False) -> None:
 
     policy = AccessPolicy(token=token, host=f"{host}:{port}")
     service = build_service(demo)
+    _log_failures(service)
     service.start()
     config = uvicorn.Config(create_app(policy, service), log_level="warning", access_log=False)
     server = uvicorn.Server(config)

@@ -6,6 +6,31 @@ const en = {
   "nav.models": "Models",
   "nav.settings": "Settings",
   "nav.about": "About",
+  "nav.label": "Main menu",
+  "nav.skip": "Skip to content",
+  "diag.title": "Diagnostics",
+  "diag.hint":
+    "Create a report to attach to a bug report: versions, hardware, recent jobs and the engine log. Your folders, links and tokens are removed; no audio is included.",
+  "diag.create": "Create diagnostic report",
+  "diag.open": "Show in folder",
+  "hint.ffmpeg":
+    "ffmpeg is missing. Restart the app; if this repeats, delete the runtime folder so the setup runs again (Installation Guide › Troubleshooting).",
+  "hint.decode":
+    "The file may be damaged or in an unusual format. Convert it to WAV or FLAC and add it again.",
+  "hint.memory":
+    "Not enough video memory. Choose the Fast preset, close other apps that use the graphics card, or allow CPU fallback in Settings.",
+  "hint.worker":
+    "The separation process stopped. Press Retry; if it happens again, update the graphics driver or allow CPU fallback in Settings.",
+  "hint.runtime":
+    "The separation runtime is still being installed. Wait until the box at the bottom left says it is installed, then press Retry.",
+  "hint.model": "Install the model on the Models page, then press Retry.",
+  "hint.download":
+    "Check the link and your connection. Video sites change often: try Settings › Check for yt-dlp update.",
+  "hint.cache":
+    "A cached file was removed when freeing space. Press Retry to rebuild it.",
+  "hint.missingFile":
+    "The file was moved or deleted. Add it again from its new place.",
+  "hint.network": "Check your internet connection and try again.",
   "nav.library": "Library",
   "nav.catalog": "CC sources",
   "library.title": "Library",
@@ -276,6 +301,31 @@ const es: Dictionary = {
   "nav.models": "Modelos",
   "nav.settings": "Ajustes",
   "nav.about": "Acerca de",
+  "nav.label": "Menú principal",
+  "nav.skip": "Saltar al contenido",
+  "diag.title": "Diagnóstico",
+  "diag.hint":
+    "Crea un informe para adjuntar a un aviso de error: versiones, equipo, trabajos recientes y el registro del motor. Se eliminan tus carpetas, enlaces y tokens; no incluye audio.",
+  "diag.create": "Crear informe de diagnóstico",
+  "diag.open": "Mostrar en la carpeta",
+  "hint.ffmpeg":
+    "Falta ffmpeg. Reinicia la app; si se repite, borra la carpeta runtime para que la preparación vuelva a ejecutarse (Installation Guide › Troubleshooting).",
+  "hint.decode":
+    "Puede que el archivo esté dañado o en un formato poco habitual. Conviértelo a WAV o FLAC y añádelo de nuevo.",
+  "hint.memory":
+    "No hay memoria de vídeo suficiente. Elige la calidad Rápida, cierra otras apps que usen la tarjeta gráfica o permite pasar a CPU en Ajustes.",
+  "hint.worker":
+    "El proceso de separación se ha detenido. Pulsa Reintentar; si vuelve a pasar, actualiza el driver de la tarjeta gráfica o permite pasar a CPU en Ajustes.",
+  "hint.runtime":
+    "El runtime de separación aún se está instalando. Espera a que el recuadro de abajo a la izquierda indique que está instalado y pulsa Reintentar.",
+  "hint.model": "Instala el modelo en la página Modelos y pulsa Reintentar.",
+  "hint.download":
+    "Revisa el enlace y tu conexión. Los sitios de vídeo cambian a menudo: prueba Ajustes › Buscar actualización de yt-dlp.",
+  "hint.cache":
+    "Se borró un archivo en caché al liberar espacio. Pulsa Reintentar para reconstruirlo.",
+  "hint.missingFile":
+    "El archivo se movió o se borró. Añádelo otra vez desde su nueva ubicación.",
+  "hint.network": "Revisa tu conexión a internet y vuelve a intentarlo.",
   "nav.library": "Biblioteca",
   "nav.catalog": "Fuentes CC",
   "library.title": "Biblioteca",

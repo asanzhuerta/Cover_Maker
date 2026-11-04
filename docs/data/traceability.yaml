@@ -1,0 +1,124 @@
+# Requirement -> verification (source for the Test Report).
+# References:
+#   engine:<file>::<test>   pytest test in engine/tests (checked by test_traceability.py)
+#   ui:<file> > <test>      vitest test in desktop/src/lib
+#   shell:<module>::<test>  Rust unit test in desktop/src-tauri/src
+#   manual: <description>   manual or measured verification (dated in the report)
+
+CON-01:
+  - "engine:test_sources.py::test_unsupported_inputs"
+  - "engine:test_catalogs.py::test_ccmixter_keeps_open_audio_only"
+  - "manual: code review checklist on every PR (no search on streaming services)"
+CON-02:
+  - "engine:test_api.py::test_online_job_requires_rights"
+  - "engine:test_runner_links.py::test_online_input_needs_rights_confirmation"
+  - "engine:test_catalogs.py::test_licence_restrictions"
+CON-03:
+  - "engine:test_recipes_catalog.py::test_catalogue_has_licence_and_notice_for_every_model"
+  - "engine:test_installer.py::test_licence_must_be_accepted"
+  - "engine:test_api.py::test_models_need_licence_acceptance"
+CON-04:
+  - "manual: tests and docs use synthetic tones only (conftest.tone, demo clip)"
+CON-05:
+  - "manual: PR checklist, brand names only as plain text"
+CON-06:
+  - "manual: CI runs on windows-latest; installer verified on Windows 11 (2026-11-03)"
+
+FR-SRC-01:
+  - "engine:test_sources.py::test_local_file_and_folder"
+  - "engine:test_runner.py::test_extract_exports_selected_stem"
+FR-SRC-02:
+  - "engine:test_library.py::test_folder_sync_is_incremental"
+  - "engine:test_api.py::test_library_folder_flow"
+FR-SRC-03:
+  - "engine:test_sources.py::test_m3u"
+  - "engine:test_sources.py::test_csv_with_exported_columns"
+  - "engine:test_sources.py::test_jspf"
+  - "engine:test_sources.py::test_data_export_playlists"
+  - "engine:test_library.py::test_imported_playlist_matching_and_review"
+FR-SRC-04:
+  - "engine:test_catalogs.py::test_archive_search_and_best_file_per_track"
+  - "engine:test_catalogs.py::test_download_writes_file_and_credits"
+  - "engine:test_catalogs.py::test_attach_copies_a_downloaded_file_with_credits"
+  - "engine:test_catalogs.py::test_credits_file_lists_each_track_once"
+  - "engine:test_storage.py::test_export_writes_credits_for_cc_audio"
+  - "engine:test_api.py::test_catalog_search_and_download_rules"
+FR-SRC-05:
+  - "engine:test_sources.py::test_video_links"
+  - "engine:test_sources.py::test_playlist_link"
+  - "engine:test_runner_links.py::test_video_link_is_downloaded_once"
+  - "engine:test_runner_links.py::test_video_items_get_title_and_artist"
+FR-SRC-06:
+  - "engine:test_api.py::test_online_job_requires_rights"
+  - "engine:test_runner_links.py::test_online_input_needs_rights_confirmation"
+
+FR-SEP-01:
+  - "engine:test_runner.py::test_extract_exports_selected_stem"
+  - "engine:test_runner.py::test_new_stem_reuses_previous_separation"
+  - "ui:stems.test.ts > lists the six selectable stems"
+FR-SEP-02:
+  - "engine:test_runner.py::test_without_vocals_keep_residual"
+  - "engine:test_runner.py::test_without_drop_residual_needs_all_stems"
+  - "engine:test_runner.py::test_both_exports_stems_and_song_without_them"
+  - "engine:test_mixer.py::test_keep_residual_is_mix_minus_removed"
+FR-SEP-03:
+  - "engine:test_recipes_catalog.py::test_every_preset_covers_all_stems_with_catalogue_models"
+  - "engine:test_runner.py::test_max_preset_runs_ensemble"
+  - "engine:test_api.py::test_system_reports_tier_and_preset"
+FR-MOD-01:
+  - "engine:test_recipes_catalog.py::test_catalogue_has_licence_and_notice_for_every_model"
+  - "engine:test_installer.py::test_download_calls_the_cli_entry_point"
+  - "engine:test_installer.py::test_download_reports_progress"
+  - "engine:test_runner.py::test_missing_model_is_reported"
+FR-JOB-01:
+  - "engine:test_api.py::test_job_runs_and_streams_events"
+  - "engine:test_runner.py::test_missing_input_fails_item_not_job"
+  - "ui:jobs.test.ts > advances with steps and finishes at 100 %"
+  - "ui:errors.test.ts > recognises the engine's common failures"
+FR-LIB-01:
+  - "engine:test_library.py::test_folder_sync_is_incremental"
+  - "engine:test_library.py::test_video_playlist_sync"
+  - "engine:test_api.py::test_collection_delete_and_state"
+  - "engine:test_storage.py::test_cleanup_keeps_what_the_mixer_needs"
+FR-LIB-02:
+  - "engine:test_library.py::test_imported_playlist_matching_and_review"
+  - "engine:test_api.py::test_match_correction"
+  - "ui:library.test.ts > sends only matched, selected items to a job"
+FR-MIX-01:
+  - "engine:test_mixer.py::test_muting_in_the_mixer_matches_without"
+  - "engine:test_preview.py::test_preview_lists_all_stems_and_serves_audio"
+  - "engine:test_preview.py::test_render_writes_the_custom_mix_without_overwriting"
+  - "ui:mixer.test.ts > matches the engine formula for the player's gain nodes"
+FR-UI-01:
+  - "ui:jobs.test.ts > has every key translated"
+  - "ui:about.test.ts > has every user-facing text in English and Spanish"
+  - "shell:locale::maps_windows_language_ids"
+
+NFR-PERF-01:
+  - "manual: M1 benchmarks on an RTX 3050 Laptop 4 GB (Architecture, Benchmarks)"
+NFR-PERF-02:
+  - "engine:test_runner.py::test_oom_steps_down_chunk"
+  - "engine:test_runner.py::test_oom_everywhere_asks_for_cpu"
+  - "engine:test_runner.py::test_cpu_fallback_when_allowed"
+NFR-PERF-03:
+  - "manual: low-impact mode with a DAW running (M3 spike)"
+NFR-PERF-04:
+  - "manual: M1 CPU benchmarks; installer CPU path separated the demo clip (2026-11-03)"
+NFR-SEC-01:
+  - "engine:test_api_security.py::test_missing_token_is_rejected"
+  - "engine:test_api_security.py::test_wrong_token_is_rejected"
+  - "engine:test_api_security.py::test_wrong_host_is_rejected"
+  - "engine:test_api_security.py::test_foreign_origin_is_rejected"
+  - "engine:test_api_security.py::test_websocket_requires_token_message"
+  - "engine:test_catalogs.py::test_download_refuses_other_hosts"
+  - "engine:test_diagnostics.py::test_report_is_redacted_and_has_no_audio"
+NFR-REL-01:
+  - "engine:test_runner.py::test_recover_resets_interrupted_items"
+  - "engine:test_runner.py::test_schema_is_migrated"
+  - "shell:engine::parses_ready_handshake"
+NFR-MNT-01:
+  - "manual: Settings › Check for yt-dlp update upgrades yt-dlp in the runtime"
+NFR-INST-01:
+  - "shell:runtime::picks_cuda_only_for_supported_gpus"
+  - "shell:runtime::extracts_only_bin_files"
+  - "manual: installer 12.7 MiB; first run on a clean profile, CPU path (2026-11-03)"

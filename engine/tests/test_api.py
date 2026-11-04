@@ -227,3 +227,8 @@ def test_catalog_search_and_download_rules(
     assert client.post("/catalog/download", json=bad_host).status_code == 400
     closed = {**request, "licence_url": "https://example.com/licence"}
     assert client.post("/catalog/download", json=closed).status_code == 400
+
+
+def test_diagnostics_report(client: TestClient, service: EngineService) -> None:
+    path = Path(client.post("/diagnostics").json()["path"])
+    assert path.exists() and path.parent == service.paths.logs

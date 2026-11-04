@@ -409,6 +409,20 @@
         "title": "Created",
         "type": "object"
       },
+      "DiagnosticsOut": {
+        "properties": {
+          "path": {
+            "description": "The zip written into the logs folder.",
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "DiagnosticsOut",
+        "type": "object"
+      },
       "FolderRequest": {
         "properties": {
           "path": {
@@ -1608,6 +1622,25 @@
           }
         },
         "summary": "Catalog Search"
+      }
+    },
+    "/diagnostics": {
+      "post": {
+        "description": "Write a redacted diagnostic zip into the logs folder.",
+        "operationId": "create_diagnostics_diagnostics_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Create Diagnostics"
       }
     },
     "/health": {

@@ -5,6 +5,7 @@
   import Icon from "$lib/components/Icon.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
   import { connection, isTauri, onEvent } from "$lib/connection.svelte";
+  import { errorHint } from "$lib/errors";
   import { t, type MessageKey } from "$lib/i18n.svelte";
   import type { IconName } from "$lib/icons";
   import {
@@ -233,9 +234,13 @@
                 <span class="pct">{Math.round(progress * 100)}%</span>
               {/if}
             </div>
-            {#if item.error}<div class="error item-error">
+            {#if item.error}
+              {@const hint = errorHint(item.error)}
+              <div class="error item-error" role="alert">
                 {item.error}
-              </div>{/if}
+                {#if hint}<p class="hint">{t(hint)}</p>{/if}
+              </div>
+            {/if}
           </li>
         {/each}
       </ul>
@@ -408,6 +413,12 @@
 
   .running .pct {
     color: var(--job);
+  }
+
+  .item-error .hint {
+    margin: 0.3rem 0 0;
+    color: var(--fg);
+    font-size: 0.85em;
   }
 
   .item-error {

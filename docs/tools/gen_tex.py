@@ -65,9 +65,34 @@ def requirement_rows(items: list[dict[str, Any]], with_meta: bool) -> list[list[
     return rows
 
 
+def trace_ref(ref: str) -> str:
+    """One verification reference as LaTeX: kind in bold, test name in monospace."""
+    kind, _, rest = ref.partition(":")
+    rest = rest.strip()
+    if kind == "manual":
+        return rf"\textit{{manual}}: {tex(rest)}"
+    # Test names are long: allow line breaks after underscores and "::".
+    name = tex(rest).replace(r"\_", r"\_\allowbreak{}").replace("::", r"::\allowbreak{}")
+    return rf"\textbf{{{tex(kind)}}} \texttt{{{name}}}"
+
+
+def traceability_rows(requirements: dict[str, Any], matrix: dict[str, list[str]]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for section in ("constraints", "functional", "non_functional"):
+        for item in requirements[section]:
+            refs = matrix.get(item["id"], [])
+            rows.append([
+                rf"\texttt{{{tex(item['id'])}}}",
+                tex(item["title"]),
+                r" \newline ".join(trace_ref(ref) for ref in refs) or "---",
+            ])
+    return rows
+
+
 def main() -> None:
     requirements = yaml.safe_load((DATA / "requirements.yaml").read_text(encoding="utf-8"))
     project = yaml.safe_load((DATA / "project.yaml").read_text(encoding="utf-8"))
+    matrix = yaml.safe_load((DATA / "traceability.yaml").read_text(encoding="utf-8"))
     OUT.mkdir(parents=True, exist_ok=True)
 
     wide = r"@{}P{0.15\linewidth}P{0.55\linewidth}P{0.09\linewidth}P{0.09\linewidth}@{}"
@@ -86,6 +111,11 @@ def main() -> None:
             wide,
             ["ID", "Requirement", "Priority", "Milestone"],
             requirement_rows(requirements["non_functional"], with_meta=True),
+        ),
+        "traceability.tex": longtable(
+            r"@{}P{0.13\linewidth}P{0.2\linewidth}P{0.59\linewidth}@{}",
+            ["ID", "Requirement", "Verified by"],
+            traceability_rows(requirements, matrix),
         ),
         "milestones.tex": longtable(
             # Widths leave room for the column separation (6 x \tabcolsep).

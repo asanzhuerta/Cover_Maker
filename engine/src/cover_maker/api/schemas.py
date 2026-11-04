@@ -160,6 +160,10 @@ class CollectionItemState(BaseModel):
     outputs: dict[str, str]
 
 
+class DiagnosticsOut(BaseModel):
+    path: str = Field(description="The zip written into the logs folder.")
+
+
 class StorageOut(BaseModel):
     library_bytes: int
     library_files: int
