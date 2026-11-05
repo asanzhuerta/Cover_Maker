@@ -30,15 +30,17 @@ fn default_host() -> String {
     "127.0.0.1".into()
 }
 
-/// `%LOCALAPPDATA%\Cover_Maker`, or `COVER_MAKER_HOME` when set.
-pub fn home() -> PathBuf {
+/// Engine data folders to look in: `COVER_MAKER_HOME` when set, else the
+/// installed app's `%LOCALAPPDATA%\Cover_Maker`, then a development build's
+/// `%LOCALAPPDATA%\Cover_Maker.dev`.
+pub fn homes() -> Vec<PathBuf> {
     if let Some(dir) = std::env::var_os("COVER_MAKER_HOME").filter(|v| !v.is_empty()) {
-        return PathBuf::from(dir);
+        return vec![PathBuf::from(dir)];
     }
     let base = std::env::var_os("LOCALAPPDATA")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("."));
-    base.join("Cover_Maker")
+    vec![base.join("Cover_Maker"), base.join("Cover_Maker.dev")]
 }
 
 pub fn read_discovery(home: &Path) -> Option<Discovery> {
@@ -180,12 +182,23 @@ impl Client {
         Self { info, agent }
     }
 
+    /// The first running engine found, the installed app before a dev build.
     pub fn connect() -> Result<Self, String> {
-        let info = read_discovery(&home())
-            .ok_or_else(|| "Cover_Maker is not running. Open the app first.".to_string())?;
-        let client = Self::new(info);
-        client.health()?;
-        Ok(client)
+        let mut found = false;
+        for home in homes() {
+            if let Some(info) = read_discovery(&home) {
+                found = true;
+                let client = Self::new(info);
+                if client.health().is_ok() {
+                    return Ok(client);
+                }
+            }
+        }
+        Err(if found {
+            "Cover_Maker is not answering. Restart the app.".to_string()
+        } else {
+            "Cover_Maker is not running. Open the app first.".to_string()
+        })
     }
 
     fn url(&self, path: &str) -> String {

@@ -34,6 +34,20 @@ cd desktop && pnpm install && pnpm tauri dev
 cd docs/latex && latexmk
 ```
 
+### Data folders
+
+Development and the installed app never share data:
+
+| What | Folder |
+|---|---|
+| Installed app (program, runtime and data) | `%LOCALAPPDATA%\Cover_Maker` |
+| Engine run from this checkout (`uv run cover-maker …`, `pnpm tauri dev`) | `%LOCALAPPDATA%\Cover_Maker.dev` |
+| Tests | a temporary folder (`COVER_MAKER_HOME`) |
+
+`COVER_MAKER_HOME` overrides the folder for any run. The VST3 plugin and the
+REAPER script look for a running engine in `Cover_Maker` first and then in
+`Cover_Maker.dev`.
+
 ## Workflow
 
 1. Open or pick an issue linked to the current milestone.
