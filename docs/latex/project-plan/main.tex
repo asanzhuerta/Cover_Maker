@@ -2,7 +2,7 @@
 \doctitle{Project Plan}
 \docsubtitle{Scope, milestones, risks and way of working for Cover\_Maker v2}
 \docid{CM-PP}
-\docstatus{Draft}
+\docstatus{Released}
 \input{glossary}
 
 \begin{document}
@@ -10,6 +10,7 @@
 
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Initial plan approved at the start of the v2 rewrite (M0). \\
+  1.0 & 2026-11-05 & Version 1.0: all milestones M0--M12 delivered; scope, backlog and status updated. \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -62,13 +63,19 @@ mid-range Windows PC or laptop, usually with a dedicated GPU and often with a
   \item Hardware detection, presets per hardware tier and a low-impact mode
         for \gls{daw} coexistence.
   \item English and Spanish user interface; installer with auto-update.
+  \item \gls{daw} integration: a REAPER script that inserts each stem as a new
+        track and a VST3 plugin that previews the stems and lets the user drag
+        them into tracks (M11, brought forward before 1.0).
 \end{itemize}
 
 \section{Out of scope for version 1.0 (backlog)}
 Lead/backing vocal separation, drum sub-stems, de-reverb, practice tools
 (tempo and pitch change, A--B loops, DAW export with tempo and key), metadata
 and cover-art tagging, ONNX/DirectML acceleration for AMD and Intel GPUs, and
-cloud separation backends.
+cloud separation backends. The \emph{Future work} milestone records three
+further ideas: key detection and a pitch shifter that keeps the tempo, an
+integrated mini \gls{daw} with ASIO recording, and interface animations
+consistent with the author's portfolio site.
 
 \section{Explicitly excluded}
 Searching, scraping or matching music on streaming services, use of their

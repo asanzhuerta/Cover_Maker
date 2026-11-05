@@ -2,7 +2,7 @@
 \doctitle{User Manual}
 \docsubtitle{Separating stems and making backing tracks with Cover\_Maker}
 \docid{CM-UM}
-\docstatus{Skeleton}
+\docstatus{Released}
 \input{glossary}
 
 \begin{document}
@@ -13,6 +13,7 @@
   0.2 & 2026-11-03 & About and credits chapter (M12). \\
   0.3 & 2026-11-04 & Library, match review, disk space and Creative Commons sources (M8). \\
   0.4 & 2026-11-05 & Using Cover\_Maker from your DAW (M11). \\
+  1.0 & 2026-11-05 & Version 1.0: model licences appendix and Auto preset tuning. \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -120,7 +121,10 @@ Max quality & BS-RoFormer SW and BS-RoFormer Resurrection. \\
         \end{itemize}
   \item Choose the quality preset (\emph{Automatic} picks the best one for your
         hardware), the format (WAV 24-bit, FLAC or MP3 320~kbps) and the output
-        folder.
+        folder. \emph{Automatic} learns from your own runs: if \emph{Balanced}
+        turns out slower than 1.5 times the song length on your computer, it
+        switches to \emph{Fast}. Settings that ran out of graphics memory twice
+        are skipped next time, so later songs start sooner.
   \item If you added links, confirm that you own the content or are allowed to
         use it.
   \item Check the summary at the bottom (stems and mode) and press
@@ -295,6 +299,17 @@ well-known songs, film or game music marked as free: the uploader may not own
 those rights.
 
 \appendix
+\chapter{Model licences}\label{app:model-licences}
+\CM{} never distributes model weights: each model is downloaded from its
+source after you accept its terms (chapter~\ref{ch:models}). The catalogue
+records the following for each model; check the source before relying on a
+model, especially for commercial use. The same list is in
+\texttt{MODEL\_LICENCES.md} in the source package.
+
+{\small
+\input{../common/generated/model-licences}
+}
+
 \chapter{Using \CM{} from your DAW}\label{ch:daw}
 \CM{} can work from inside your \gls{daw}. The app must be open: the DAW tools
 talk to the engine it runs, on this computer only.

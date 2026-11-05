@@ -128,10 +128,11 @@ def main() -> None:
         ),
         "milestones.tex": longtable(
             # Widths leave room for the column separation (6 x \tabcolsep).
-            r"@{}P{0.07\linewidth}P{0.29\linewidth}P{0.08\linewidth}P{0.48\linewidth}@{}",
-            ["ID", "Milestone", "Effort", "Goal"],
+            r"@{}P{0.07\linewidth}P{0.24\linewidth}P{0.07\linewidth}P{0.4\linewidth}P{0.12\linewidth}@{}",
+            ["ID", "Milestone", "Effort", "Goal", "Status"],
             [
-                [tex(m["id"]), tex(m["name"]), tex(m["effort"]), tex(m["goal"])]
+                [tex(m["id"]), tex(m["name"]), tex(m["effort"]), tex(m["goal"]),
+                 tex(m.get("status", ""))]
                 for m in project["milestones"]
             ],
         ),

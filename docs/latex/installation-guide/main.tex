@@ -2,7 +2,7 @@
 \doctitle{Installation Guide}
 \docsubtitle{Installing, updating and removing Cover\_Maker on Windows}
 \docid{CM-IG}
-\docstatus{Draft}
+\docstatus{Released}
 \input{glossary}
 
 \begin{document}
@@ -12,6 +12,7 @@
   0.1 & 2026-11-03 & Document skeleton with system requirements (M0). \\
   0.2 & 2026-11-03 & Installation, first run, updates, removal and
   troubleshooting (M9). \\
+  1.0 & 2026-11-05 & Version 1.0 for release v1.0.0, with the DAW plugin and script. \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -98,6 +99,26 @@ Everything is stored in
 \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash runtime}.
 Models are not part of the setup: you choose and download them on the
 \emph{Models} page after reading their licences.
+
+\section{What the installer downloads}
+The installer carries uv, the engine and its lock files. On first run uv
+downloads a Python runtime (checked against the hashes uv ships with) and the
+engine's packages, each pinned by exact URL and SHA-256 hash in the lock files;
+ffmpeg and deno are checked against the hashes listed in the installer's
+\texttt{deps.json}. A file that does not match is rejected.
+App updates are verified with the update signature before
+they are installed. AI models are downloaded only when you accept them on the
+\emph{Models} page, from their original sources.
+
+\section{DAW plugin and script (optional)}
+The release page also offers \texttt{Cover\_Maker-VST3-<version>-x64.zip} and
+\texttt{Cover\_Maker-REAPER-<version>.lua}. Copy \texttt{Cover\_Maker.vst3}
+from the zip to
+\texttt{C:\textbackslash Program Files\textbackslash Common Files\textbackslash VST3}
+(this folder needs administrator rights) and rescan plugins in your DAW; load
+the script in REAPER from \emph{Actions → Load ReaScript}. Both need the app
+to be running. The User Manual explains how to use them. The plugin is
+licensed under the GNU GPL version 3 or later.
 
 \chapter{Updates and removal}
 \section{App updates}
