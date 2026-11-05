@@ -2,7 +2,7 @@
 \doctitle{Architecture \& Design Document}
 \docsubtitle{Structure, decisions, compliance and model evaluation (arc42)}
 \docid{CM-ADD}
-\docstatus{Draft}
+\docstatus{Released}
 \input{glossary}
 
 \begin{document}
@@ -12,6 +12,7 @@
   0.1 & 2026-11-03 & Initial architecture, compliance analysis and model research (M0). \\
   0.2 & 2026-11-03 & Deployment view and final ADR-006 (M9). \\
   0.3 & 2026-11-05 & ADR-008: DAW integration and engine discovery (M11). \\
+  1.0 & 2026-11-05 & Version 1.0: preset tuning from measured runs (M10). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -290,6 +291,18 @@ power source and free disk. On \gls{oom} it retries with half precision and
 smaller chunks before asking the user to fall back to the CPU. It also watches
 throughput to detect the driver's system-memory fallback, which slows inference
 instead of failing.
+
+\section{Preset tuning from measured runs}
+Every separation attempt is stored in \texttt{separation\_runs} (migration 5):
+model, device, precision, chunk, song length, time taken or \gls{oom}. The
+engine learns two things from it on each machine. GPU settings of the
+\gls{vram} ladder that ran out of memory the last two times for a model are
+skipped, so a 4~GB card starts directly at the chunk that works; a success at a
+setting resets it, and the smallest GPU setting is always tried. The
+\emph{Automatic} preset becomes \emph{Fast} instead of \emph{Balanced} when
+Balanced's models were measured slower than 1.5 times the song length (median of
+the last five runs); it never escalates to \emph{Max} by itself.
+\texttt{GET /system} reports the measured speed per preset.
 
 \section{DAW coexistence}
 Separation runs at reduced priority with an efficiency hint and a thread cap. If a

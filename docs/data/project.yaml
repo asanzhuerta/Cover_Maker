@@ -5,58 +5,72 @@ milestones:
     name: Clean-up and foundations
     effort: M
     goal: Remove v1, scaffold the monorepo, CI, LaTeX class and initial documents.
+    status: Done
   - id: M1
     name: "Spike: AI models on target hardware"
     effort: M
     goal: Benchmark separation models on 4 GB VRAM and CPU; fix presets per hardware tier.
+    status: Done
   - id: M2
     name: "Spike: shell, audio and bootstrap"
     effort: M
     goal: Validate Tauri-Python lifecycle, synced multi-stem playback and uv/torch bootstrap.
+    status: Done
   - id: M3
     name: "Engine: separation and mixing core (CLI)"
     effort: L
     goal: Store, pipeline, job runner, model catalogue, recipes, GPU worker, mixer and CLI.
+    status: Done
   - id: M4
     name: "Engine: library, folders and playlist import"
     effort: M
     goal: Video links via yt-dlp, watched folders, playlist-file import with local matching, re-sync; alpha CLI release.
+    status: Done
   - id: M5
     name: Local API
     effort: S/M
     goal: FastAPI + WebSocket API with token, Host and Origin checks; generated TypeScript types.
+    status: Done
   - id: M6
     name: Desktop MVP
     effort: L
     goal: First-run wizard, new job flow, queue, settings and EN/ES interface.
+    status: Done
   - id: M7
     name: Preview mixer
     effort: L
     goal: Synced multi-stem mixer with waveforms and export of the current mix.
+    status: Done
   - id: M8
     name: Library UI, matching and CC catalogues
     effort: M/L
     goal: Library view, match review and Creative Commons sources with attribution.
+    status: Done
   - id: M9
     name: Installer, first run and updates
     effort: L
     goal: NSIS installer, two-phase bootstrap, auto-update; beta release.
+    status: Done
   - id: M9.2
     name: First-run guide and polish
     effort: S
     goal: Guided welcome while the runtime installs, installer language, model download progress, layout, licence review and author data.
+    status: Done
   - id: M10
     name: Quality and 1.0
     effort: M
     goal: Hardening, accessibility, test report and the 1.0 release.
+    status: Done (v1.0.0)
   - id: M11
     name: DAW integration (VST3 + REAPER)
     effort: L
     goal: VST3 plugin as a client of the local engine, plus a REAPER extension that inserts each stem as a new track.
+    status: Done (v1.0.0)
   - id: M12
     name: About and credits
     effort: S
     goal: About page with the author profile, the app description and the open-source credits, from one data file in EN/ES.
+    status: Done
 
 risks:
   - id: R-01

@@ -87,6 +87,21 @@ MIGRATIONS: tuple[str, ...] = (
     ALTER TABLE job_items ADD COLUMN title TEXT;
     ALTER TABLE job_items ADD COLUMN artist TEXT
     """,
+    # 5: measured separation attempts, for preset tuning (separation/tuning.py).
+    """
+    CREATE TABLE separation_runs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        model_id TEXT NOT NULL,
+        device TEXT NOT NULL,
+        precision TEXT NOT NULL,
+        chunk_s REAL,
+        audio_s REAL NOT NULL,
+        wall_s REAL,
+        oom INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX separation_runs_model ON separation_runs(model_id, device)
+    """,
 )
 
 

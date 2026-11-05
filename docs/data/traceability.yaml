@@ -105,10 +105,15 @@ FR-DAW-02:
 
 NFR-PERF-01:
   - "manual: M1 benchmarks on an RTX 3050 Laptop 4 GB (Architecture, Benchmarks)"
+  - "engine:test_tuning.py::test_auto_preset_follows_measured_speed"
+  - "engine:test_tuning.py::test_fast_gpu_keeps_balanced"
 NFR-PERF-02:
   - "engine:test_runner.py::test_oom_steps_down_chunk"
   - "engine:test_runner.py::test_oom_everywhere_asks_for_cpu"
   - "engine:test_runner.py::test_cpu_fallback_when_allowed"
+  - "engine:test_tuning.py::test_runs_are_recorded_and_known_ooms_skipped"
+  - "engine:test_tuning.py::test_a_success_resets_the_streak"
+  - "engine:test_tuning.py::test_the_smallest_gpu_setting_is_always_tried"
 NFR-PERF-03:
   - "manual: low-impact mode with a DAW running (M3 spike)"
 NFR-PERF-04:

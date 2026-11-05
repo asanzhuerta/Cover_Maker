@@ -6,6 +6,18 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added (M10: quality and 1.0)
+- Presets tuned from measured runs: every separation attempt is recorded
+  (migration 5); GPU settings that ran out of memory twice in a row for a
+  model are skipped, and *Automatic* picks Fast instead of Balanced when
+  Balanced was measured slower than 1.5 times the song length.
+  `GET /system` reports the measured speed per preset.
+- `MODEL_LICENCES.md` and a User Manual appendix list each catalogue model's
+  licence, source and verification date (generated from the catalogue).
+- All six documents at version 1.0; the SRS includes the traceability
+  matrix, the Installation Guide explains what the installer downloads and how
+  it is verified, and the Test Report covers v1.0.0.
+
 ### Added (M11: DAW integration)
 - REAPER script (`daw/reaper`): separates the selected item's song (or a
   typed file or link) and inserts each stem as a new track below it, lined up

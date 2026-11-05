@@ -1263,6 +1263,21 @@
               }
             ]
           },
+          "measured_speed": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Seconds of work per second of audio measured for each preset (None: no runs yet).",
+            "title": "Measured Speed",
+            "type": "object"
+          },
           "on_battery": {
             "anyOf": [
               {

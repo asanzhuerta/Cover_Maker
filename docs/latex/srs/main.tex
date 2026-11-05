@@ -2,7 +2,7 @@
 \doctitle{Software Requirements Specification}
 \docsubtitle{Requirements for Cover\_Maker v1.0 (after ISO/IEC/IEEE 29148)}
 \docid{CM-SRS}
-\docstatus{Draft}
+\docstatus{Released}
 \input{glossary}
 
 \begin{document}
@@ -10,6 +10,7 @@
 
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Initial requirements catalogue and constraints (M0). \\
+  1.0 & 2026-11-05 & Version 1.0: DAW and discovery requirements (M11); traceability to the Test Report. \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -69,9 +70,13 @@ depends on third-party hosts.
 \input{generated/requirements-nonfunctional}
 
 \chapter{Traceability}
-\todoin{M3}
-A requirement-to-test matrix will be generated from test markers and included
-in the Test Report.
+The matrix below is generated from \texttt{docs/data/traceability.yaml}; an
+engine test fails if a requirement has no verification or cites a test that
+does not exist. The Test Report records the results.
+
+{\small
+\input{generated/traceability}
+}
 
 \printnoidxglossaries
 \end{document}

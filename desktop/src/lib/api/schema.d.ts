@@ -1054,6 +1054,13 @@ export interface components {
             /** Free Disk Gb */
             free_disk_gb: number;
             gpu: components["schemas"]["GpuOut"] | null;
+            /**
+             * Measured Speed
+             * @description Seconds of work per second of audio measured for each preset (None: no runs yet).
+             */
+            measured_speed?: {
+                [key: string]: number | null;
+            };
             /** On Battery */
             on_battery: boolean | null;
             /** Physical Cores */
