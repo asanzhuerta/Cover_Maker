@@ -67,20 +67,21 @@ Store & Migrations to the latest schema. \\
 \end{tabularx}
 
 \chapter{Test report}
-\section{Summary (version 0.3.0, 2026-11-04)}
+\section{Summary (version 1.0.0, 2026-11-05)}
 \begin{tabularx}{\linewidth}{@{}lrY@{}}
 \toprule
 \textbf{Suite} & \textbf{Tests} & \textbf{Result} \\
 \midrule
-Engine (pytest, Windows) & 119 & all passed; ruff and strict pyright clean \\
-Desktop UI (vitest) & 38 & all passed; ESLint, Prettier and svelte-check clean \\
+Engine (pytest, Windows) & 133 & all passed; ruff and strict pyright clean \\
+Desktop UI (vitest) & 40 & all passed; ESLint, Prettier and svelte-check clean \\
 Desktop shell (cargo test) & 8 & all passed; clippy with warnings as errors clean \\
+VST3 plugin (cargo test) & 6 & all passed; clippy with warnings as errors clean \\
 Documentation (latexmk) & 6 documents & all built; generated tables up to date \\
 \bottomrule
 \end{tabularx}
 
 \noindent Every pull request runs these suites in GitHub Actions on
-\texttt{windows-latest} (engine, UI and shell) and Ubuntu (documents).
+\texttt{windows-latest} (engine, UI, shell and plugin) and Ubuntu (documents).
 
 \section{Manual and measured verification}
 \begin{description}
@@ -97,6 +98,12 @@ Documentation (latexmk) & 6 documents & all built; generated tables up to date \
   about), in English and Spanish.
   \item[Catalogues] live searches on ccMixter and the Internet Archive and a
   real Internet Archive download with its credits (2026-11-04).
+  \item[DAW integration] the REAPER script run against the demo engine with
+  real HTTP calls and a stubbed REAPER API
+  (\texttt{daw/reaper/tests/e2e\_demo.py}): four stem tracks inserted in the
+  requested order, aligned with the source item; the discovery folder checked
+  with \texttt{icacls} (current user only); the VST3 bundle built and its
+  factory loaded (2026-11-05).
 \end{description}
 
 \section{Open items}
@@ -106,8 +113,10 @@ Documentation (latexmk) & 6 documents & all built; generated tables up to date \
   prepares the former.
   \item The app's own update from one published version to the next has not
   been exercised end to end.
-  \item Automatic preset tuning from the user's own benchmark runs is
-  postponed; presets come from the M1 measurements.
+  \item The VST3 plugin and the REAPER script have not yet been exercised
+  inside a real host.
+  \item The installer and the app are not code-signed yet (issue \#51), so
+  SmartScreen warns about an unknown publisher.
   \item Listening tests are informal; the M1 report lists the blind test as
   pending.
 \end{itemize}
