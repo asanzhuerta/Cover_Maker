@@ -25,9 +25,7 @@ def job(song: Path, tmp_path: Path) -> JobSpec:
     )
 
 
-def test_runs_are_recorded_and_known_ooms_skipped(
-    paths: Paths, song: Path, tmp_path: Path
-) -> None:
+def test_runs_are_recorded_and_known_ooms_skipped(paths: Paths, song: Path, tmp_path: Path) -> None:
     backend = FakeBackend(fail_oom_above_chunk=5.0)
     runner = JobRunner(paths, connect(paths.db), Catalog.load(), InProcessService(backend))
     for model in runner.catalog.models.values():
