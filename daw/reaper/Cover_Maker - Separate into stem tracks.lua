@@ -128,10 +128,13 @@ end
 
 local function sep() return package.config:sub(1, 1) end
 
-local function home()
+-- Engine data folders: COVER_MAKER_HOME, else the installed app's folder,
+-- then a development build's (Cover_Maker.dev).
+local function homes()
   local override = os.getenv("COVER_MAKER_HOME")
-  if override and override ~= "" then return override end
-  return (os.getenv("LOCALAPPDATA") or "") .. sep() .. "Cover_Maker"
+  if override and override ~= "" then return { override } end
+  local base = (os.getenv("LOCALAPPDATA") or "") .. sep()
+  return { base .. "Cover_Maker", base .. "Cover_Maker.dev" }
 end
 
 local function read_file(path)
@@ -148,8 +151,8 @@ local function write_file(path, data)
   f:close()
 end
 
-local function discover()
-  local run = home() .. sep() .. "run"
+local function read_discovery(home)
+  local run = home .. sep() .. "run"
   local text = read_file(run .. sep() .. "engine.json")
   if not text then return nil end
   local ok, info = pcall(json.decode, text)
@@ -323,14 +326,18 @@ end
 
 local function main()
   math.randomseed(math.floor(reaper.time_precise() * 1000))
-  local engine = discover()
-  if not engine then
-    message("Cover_Maker is not running. Open the Cover_Maker app and try again.")
-    return
+  local engine, found
+  for _, home in ipairs(homes()) do
+    local info = read_discovery(home)
+    if info then
+      found = true
+      if request(info, "GET", "/health") == 200 then engine = info; break end
+    end
   end
-  local status = request(engine, "GET", "/health")
-  if status ~= 200 then
-    message("Cover_Maker is not answering (stale discovery file?). Restart the app and try again.")
+  if not engine then
+    message(found
+      and "Cover_Maker is not answering (stale discovery file?). Restart the app and try again."
+      or "Cover_Maker is not running. Open the Cover_Maker app and try again.")
     return
   end
 

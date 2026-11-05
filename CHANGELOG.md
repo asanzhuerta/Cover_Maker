@@ -6,6 +6,12 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Development runs (the engine from a source checkout, `pnpm tauri dev`) keep
+  their data in `%LOCALAPPDATA%\Cover_Maker.dev`, apart from the installed
+  app's `%LOCALAPPDATA%\Cover_Maker`. The VST3 plugin and the REAPER script
+  find either.
+
 ### Added (M10: quality and 1.0)
 - Presets tuned from measured runs: every separation attempt is recorded
   (migration 5); GPU settings that ran out of memory twice in a row for a

@@ -19,7 +19,8 @@ plugins in your DAW. Open the Cover_Maker app before using the plugin.
 ## How it finds the app
 
 The engine writes `%LOCALAPPDATA%\Cover_Maker\run\engine.json` with its port
-and a client token while it runs; only your Windows account can read it
+and a client token while it runs (`Cover_Maker.dev` for a development build,
+which the plugin also checks); only your Windows account can read it
 (ADR-008 in the Architecture document). The plugin only talks to
 `127.0.0.1`, never follows redirects and sends the token in a header.
 

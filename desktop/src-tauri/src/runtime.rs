@@ -83,12 +83,22 @@ impl Layout {
     }
 }
 
-/// Default runtime folder, next to the engine data (`paths.py`).
-pub fn default_root() -> PathBuf {
+/// Engine data folder (`paths.py`): `Cover_Maker` for the installed app,
+/// `Cover_Maker.dev` for development builds, so they never share data.
+pub fn data_home(development: bool) -> PathBuf {
     let base = std::env::var_os("LOCALAPPDATA")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("."));
-    base.join("Cover_Maker").join("runtime")
+    base.join(if development {
+        "Cover_Maker.dev"
+    } else {
+        "Cover_Maker"
+    })
+}
+
+/// Default runtime folder, next to the engine data (`paths.py`).
+pub fn default_root() -> PathBuf {
+    data_home(false).join("runtime")
 }
 
 /// What has been installed, persisted in `state.json`.
@@ -680,6 +690,13 @@ mod tests {
         assert_eq!(torch_for_capability(Some("6.1\n8.9\n")), "cu128");
         assert_eq!(torch_for_capability(Some("garbage")), "cpu");
         assert_eq!(torch_for_capability(None), "cpu");
+    }
+
+    #[test]
+    fn development_and_installed_data_are_apart() {
+        assert!(data_home(true).ends_with("Cover_Maker.dev"));
+        assert!(data_home(false).ends_with("Cover_Maker"));
+        assert!(default_root().ends_with("Cover_Maker/runtime"));
     }
 
     #[test]
