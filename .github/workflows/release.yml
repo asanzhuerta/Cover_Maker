@@ -67,7 +67,10 @@ jobs:
           args: --config src-tauri/tauri.release.conf.json
           tagName: ${{ github.ref_name }}
           releaseName: Cover_Maker ${{ github.ref_name }}
-          releaseBody: See CHANGELOG.md for the changes in this release.
+          releaseBody: |
+            See CHANGELOG.md for the changes in this release.
+
+            Code signing policy and privacy notice: https://github.com/asanzhuerta/Cover_Maker#code-signing-policy
           releaseDraft: true
           prerelease: ${{ contains(github.ref_name, '-') }}
           includeUpdaterJson: true
