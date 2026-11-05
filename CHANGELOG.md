@@ -20,6 +20,12 @@ project follows [Semantic Versioning](https://semver.org/).
 - Docs: User Manual DAW chapter, ADR-008, FR-DAW-01/02, third-party notices
   of the plugin.
 
+### Added (M8: library UI)
+- A re-sync now shows what changed in the collection: new, removed,
+  unchanged, to check and not available songs.
+- "Select new" ticks only the matched songs without separated stems, so only
+  what is new is sent to a job.
+
 ## [0.3.0] - 2026-11-04
 
 Library page, Creative Commons sources, title and artist in the queue,
