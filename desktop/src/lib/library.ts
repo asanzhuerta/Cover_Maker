@@ -38,3 +38,31 @@ export function selectedInputs(
 export function baseName(input: string): string {
   return input.split(/[\\/]/).filter(Boolean).pop() ?? input;
 }
+
+/** Ids of the matched items that have no exported stems yet ("only what is new"). */
+export function newItemIds(
+  items: { id: number; status: string }[],
+  done: Record<number, string[]>,
+): number[] {
+  return items
+    .filter((item) => item.status === "ready" && !done[item.id]?.length)
+    .map((item) => item.id);
+}
+
+/** Counts of a sync result, without the zero ones, in a stable order. */
+export function syncSummary(result: {
+  added: number;
+  removed: number;
+  unchanged: number;
+  needs_review: number;
+  unavailable: number;
+}): [keyof typeof result, number][] {
+  const keys = [
+    "added",
+    "removed",
+    "unchanged",
+    "needs_review",
+    "unavailable",
+  ] as const;
+  return keys.filter((key) => result[key] > 0).map((key) => [key, result[key]]);
+}

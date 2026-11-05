@@ -8,8 +8,10 @@
   import {
     baseName,
     formatBytes,
+    newItemIds,
     selectedInputs,
     statusTone,
+    syncSummary,
   } from "$lib/library";
 
   type Collection = Schemas["CollectionOut"];
@@ -25,11 +27,19 @@
   let busy = $state(false);
   let usage = $state<Schemas["StorageOut"] | null>(null);
   let freed = $state<number | null>(null);
+  let summary = $state<{ id: number; parts: [string, number][] } | null>(null);
 
   const KIND: Record<string, MessageKey> = {
     folder: "library.kind.folder",
     video_playlist: "library.kind.video",
     playlist_file: "library.kind.file",
+  };
+  const SYNC: Record<string, MessageKey> = {
+    added: "library.sync.added",
+    removed: "library.sync.removed",
+    unchanged: "library.sync.unchanged",
+    needs_review: "library.sync.review",
+    unavailable: "library.sync.unavailable",
   };
   const STATUS: Record<string, MessageKey> = {
     ready: "library.status.ready",
@@ -91,11 +101,18 @@
   async function sync(id: number) {
     if (!connection.api) return;
     const api = connection.api;
-    await run(() =>
-      api.POST("/library/{collection_id}/sync", {
+    await run(async () => {
+      const result = await api.POST("/library/{collection_id}/sync", {
         params: { path: { collection_id: id } },
-      }),
-    );
+      });
+      if (result.data) summary = { id, parts: syncSummary(result.data) };
+      return result;
+    });
+  }
+
+  function selectNew() {
+    selected.clear();
+    for (const id of newItemIds(items, done)) selected.add(id);
   }
 
   async function addFolder() {
@@ -267,6 +284,16 @@
         >
       </div>
       <p class="muted source" title={collection.source}>{collection.source}</p>
+      {#if summary?.id === collection.id}
+        <p class="muted summary" role="status" data-testid="sync-summary">
+          {t("library.synced")}:
+          {#if summary.parts.length === 0}{t("library.sync.none")}{/if}
+          {#each summary.parts as [key, count], i (key)}{i > 0
+              ? " · "
+              : " "}{count}
+            {t(SYNC[key] ?? "library.sync.added")}{/each}
+        </p>
+      {/if}
 
       {#if open === collection.id}
         <table class="items">
@@ -339,6 +366,11 @@
           </tbody>
         </table>
         <div class="row footer">
+          <button
+            class="small ghost"
+            onclick={selectNew}
+            title={t("library.selectNewHint")}>{t("library.selectNew")}</button
+          >
           <span class="muted">{t("library.selected")}: {ready.length}</span>
           <button
             class="primary small"
