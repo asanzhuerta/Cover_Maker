@@ -6,6 +6,12 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-05
+
+First stable release: DAW integration (REAPER script and VST3 plugin),
+presets tuned from measured runs, model licences page, the code signing
+policy and privacy notice, and all documents at version 1.0 (M8, M10, M11).
+
 ### Added (M10: quality and 1.0)
 - Presets tuned from measured runs: every separation attempt is recorded
   (migration 5); GPU settings that ran out of memory twice in a row for a
