@@ -40,9 +40,19 @@ token on every request. VST3 plugins cannot create tracks; REAPER scripts can.
         with \texttt{reaper.defer} and inserts one track per stem below the
         source track, placed where the source item's start would be, in the
         order the stems were asked for.
-  \item \textbf{VST3 plugin} is a client of the same API: it separates a file or
-        link and lists the stems for preview and drag-and-drop into tracks,
-        because the plugin standard cannot create tracks.
+  \item \textbf{VST3 plugin} (\texttt{daw/vst3}) is a client of the same API,
+        written in Rust with NIH-plug and an egui editor: it separates a file
+        or link, previews each stem through the track and lets the user drag
+        the files into tracks (OLE drag and drop of a shell data object,
+        \texttt{CF\_HDROP}), because the plugin standard cannot create tracks.
+        It only connects to 127.0.0.1 and does not follow redirects.
+  \item \textbf{Plugin licence.} NIH-plug is ISC, but its VST3 export uses the
+        \texttt{vst3-sys} bindings, which are GPLv3. The product owner chose
+        (2026-11-05) to ship the plugin as a separate GPL-3.0-or-later program
+        and keep the rest of \CM{} under MIT. The alternative, a hand-written
+        MIT wrapper over the \texttt{vst3} crate generated from the VST 3.8 SDK
+        (MIT since October 2025), was rejected for its cost and unsafe code;
+        it remains possible if NIH-plug moves to MIT bindings.
 \end{itemize}
 
 \textbf{Alternatives:} a fixed port (collides and is guessable); a named pipe

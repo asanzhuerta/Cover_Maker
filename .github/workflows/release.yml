@@ -1,8 +1,8 @@
 name: Release
 
 # Builds the signed NSIS installer and the updater manifest on a version tag
-# and attaches them, the ffmpeg mirror and the six PDF documents to a draft
-# GitHub release. Publishing the draft stays a manual step.
+# and attaches them, the ffmpeg mirror, the DAW plugin and script and the six
+# PDF documents to a draft GitHub release. Publishing the draft stays a manual step.
 
 on:
   push:
@@ -77,6 +77,34 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${{ github.ref_name }}" (Get-ChildItem mirror/*.zip).FullName --clobber
         shell: pwsh
+
+  daw:
+    name: DAW plugin and script
+    needs: installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: daw/vst3
+      - name: Build the VST3 bundle
+        working-directory: daw/vst3
+        run: cargo xtask bundle cover_maker_vst3 --release --locked
+      - name: Package the plugin (GPL-3.0-or-later) and the REAPER script (MIT)
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          New-Item -ItemType Directory -Force out/vst3 | Out-Null
+          Copy-Item -Recurse daw/vst3/target/bundled/Cover_Maker.vst3 out/vst3/
+          Copy-Item daw/vst3/COPYING, daw/vst3/README.md out/vst3/
+          Compress-Archive -Path out/vst3/* -DestinationPath "Cover_Maker-VST3-$version-x64.zip"
+          Copy-Item "daw/reaper/Cover_Maker - Separate into stem tracks.lua" "Cover_Maker-REAPER-$version.lua"
+      - name: Attach them to the draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: gh release upload "${{ github.ref_name }}" (Get-ChildItem Cover_Maker-VST3-*.zip, Cover_Maker-REAPER-*.lua).FullName --clobber
 
   docs:
     name: Documentation PDFs

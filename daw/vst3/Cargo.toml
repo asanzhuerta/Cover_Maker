@@ -1,0 +1,39 @@
+[workspace]
+members = ["xtask"]
+resolver = "2"
+
+[package]
+name = "cover_maker_vst3"
+version = "0.1.0"
+edition = "2021"
+description = "Cover_Maker VST3 plugin: separate stems with the local Cover_Maker engine and drag them into your DAW"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/asanzhuerta/Cover_Maker"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683" }
+nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2", default-features = false, features = ["json"] }
+hound = "3"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+  "implement",
+  "Win32_Foundation",
+  "Win32_System_Com",
+  "Win32_System_Ole",
+  "Win32_System_SystemServices",
+  "Win32_UI_Shell",
+  "Win32_UI_Shell_Common",
+] }
+windows-core = "0.58"
+
+[profile.release]
+lto = "thin"
+strip = "symbols"

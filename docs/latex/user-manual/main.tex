@@ -12,6 +12,7 @@
   0.1 & 2026-11-03 & Document skeleton (M0). \\
   0.2 & 2026-11-03 & About and credits chapter (M12). \\
   0.3 & 2026-11-04 & Library, match review, disk space and Creative Commons sources (M8). \\
+  0.4 & 2026-11-05 & Using Cover\_Maker from your DAW (M11). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -318,6 +319,29 @@ The REAPER script separates a song and inserts each stem as a new track.
 The progress is visible in the \CM{} queue, and the models you use must be
 installed there first (chapter~\ref{ch:models}); otherwise the script tells
 you which ones are missing.
+
+\section{VST3 plugin}
+The plugin works in any VST3 host (Cubase, Studio One, Bitwig, Ableton Live,
+FL Studio, REAPER\ldots). A plugin cannot create tracks, so it offers the stems
+for you to drag onto tracks.
+\begin{enumerate}
+  \item Unzip \texttt{Cover\_Maker-VST3-<version>-x64.zip} from the release
+        page and copy \texttt{Cover\_Maker.vst3} to
+        \texttt{C:\textbackslash Program Files\textbackslash Common Files\textbackslash VST3};
+        rescan plugins in your DAW.
+  \item Insert \emph{Cover\_Maker} as an effect on any stereo track and open it.
+  \item Type or paste a file path or a video link, tick the stems, tick
+        \emph{I have the rights to this audio} for a link, check the folder
+        where the stems are saved and press \emph{Separate}.
+  \item When it finishes, each stem has a play button (it plays through the
+        track, at the \emph{Preview level} parameter), a handle that you drag
+        onto a track or an empty area of the arrangement, and \emph{Show in
+        folder}. \emph{Drag all stems} drags every file at once; some hosts
+        then create one track per file.
+\end{enumerate}
+The plugin is free software under the GNU GPL version 3 or later, because the
+VST3 bindings it is built with are GPL; the rest of \CM{} keeps the MIT
+licence. VST is a registered trademark of Steinberg Media Technologies GmbH.
 
 \section{How the DAW finds \CM{}}
 While the app runs, the engine writes a small file,

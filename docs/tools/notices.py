@@ -7,7 +7,8 @@ Three tables are rewritten between `<!-- generated:<name> -->` markers:
 - `rust`: the crates compiled into the desktop shell for Windows (normal
   dependencies only, from `cargo metadata`);
 - `javascript`: the production packages of the user interface (`pnpm
-  licenses`), plus the Svelte and SvelteKit runtimes that the build bundles.
+  licenses`), plus the Svelte and SvelteKit runtimes that the build bundles;
+- `vst3`: the crates compiled into the VST3 plugin (`daw/vst3`).
 
 Run from the repository root, with the engine venv synced with
 `--extra separation --extra cu128`:
@@ -28,6 +29,7 @@ NOTICES = ROOT / "THIRD_PARTY_NOTICES.md"
 ENGINE = ROOT / "engine"
 DESKTOP = ROOT / "desktop"
 SHELL = DESKTOP / "src-tauri"
+PLUGIN = ROOT / "daw" / "vst3"
 # Build-time packages whose runtime code ends up in the UI bundle.
 BUNDLED_DEV = ("svelte", "@sveltejs/kit")
 
@@ -92,14 +94,17 @@ def python_rows() -> list[tuple[str, str, str]]:
 # -------------------------------------------------------------------- rust
 
 
-def rust_rows() -> list[tuple[str, str, str]]:
+def rust_rows(cwd: Path = SHELL) -> list[tuple[str, str, str]]:
     data = json.loads(
         run("cargo", "metadata", "--format-version", "1", "--locked",
-            "--filter-platform", "x86_64-pc-windows-msvc", cwd=SHELL)
+            "--filter-platform", "x86_64-pc-windows-msvc", cwd=cwd)
     )  # fmt: skip
     packages = {p["id"]: p for p in data["packages"]}
     nodes = {n["id"]: n for n in data["resolve"]["nodes"]}
-    root = data["resolve"]["root"]
+    # The plugin folder is a workspace (plugin + xtask): start from the plugin.
+    root = data["resolve"]["root"] or next(
+        i for i, pkg in packages.items() if pkg["name"] == "cover_maker_vst3"
+    )
     seen: set[str] = set()
     stack = [root]
     while stack:
@@ -144,6 +149,7 @@ def main() -> None:
     text = replace(text, "python", table(python_rows(), ("Package", "Version", "Licence")))
     text = replace(text, "rust", table(rust_rows(), ("Crate", "Version", "Licence")))
     text = replace(text, "javascript", table(javascript_rows(), ("Package", "Version", "Licence")))
+    text = replace(text, "vst3", table(rust_rows(PLUGIN), ("Crate", "Version", "Licence")))
     NOTICES.write_text(text, encoding="utf-8", newline="\n")
     print(f"updated {NOTICES}")
 

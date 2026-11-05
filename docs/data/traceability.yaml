@@ -3,6 +3,7 @@
 #   engine:<file>::<test>   pytest test in engine/tests (checked by test_traceability.py)
 #   ui:<file> > <test>      vitest test in desktop/src/lib
 #   shell:<module>::<test>  Rust unit test in desktop/src-tauri/src
+#   plugin:<module>::<test> Rust unit test in daw/vst3/src
 #   manual: <description>   manual or measured verification (dated in the report)
 
 CON-01:
@@ -96,6 +97,11 @@ FR-UI-01:
 FR-DAW-01:
   - "manual: daw/reaper/tests/e2e_demo.py runs the script against the demo engine with a stubbed reaper API (2026-11-05)"
   - "manual: daw/reaper/tests/check_script.py checks the script's JSON and stem parsing"
+FR-DAW-02:
+  - "plugin:engine::tests::reads_discovery_and_rejects_other_hosts"
+  - "plugin:engine::tests::orders_stems_as_asked_and_describes_progress"
+  - "plugin:preview::tests::resamples_and_stops_at_the_end"
+  - "manual: the bundle loads and exposes its VST3 factory (2026-11-05)"
 
 NFR-PERF-01:
   - "manual: M1 benchmarks on an RTX 3050 Laptop 4 GB (Architecture, Benchmarks)"
