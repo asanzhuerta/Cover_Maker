@@ -477,3 +477,156 @@ runtimes that the build bundles into it.
 | openapi-typescript-helpers | 0.1.0 | MIT |
 | svelte | 5.57.3 | MIT |
 <!-- /generated:javascript -->
+
+## VST3 plugin
+
+The optional VST3 plugin in `daw/vst3` is distributed separately under the
+**GNU General Public License v3.0 or later** (`daw/vst3/COPYING`), because the
+VST3 bindings it uses (`vst3-sys`, through NIH-plug) are GPLv3. The rest of
+Cover_Maker stays under the MIT licence. VST is a registered trademark of
+Steinberg Media Technologies GmbH. The crates linked into the plugin:
+
+<!-- generated:vst3 -->
+| Crate | Version | Licence |
+|---|---|---|
+| ab_glyph | 0.2.32 | Apache-2.0 |
+| ab_glyph_rasterizer | 0.1.10 | Apache-2.0 |
+| ahash | 0.8.12 | MIT OR Apache-2.0 |
+| anyhow | 1.0.104 | MIT OR Apache-2.0 |
+| anymap3 | 1.1.0 | BlueOak-1.0.0 OR MIT OR Apache-2.0 |
+| atomic_float | 0.1.0 | Apache-2.0 OR MIT OR Zlib |
+| atomic_refcell | 0.1.14 | Apache-2.0 OR MIT |
+| atty | 0.2.14 | MIT |
+| backtrace | 0.3.77 | MIT OR Apache-2.0 |
+| base64 | 0.22.1 | MIT OR Apache-2.0 |
+| baseview | 0.1.0 | MIT OR Apache-2.0 |
+| bitflags | 1.3.2 | MIT/Apache-2.0 |
+| bitflags | 2.13.2 | MIT OR Apache-2.0 |
+| bytemuck | 1.25.2 | Zlib OR Apache-2.0 OR MIT |
+| bytemuck_derive | 1.12.1 | Zlib OR Apache-2.0 OR MIT |
+| cfg-if | 1.0.5 | MIT OR Apache-2.0 |
+| clap-sys | 0.5.0 | MIT/Apache-2.0 |
+| clipboard-win | 5.4.3 | BSL-1.0 |
+| copypasta | 0.10.2 | MIT / Apache-2.0 |
+| crossbeam | 0.8.5 | MIT OR Apache-2.0 |
+| crossbeam-channel | 0.5.17 | MIT OR Apache-2.0 |
+| crossbeam-deque | 0.8.8 | MIT OR Apache-2.0 |
+| crossbeam-epoch | 0.9.21 | MIT OR Apache-2.0 |
+| crossbeam-queue | 0.3.14 | MIT OR Apache-2.0 |
+| crossbeam-utils | 0.8.23 | MIT OR Apache-2.0 |
+| cursor-icon | 1.2.0 | MIT OR Apache-2.0 OR Zlib |
+| deranged | 0.5.9 | MIT OR Apache-2.0 |
+| displaydoc | 0.2.7 | MIT OR Apache-2.0 |
+| dpi | 0.1.2 | Apache-2.0 AND MIT |
+| ecolor | 0.31.1 | MIT OR Apache-2.0 |
+| egui | 0.31.1 | MIT OR Apache-2.0 |
+| egui-baseview | 0.5.0 | MIT |
+| egui_glow | 0.31.1 | MIT OR Apache-2.0 |
+| emath | 0.31.1 | MIT OR Apache-2.0 |
+| epaint | 0.31.1 | MIT OR Apache-2.0 |
+| epaint_default_fonts | 0.31.1 | (MIT OR Apache-2.0) AND OFL-1.1 AND Ubuntu-font-1.0 |
+| error-code | 3.4.0 | BSL-1.0 |
+| form_urlencoded | 1.2.2 | MIT OR Apache-2.0 |
+| getrandom | 0.2.17 | MIT OR Apache-2.0 |
+| glow | 0.16.0 | MIT OR Apache-2.0 OR Zlib |
+| hound | 3.5.1 | Apache-2.0 |
+| icu_collections | 2.4.0 | Unicode-3.0 |
+| icu_locale_core | 2.4.0 | Unicode-3.0 |
+| icu_normalizer | 2.4.0 | Unicode-3.0 |
+| icu_normalizer_data | 2.4.0 | Unicode-3.0 |
+| icu_properties | 2.4.0 | Unicode-3.0 |
+| icu_properties_data | 2.4.0 | Unicode-3.0 |
+| icu_provider | 2.4.0 | Unicode-3.0 |
+| idna | 1.1.0 | MIT OR Apache-2.0 |
+| idna_adapter | 1.2.2 | Apache-2.0 OR MIT |
+| itoa | 1.0.18 | MIT OR Apache-2.0 |
+| keyboard-types | 0.6.2 | MIT/Apache-2.0 |
+| litemap | 0.8.3 | Unicode-3.0 |
+| lock_api | 0.4.14 | MIT OR Apache-2.0 |
+| log | 0.4.35 | MIT OR Apache-2.0 |
+| memchr | 2.8.3 | Unlicense OR MIT |
+| memoffset | 0.9.1 | MIT |
+| midi-consts | 0.1.0 | MIT OR Apache-2.0 |
+| nih_log | 0.3.1 | ISC |
+| nih_plug | 0.0.0 | ISC |
+| nih_plug_derive | 0.1.0 | ISC |
+| nih_plug_egui | 0.0.0 | ISC |
+| nohash-hasher | 0.2.0 | Apache-2.0 OR MIT |
+| num-conv | 0.2.2 | MIT OR Apache-2.0 |
+| once_cell | 1.21.4 | MIT OR Apache-2.0 |
+| open | 5.4.5 | MIT |
+| owned_ttf_parser | 0.25.1 | Apache-2.0 |
+| parking_lot | 0.12.5 | MIT OR Apache-2.0 |
+| parking_lot_core | 0.9.12 | MIT OR Apache-2.0 |
+| percent-encoding | 2.3.2 | MIT OR Apache-2.0 |
+| pin-project-lite | 0.2.17 | Apache-2.0 OR MIT |
+| potential_utf | 0.1.6 | Unicode-3.0 |
+| powerfmt | 0.2.1 | MIT OR Apache-2.0 |
+| proc-macro2 | 1.0.107 | MIT OR Apache-2.0 |
+| profiling | 1.0.18 | MIT OR Apache-2.0 |
+| quote | 1.0.47 | MIT OR Apache-2.0 |
+| raw-window-handle | 0.6.2 | MIT OR Apache-2.0 OR Zlib |
+| raw-window-handle | 0.5.2 | MIT OR Apache-2.0 OR Zlib |
+| rustc-demangle | 0.1.28 | MIT/Apache-2.0 |
+| scopeguard | 1.2.0 | MIT OR Apache-2.0 |
+| serde | 1.0.229 | MIT OR Apache-2.0 |
+| serde_core | 1.0.229 | MIT OR Apache-2.0 |
+| serde_derive | 1.0.229 | MIT OR Apache-2.0 |
+| serde_json | 1.0.154 | MIT OR Apache-2.0 |
+| smallvec | 1.16.4 | MIT OR Apache-2.0 |
+| smol_str | 0.2.2 | MIT OR Apache-2.0 |
+| stable_deref_trait | 1.2.1 | MIT OR Apache-2.0 |
+| syn | 1.0.109 | MIT OR Apache-2.0 |
+| syn | 3.0.9 | MIT OR Apache-2.0 |
+| syn | 2.0.119 | MIT OR Apache-2.0 |
+| synstructure | 0.14.0 | MIT |
+| termcolor | 1.4.1 | Unlicense OR MIT |
+| thiserror | 2.0.21 | MIT OR Apache-2.0 |
+| thiserror-impl | 2.0.21 | MIT OR Apache-2.0 |
+| time | 0.3.55 | MIT OR Apache-2.0 |
+| time-core | 0.1.9 | MIT OR Apache-2.0 |
+| time-macros | 0.2.32 | MIT OR Apache-2.0 |
+| tinystr | 0.8.5 | Unicode-3.0 |
+| tracing | 0.1.44 | MIT |
+| tracing-core | 0.1.36 | MIT |
+| ttf-parser | 0.25.1 | MIT OR Apache-2.0 |
+| unicode-ident | 1.0.27 | (MIT OR Apache-2.0) AND Unicode-3.0 |
+| unicode-segmentation | 1.13.3 | MIT OR Apache-2.0 |
+| ureq | 2.12.1 | MIT OR Apache-2.0 |
+| url | 2.5.8 | MIT OR Apache-2.0 |
+| utf8_iter | 1.1.0 | Apache-2.0 OR MIT |
+| utf_types | 1.0.0 | Apache-2.0 OR MIT |
+| uuid | 0.8.2 | Apache-2.0 OR MIT |
+| vst3-com | 0.1.0 | MIT |
+| vst3-com-macros | 0.2.0 | MIT |
+| vst3-com-macros-support | 0.2.0 | MIT |
+| vst3-sys | 0.1.0 | GPLv3 |
+| widestring | 1.2.1 | MIT OR Apache-2.0 |
+| winapi | 0.3.9 | MIT/Apache-2.0 |
+| winapi-util | 0.1.11 | Unlicense OR MIT |
+| windows | 0.44.0 | MIT OR Apache-2.0 |
+| windows | 0.58.0 | MIT OR Apache-2.0 |
+| windows-core | 0.58.0 | MIT OR Apache-2.0 |
+| windows-implement | 0.58.0 | MIT OR Apache-2.0 |
+| windows-interface | 0.58.0 | MIT OR Apache-2.0 |
+| windows-link | 0.2.1 | MIT OR Apache-2.0 |
+| windows-result | 0.2.0 | MIT OR Apache-2.0 |
+| windows-strings | 0.1.0 | MIT OR Apache-2.0 |
+| windows-sys | 0.52.0 | MIT OR Apache-2.0 |
+| windows-sys | 0.61.2 | MIT OR Apache-2.0 |
+| windows-targets | 0.52.6 | MIT OR Apache-2.0 |
+| windows-targets | 0.42.2 | MIT OR Apache-2.0 |
+| windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 |
+| windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 |
+| winit | 0.30.13 | Apache-2.0 |
+| writeable | 0.6.4 | Unicode-3.0 |
+| yoke | 0.8.4 | Unicode-3.0 |
+| yoke-derive | 0.8.4 | Unicode-3.0 |
+| zerocopy | 0.8.63 | BSD-2-Clause OR Apache-2.0 OR MIT |
+| zerofrom | 0.1.8 | Unicode-3.0 |
+| zerofrom-derive | 0.1.8 | Unicode-3.0 |
+| zerotrie | 0.2.5 | Unicode-3.0 |
+| zerovec | 0.11.9 | Unicode-3.0 |
+| zerovec-derive | 0.11.7 | Unicode-3.0 |
+| zmij | 1.0.23 | MIT |
+<!-- /generated:vst3 -->

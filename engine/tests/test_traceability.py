@@ -35,7 +35,7 @@ def test_engine_references_exist() -> None:
             assert test in names, ref
 
 
-def test_ui_and_shell_references_exist() -> None:
+def test_ui_shell_and_plugin_references_exist() -> None:
     for refs in matrix().values():
         for ref in refs:
             if ref.startswith("ui:"):
@@ -48,5 +48,9 @@ def test_ui_and_shell_references_exist() -> None:
                     "utf-8"
                 )
                 assert re.search(rf"fn {name}\(\)", source), ref
+            elif ref.startswith("plugin:"):
+                module, *_, name = ref.removeprefix("plugin:").split("::")
+                source = (ROOT / "daw" / "vst3" / "src" / f"{module}.rs").read_text("utf-8")
+                assert f"fn {name}()" in source, ref
             else:
                 assert ref.startswith(("engine:", "manual: ")), ref

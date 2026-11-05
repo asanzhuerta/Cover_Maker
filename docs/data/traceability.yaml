@@ -3,6 +3,7 @@
 #   engine:<file>::<test>   pytest test in engine/tests (checked by test_traceability.py)
 #   ui:<file> > <test>      vitest test in desktop/src/lib
 #   shell:<module>::<test>  Rust unit test in desktop/src-tauri/src
+#   plugin:<module>::<test> Rust unit test in daw/vst3/src
 #   manual: <description>   manual or measured verification (dated in the report)
 
 CON-01:
@@ -93,6 +94,14 @@ FR-UI-01:
   - "ui:jobs.test.ts > has every key translated"
   - "ui:about.test.ts > has every user-facing text in English and Spanish"
   - "shell:locale::maps_windows_language_ids"
+FR-DAW-01:
+  - "manual: daw/reaper/tests/e2e_demo.py runs the script against the demo engine with a stubbed reaper API (2026-11-05)"
+  - "manual: daw/reaper/tests/check_script.py checks the script's JSON and stem parsing"
+FR-DAW-02:
+  - "plugin:engine::tests::reads_discovery_and_rejects_other_hosts"
+  - "plugin:engine::tests::orders_stems_as_asked_and_describes_progress"
+  - "plugin:preview::tests::resamples_and_stops_at_the_end"
+  - "manual: the bundle loads and exposes its VST3 factory (2026-11-05)"
 
 NFR-PERF-01:
   - "manual: M1 benchmarks on an RTX 3050 Laptop 4 GB (Architecture, Benchmarks)"
@@ -112,6 +121,11 @@ NFR-SEC-01:
   - "engine:test_api_security.py::test_websocket_requires_token_message"
   - "engine:test_catalogs.py::test_download_refuses_other_hosts"
   - "engine:test_diagnostics.py::test_report_is_redacted_and_has_no_audio"
+NFR-SEC-02:
+  - "engine:test_discovery.py::test_write_read_and_remove"
+  - "engine:test_discovery.py::test_client_token_is_accepted_but_host_still_checked"
+  - "engine:test_discovery.py::test_no_client_tokens_by_default"
+  - "manual: icacls shows the run folder granted to the current user only (2026-11-05)"
 NFR-REL-01:
   - "engine:test_runner.py::test_recover_resets_interrupted_items"
   - "engine:test_runner.py::test_schema_is_migrated"

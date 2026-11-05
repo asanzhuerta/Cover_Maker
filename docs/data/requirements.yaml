@@ -97,6 +97,16 @@ functional:
     text: The user interface shall be available in English and Spanish.
     priority: must
     milestone: M6
+  - id: FR-DAW-01
+    title: REAPER tracks
+    text: A REAPER script shall send a song to the running engine and insert each resulting stem as a new track aligned with the source.
+    priority: should
+    milestone: M11
+  - id: FR-DAW-02
+    title: VST3 plugin
+    text: A VST3 plugin shall run a separation through the running engine and offer the stems for preview and drag-and-drop into tracks.
+    priority: should
+    milestone: M11
 
 non_functional:
   - id: NFR-PERF-01
@@ -124,6 +134,11 @@ non_functional:
     text: The local engine shall listen on 127.0.0.1 only and require a per-session token, an exact Host header and an allowed Origin.
     priority: must
     milestone: M5
+  - id: NFR-SEC-02
+    title: Engine discovery
+    text: Local clients such as DAW tools shall find the engine through a per-user file readable only by the user, with a client token separate from the shell's session token, and shall be subject to the Host and Origin checks.
+    priority: must
+    milestone: M11
   - id: NFR-REL-01
     title: Crash safety
     text: Jobs shall survive application restarts and worker crashes without corrupting the library.

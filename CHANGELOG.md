@@ -6,6 +6,20 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added (M11: DAW integration)
+- REAPER script (`daw/reaper`): separates the selected item's song (or a
+  typed file or link) and inserts each stem as a new track below it, lined up
+  with the song.
+- VST3 plugin (`daw/vst3`, GPL-3.0-or-later): separate a file or link from
+  inside any VST3 host, preview each stem through the track and drag the stem
+  files onto tracks. Release builds attach the plugin and the script.
+- Engine discovery for DAW tools: while it runs the engine writes
+  `%LOCALAPPDATA%\Cover_Maker\run\engine.json` with its port and a separate
+  client token, in a folder only the user can read; set
+  `COVER_MAKER_DAW_ACCESS=0` to turn it off (ADR-008, NFR-SEC-02).
+- Docs: User Manual DAW chapter, ADR-008, FR-DAW-01/02, third-party notices
+  of the plugin.
+
 ### Added (M8: library UI)
 - A re-sync now shows what changed in the collection: new, removed,
   unchanged, to check and not available songs.
