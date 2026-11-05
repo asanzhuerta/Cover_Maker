@@ -27,6 +27,7 @@ import uvicorn
 
 from .. import __version__, diagnostics
 from ..paths import Paths
+from . import discovery
 from .app import create_app
 from .engine import EngineService
 from .security import AccessPolicy
@@ -88,7 +89,11 @@ def serve(host: str = "127.0.0.1", *, demo: bool = False) -> None:
     sock.bind((host, 0))
     port: int = sock.getsockname()[1]
 
-    policy = AccessPolicy(token=token, host=f"{host}:{port}")
+    client_token = discovery.new_client_token() if discovery.enabled() else None
+    policy = AccessPolicy(
+        token=token, host=f"{host}:{port}",
+        client_tokens=frozenset({client_token}) if client_token else frozenset(),
+    )  # fmt: skip
     service = build_service(demo)
     _log_failures(service)
     service.start()
@@ -102,7 +107,15 @@ def serve(host: str = "127.0.0.1", *, demo: bool = False) -> None:
     handshake = {"event": "ready", "port": port, "pid": os.getpid(), "version": __version__}
     sys.stdout.write(json.dumps(handshake) + "\n")
     sys.stdout.flush()
+    home = service.paths.home
+    if client_token:
+        info = discovery.Discovery(
+            port=port, token=client_token, pid=os.getpid(), version=__version__, host=host
+        )
+        discovery.write(home, info)
     try:
         server.run(sockets=[sock])
     finally:
+        if client_token:
+            discovery.remove(home, os.getpid())
         service.stop()

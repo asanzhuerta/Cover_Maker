@@ -30,9 +30,15 @@ class AccessPolicy:
     token: str
     host: str
     allowed_origins: frozenset[str] = field(default=DEFAULT_ALLOWED_ORIGINS)
+    # Tokens of local clients such as DAW plugins (ADR-008); empty when disabled.
+    client_tokens: frozenset[str] = field(default=frozenset())
 
     def token_ok(self, presented: str | None) -> bool:
-        return presented is not None and hmac.compare_digest(presented, self.token)
+        if presented is None:
+            return False
+        valid = [self.token, *self.client_tokens]
+        # Compare against every token so timing does not reveal which matched.
+        return any([hmac.compare_digest(presented, t) for t in valid])
 
     def host_ok(self, host: str | None) -> bool:
         return host == self.host

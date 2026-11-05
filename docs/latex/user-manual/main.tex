@@ -294,6 +294,40 @@ well-known songs, film or game music marked as free: the uploader may not own
 those rights.
 
 \appendix
+\chapter{Using \CM{} from your DAW}\label{ch:daw}
+\CM{} can work from inside your \gls{daw}. The app must be open: the DAW tools
+talk to the engine it runs, on this computer only.
+
+\section{REAPER}
+The REAPER script separates a song and inserts each stem as a new track.
+\begin{enumerate}
+  \item In REAPER choose \emph{Actions → Show action list → New action → Load
+        ReaScript} and pick
+        \texttt{daw/reaper/Cover\_Maker - Separate into stem tracks.lua} from the
+        \CM{} source package (or the \texttt{daw} folder of a release).
+  \item Select the audio item of the song (or no item, to type a file or a
+        video link) and run the action.
+  \item Check the file or link, list the stems you want separated by commas
+        (vocals, drums, bass, guitar, piano, other) and, for a link, answer
+        \texttt{y} to confirm that you have the rights to that audio.
+  \item When the job finishes, one track per stem appears below the song's
+        track, lined up with the song; without a selected item they start at the
+        edit cursor. The files are saved in the \texttt{Cover\_Maker stems}
+        folder next to the project.
+\end{enumerate}
+The progress is visible in the \CM{} queue, and the models you use must be
+installed there first (chapter~\ref{ch:models}); otherwise the script tells
+you which ones are missing.
+
+\section{How the DAW finds \CM{}}
+While the app runs, the engine writes a small file,
+\texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker\textbackslash run\textbackslash engine.json},
+with its port and a key for DAW tools. Only your Windows account can read the
+folder, the key changes every time the app starts and the file is deleted when
+the app closes. Web pages cannot use it. To turn DAW access off, set the
+environment variable \texttt{COVER\_MAKER\_DAW\_ACCESS} to \texttt{0} before
+starting the app.
+
 \chapter{About and credits}\label{ch:about}
 The \emph{About} page, at the bottom of the sidebar menu, shows:
 \begin{itemize}
