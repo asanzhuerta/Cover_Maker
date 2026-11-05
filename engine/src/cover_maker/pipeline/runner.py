@@ -27,7 +27,8 @@ from ..paths import Paths
 from ..separation import recipes
 from ..separation.catalog import Catalog, Installs, ModelSpec
 from ..separation.recipes import MINUS, Node, Recipe, Ref
-from ..separation.service import SeparationService, with_ladder
+from ..separation.service import GPU_LADDER, SeparationService, with_ladder
+from ..separation.tuning import Tuning
 from ..separation.types import Cancelled, SeparationRequest
 from ..sources import catalogs, youtube
 from ..sources.links import InputKind, parse_input
@@ -129,6 +130,7 @@ class JobRunner:
         self.use_gpu = use_gpu
         self.assets = AssetStore(paths.assets, conn)
         self.installs = Installs(conn)
+        self.tuning = Tuning(conn)
         self._cancel = threading.Event()
         self._pause = threading.Event()
 
@@ -486,9 +488,18 @@ class JobRunner:
                 output_dir=Path(scratch),
                 stems=model.stems,  # keep every stem the model makes, for later reuse
             )
+            audio_s = _duration(request.input_path)
+
+            def record(attempt: SeparationRequest, seconds: float | None, oom: bool) -> None:
+                self.tuning.record(
+                    model.id, attempt.device, attempt.precision, attempt.chunk_s, audio_s,
+                    seconds, oom,
+                )  # fmt: skip
+
             result = with_ladder(
                 self.service, request, use_gpu=self.use_gpu, allow_cpu=spec.allow_cpu_fallback,
                 on_retry=lambda message: self.events.emit("separation.retry", message=message),
+                start=self.tuning.first_gpu_rung(model.id, GPU_LADDER), record=record,
             )  # fmt: skip
             stored = {
                 stem: self.assets.put(path, "stem", move=True)
@@ -546,8 +557,28 @@ class JobRunner:
         return outputs
 
 
-def resolve_preset(preset: str, tier_is_gpu: bool) -> Preset:
-    """``auto`` picks Balanced on a usable GPU and Fast on CPU-only machines."""
+def preset_models() -> dict[Preset, set[str]]:
+    """Models each preset runs to produce every stem."""
+    return {p: recipes.load(p).models(set(ALL_STEMS)) for p in Preset}
+
+
+def resolve_preset(preset: str, tier_is_gpu: bool, tuning: Tuning | None = None) -> Preset:
+    """``auto`` picks Balanced on a usable GPU and Fast on CPU-only machines.
+
+    With measured runs, a GPU too slow for Balanced gets Fast (tuning.py).
+    """
     if preset == "auto":
+        if tuning is not None:
+            return tuning.auto_preset(tier_is_gpu, preset_models())
         return Preset.BALANCED if tier_is_gpu else Preset.FAST
     return Preset(preset)
+
+
+def _duration(path: Path) -> float:
+    """Song length in seconds, or 0 when it cannot be read (no speed recorded)."""
+    try:
+        import soundfile  # pyright: ignore[reportMissingTypeStubs]
+
+        return float(soundfile.info(str(path)).duration)
+    except Exception:
+        return 0.0

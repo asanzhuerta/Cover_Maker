@@ -22,6 +22,7 @@ from ..audio.peaks import compute_peaks
 from ..domain import JobSpec
 from ..pipeline.runner import (
     RightsNotConfirmed,
+    preset_models,
     render_custom_mix,
     resolve_preset,
     stems_to_separate,
@@ -29,6 +30,7 @@ from ..pipeline.runner import (
 from ..separation import recipes
 from ..separation.hardware import Tier
 from ..separation.installer import InstallError, install, separation_available
+from ..separation.tuning import Tuning
 from ..sources import catalogs
 from ..sources.expand import expand_inputs
 from ..sources.links import InputKind, UnsupportedInput, parse_input
@@ -82,10 +84,17 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         svc = engine()
         hw = await asyncio.to_thread(svc.hardware, refresh)
         gpu = schemas.GpuOut(**hw.gpu.__dict__) if hw.gpu else None
+        tuning = Tuning(svc.conn)
+        recommended, speed = await _db(
+            lambda: (
+                resolve_preset("auto", hw.tier is not Tier.CPU, tuning).value,
+                tuning.summary(preset_models()),
+            )
+        )
         return schemas.SystemOut(
             version=__version__, data_dir=str(svc.paths.home), cpu=hw.cpu_name,
             physical_cores=hw.physical_cores, ram_gb=hw.ram_gb, gpu=gpu, tier=hw.tier.value,
-            recommended_preset=resolve_preset("auto", hw.tier is not Tier.CPU).value,
+            recommended_preset=recommended, measured_speed=speed,
             free_disk_gb=hw.free_disk_gb, on_battery=hw.on_battery, daws=hw.daws,
             ffmpeg=ffmpeg_path() is not None,
             separation_available=svc.demo or separation_available(), demo=svc.demo,
@@ -202,9 +211,12 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         if online and not body.rights_confirmed:
             raise ApiProblem(400, "rights_required", str(RightsNotConfirmed()))
         hw = await asyncio.to_thread(svc.hardware)
+        preset = await _db(
+            lambda: resolve_preset(body.preset, hw.tier is not Tier.CPU, Tuning(svc.conn))
+        )
         spec = JobSpec(
             inputs=expanded, stems=body.stems, mode=body.mode, residual=body.residual,
-            preset=resolve_preset(body.preset, hw.tier is not Tier.CPU), output_dir=body.output_dir,
+            preset=preset, output_dir=body.output_dir,
             output_format=body.output_format, allow_cpu_fallback=body.allow_cpu_fallback,
             rights_confirmed=body.rights_confirmed,
         )  # fmt: skip

@@ -19,6 +19,14 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs" / "data"
 OUT = ROOT / "docs" / "latex" / "common" / "generated"
+CATALOGUE = ROOT / "engine" / "src" / "cover_maker" / "data" / "catalog.yaml"
+CLASS_NAMES = {
+    "permissive": "Permissive",
+    "disputed": "Disputed",
+    "none": "No licence published",
+    "non-commercial": "Non-commercial",
+    "copyleft": "Copyleft",
+}
 OPENAPI = ROOT / "desktop" / "src" / "lib" / "api" / "openapi.json"
 
 _ESCAPES = {
@@ -93,6 +101,7 @@ def main() -> None:
     requirements = yaml.safe_load((DATA / "requirements.yaml").read_text(encoding="utf-8"))
     project = yaml.safe_load((DATA / "project.yaml").read_text(encoding="utf-8"))
     matrix = yaml.safe_load((DATA / "traceability.yaml").read_text(encoding="utf-8"))
+    catalogue = yaml.safe_load(CATALOGUE.read_text(encoding="utf-8"))
     OUT.mkdir(parents=True, exist_ok=True)
 
     wide = r"@{}P{0.15\linewidth}P{0.55\linewidth}P{0.09\linewidth}P{0.09\linewidth}@{}"
@@ -124,6 +133,18 @@ def main() -> None:
             [
                 [tex(m["id"]), tex(m["name"]), tex(m["effort"]), tex(m["goal"])]
                 for m in project["milestones"]
+            ],
+        ),
+        "model-licences.tex": longtable(
+            r"@{}P{0.2\linewidth}P{0.14\linewidth}P{0.62\linewidth}@{}",
+            ["Model", "Licence class", "Terms (verified on)"],
+            [
+                [
+                    tex(m["name"]),
+                    tex(CLASS_NAMES.get(m["licence_class"], m["licence_class"])),
+                    rf"{tex(m['licence'])} \newline \url{{{m['licence_url']}}} ({tex(m['verified_on'])})",
+                ]
+                for m in catalogue["models"]
             ],
         ),
         "risks.tex": longtable(

@@ -32,6 +32,10 @@ class SystemOut(BaseModel):
     gpu: GpuOut | None
     tier: str
     recommended_preset: str
+    measured_speed: dict[str, float | None] = Field(
+        default_factory=dict,
+        description="Seconds of work per second of audio measured for each preset (None: no runs yet).",
+    )
     free_disk_gb: float
     on_battery: bool | None
     daws: list[str]

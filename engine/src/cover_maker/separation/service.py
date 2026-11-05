@@ -46,11 +46,17 @@ def with_ladder(
     use_gpu: bool,
     allow_cpu: bool,
     on_retry: Callable[[str], None] | None = None,
+    start: int = 0,
+    record: Callable[[SeparationRequest, float | None, bool], None] | None = None,
 ) -> SeparationResult:
-    """Run ``request`` stepping down precision/chunk on OOM, then CPU if allowed."""
+    """Run ``request`` stepping down precision/chunk on OOM, then CPU if allowed.
+
+    ``start`` skips GPU settings known to run out of memory (see tuning.py);
+    ``record`` is told about every attempt: seconds taken, or OOM.
+    """
     steps: list[tuple[Device, Precision, float | None]] = []
     if use_gpu:
-        for precision, chunk in GPU_LADDER:
+        for precision, chunk in GPU_LADDER[max(0, min(start, len(GPU_LADDER) - 1)) :]:
             steps.append(("gpu", precision, chunk))
     if allow_cpu or not use_gpu:
         steps.append(("cpu", CPU_STEP[0], CPU_STEP[1]))
@@ -60,15 +66,21 @@ def with_ladder(
             update={"device": device, "precision": precision, "chunk_s": chunk}
         )
         try:
-            return service.separate(attempt)
+            result = service.separate(attempt)
         except SeparationError as exc:
             if not exc.oom:
                 raise
             last = exc
+            if record:
+                record(attempt, None, True)
             if on_retry:
                 on_retry(
                     f"out of memory on {device} ({precision}, chunk {chunk or 'default'}); retrying"
                 )
+            continue
+        if record:
+            record(attempt, result.seconds, False)
+        return result
     raise NeedsCpuFallback(
         "The GPU ran out of memory with every setting. Allow CPU mode to continue (much slower).",
         oom=True,

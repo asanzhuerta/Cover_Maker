@@ -208,6 +208,7 @@ def separate(
     from .separation.hardware import Tier, detect
     from .separation.installer import separation_available
     from .separation.service import NeedsCpuFallback, WorkerService
+    from .separation.tuning import Tuning
     from .sources.links import UnsupportedInput
     from .sources.youtube import DownloadError
     from .store.db import connect
@@ -238,19 +239,20 @@ def separate(
         if not confirm_rights:
             raise typer.Exit(1)
 
+    conn = connect(paths.db)
     spec = JobSpec(
         inputs=expanded,
         stems=_parse_stems(stems),
         mode=mode,
         residual=residual,
-        preset=resolve_preset(preset, use_gpu),
+        preset=resolve_preset(preset, use_gpu, Tuning(conn)),
         output_dir=output.resolve(),
         output_format=fmt,
         allow_cpu_fallback=allow_cpu,
         rights_confirmed=confirm_rights,
     )
     service = WorkerService(threads=threads)
-    runner = JobRunner(paths, connect(paths.db), Catalog.load(), service, use_gpu=use_gpu)
+    runner = JobRunner(paths, conn, Catalog.load(), service, use_gpu=use_gpu)
     runner.recover()
 
     def show(event: dict[str, object]) -> None:
