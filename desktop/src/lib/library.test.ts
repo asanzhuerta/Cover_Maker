@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { baseName, formatBytes, selectedInputs, statusTone } from "./library";
+import {
+  baseName,
+  formatBytes,
+  newItemIds,
+  selectedInputs,
+  statusTone,
+  syncSummary,
+} from "./library";
 
 describe("library helpers", () => {
   it("formats sizes", () => {
@@ -28,6 +35,32 @@ describe("library helpers", () => {
       "https://youtu.be/x",
     ]);
     expect(selectedInputs(items, new Set([2]))).toEqual([]);
+  });
+
+  it("selects only matched songs without stems", () => {
+    const items = [
+      { id: 1, status: "ready" },
+      { id: 2, status: "ready" },
+      { id: 3, status: "needs_review" },
+      { id: 4, status: "ready" },
+    ];
+    expect(newItemIds(items, { 1: ["vocals"], 4: [] })).toEqual([2, 4]);
+  });
+
+  it("summarises a sync without zero counts", () => {
+    expect(
+      syncSummary({
+        added: 2,
+        removed: 0,
+        unchanged: 5,
+        needs_review: 1,
+        unavailable: 0,
+      }),
+    ).toEqual([
+      ["added", 2],
+      ["unchanged", 5],
+      ["needs_review", 1],
+    ]);
   });
 
   it("names files and links", () => {
