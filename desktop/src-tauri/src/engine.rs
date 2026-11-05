@@ -96,6 +96,10 @@ fn engine_command(token: &str, runtime: Option<&Layout>) -> Command {
                 .args(["run", "--inexact", "--project"])
                 .arg(dev_engine_dir())
                 .args(["cover-maker", "serve"]);
+            // Development data lives apart from an installed copy's.
+            if std::env::var_os("COVER_MAKER_HOME").is_none() {
+                command.env("COVER_MAKER_HOME", crate::runtime::data_home(true));
+            }
             command
         }
     };

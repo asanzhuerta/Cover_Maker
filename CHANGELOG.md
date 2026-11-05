@@ -12,6 +12,12 @@ First stable release: DAW integration (REAPER script and VST3 plugin),
 presets tuned from measured runs, model licences page, the code signing
 policy and privacy notice, and all documents at version 1.0 (M8, M10, M11).
 
+### Changed
+- Development runs (the engine from a source checkout, `pnpm tauri dev`) keep
+  their data in `%LOCALAPPDATA%\Cover_Maker.dev`, apart from the installed
+  app's `%LOCALAPPDATA%\Cover_Maker`. The VST3 plugin and the REAPER script
+  find either.
+
 ### Added (M10: quality and 1.0)
 - Presets tuned from measured runs: every separation attempt is recorded
   (migration 5); GPU settings that ran out of memory twice in a row for a

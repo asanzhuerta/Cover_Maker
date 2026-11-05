@@ -3,7 +3,10 @@
 bundled runtime files (in \texttt{bundle\textbackslash}) into
 \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker}, the Tauri default for a
 per-user install; the runtime and the user data that the app creates live in
-sub-folders of the same directory.
+sub-folders of the same directory. An engine run from a source checkout
+(development) uses \texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker.dev}
+instead, so development never touches an installed copy's data;
+\texttt{COVER\_MAKER\_HOME} overrides both.
 
 \begin{figure}[htbp]
 \centering
