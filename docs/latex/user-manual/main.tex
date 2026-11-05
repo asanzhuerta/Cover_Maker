@@ -222,7 +222,9 @@ Each collection shows its number of songs and when it was last synced;
 \emph{Re-sync} looks for changes again, and the bin icon removes the collection
 from the library (your audio files are never deleted). Open a collection to see
 its songs, with title and artist, the match state, the file and, in
-\emph{Separated}, the stems already exported for it.
+\emph{Separated}, the stems already exported for it. After a re-sync the
+collection shows what changed: how many songs are new, removed, unchanged, to
+check or not available.
 
 \section{Reviewing matches}
 Entries of an imported playlist are matched by artist, title and duration.
@@ -233,6 +235,8 @@ an entry you do not have. Manual choices are kept on the next re-sync.
 
 Tick the songs you want and press \emph{Separate selected}: they open on the
 \emph{New job} page, where you choose the stems and the export as usual.
+\emph{Select new} ticks only the matched songs that have no separated stems
+yet, so a grown folder or playlist is processed without repeating work.
 
 \section{Disk space}
 The bottom of the page shows the space used by the library files, the cache
