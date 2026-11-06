@@ -4,9 +4,11 @@
  * (separation runtime with PyTorch) runs in the background afterwards.
  */
 import type { MessageKey } from "./i18n.svelte";
+import type { DiskPlan } from "./space";
 
 export interface PhaseStatus {
-  state: "pending" | "running" | "done" | "failed";
+  /** `consent`: first run, waiting for the user to start the download. */
+  state: "consent" | "pending" | "running" | "done" | "failed";
   step: string;
   index: number;
   total: number;
@@ -20,6 +22,8 @@ export interface BootstrapStatus {
   core: PhaseStatus;
   separation: PhaseStatus;
   torch: string | null;
+  /** What the runtime downloads and needs on disk (release builds). */
+  space?: DiskPlan | null;
 }
 
 const done: PhaseStatus = {

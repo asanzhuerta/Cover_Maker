@@ -78,7 +78,8 @@ fn bootstrap_status(bootstrap: State<'_, BootstrapState>) -> Result<BootstrapSta
         .clone())
 }
 
-/// Start the bootstrap again after a failure (downloads resume from the cache).
+/// Start the bootstrap: on a first run after the user's OK, or again after a
+/// failure (downloads resume from the cache).
 #[tauri::command]
 fn bootstrap_retry(app: AppHandle) {
     spawn_bootstrap(&app);
@@ -124,6 +125,22 @@ async fn update_ytdlp(app: AppHandle, runtime: State<'_, Runtime>) -> Result<Str
     Ok(version)
 }
 
+/// Open one of the engine's data folders in Explorer. Only these fixed
+/// sub-folders of the data home (`paths.py`) can be opened.
+#[tauri::command]
+fn open_data_folder(name: String) -> Result<(), String> {
+    if !["tmp", "models", "library", "logs", "runtime"].contains(&name.as_str()) {
+        return Err(format!("unknown folder {name}"));
+    }
+    let home = match std::env::var_os("COVER_MAKER_HOME").filter(|v| !v.is_empty()) {
+        Some(dir) => std::path::PathBuf::from(dir),
+        None => runtime::data_home(engine::development()),
+    };
+    let folder = home.join(&name);
+    std::fs::create_dir_all(&folder).map_err(|e| format!("cannot create {name}: {e}"))?;
+    tauri_plugin_opener::open_path(folder, None::<&str>).map_err(|e| e.to_string())
+}
+
 /// Language picked in the installer (`en` or `es`), used as the first default.
 #[tauri::command]
 fn installer_locale() -> Option<&'static str> {
@@ -148,7 +165,15 @@ pub fn run() {
                     app_version: app.package_info().version.to_string(),
                 })
             };
-            let status = match layout {
+            // A first run waits on the setup screen, which shows what the
+            // runtime downloads and the disk space it needs, until the user
+            // starts it (`bootstrap_retry`). Updates and repairs start at once.
+            let consent = layout.as_ref().is_some_and(runtime::first_run);
+            let status = match &layout {
+                Some(layout) if consent => BootstrapStatus::awaiting_consent(runtime::disk_plan(
+                    layout,
+                    &runtime::torch_build(),
+                )),
                 Some(_) => BootstrapStatus::runtime(),
                 None => BootstrapStatus::development(),
             };
@@ -157,7 +182,9 @@ pub fn run() {
                 layout,
                 busy: Arc::new(AtomicBool::new(false)),
             });
-            spawn_bootstrap(app.handle());
+            if !consent {
+                spawn_bootstrap(app.handle());
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -167,6 +194,7 @@ pub fn run() {
             restart_engine,
             check_ytdlp,
             update_ytdlp,
+            open_data_folder,
             installer_locale
         ])
         .build(tauri::generate_context!())

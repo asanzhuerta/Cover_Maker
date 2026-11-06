@@ -12,6 +12,23 @@ First stable release: DAW integration (REAPER script and VST3 plugin),
 presets tuned from measured runs, model licences page, the code signing
 policy and privacy notice, and all documents at version 1.0 (M8, M10, M11).
 
+### Added (installer test)
+- First run asks before downloading: the setup screen shows the download
+  size, the approximate disk space, the free space on the drive, the PyTorch
+  build and the folder, and stops with a clear message when the drive is too
+  full. The sizes come from the bundled lock files (`sizes.json`).
+- The model licence dialog shows the download size and the free disk space,
+  and the engine refuses a model download that does not fit
+  (`507 not_enough_space`).
+- Library page: *Temporary files* lists what stopped or failed jobs left
+  behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
+  `POST /storage/temporary/clear`), and opens the folder in Explorer.
+
+### Fixed
+- A second song separated with the same model in one session no longer
+  fails with `FileNotFoundError`: the reused model wrote its stems into the
+  previous job's temporary folder.
+
 ### Changed
 - Development runs (the engine from a source checkout, `pnpm tauri dev`) keep
   their data in `%LOCALAPPDATA%\Cover_Maker.dev`, apart from the installed

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import shutil
 import threading
 from collections.abc import Callable
 from pathlib import Path
@@ -39,6 +40,9 @@ from ..store import storage
 from . import schemas
 from .engine import EngineService
 from .security import AccessMiddleware, AccessPolicy
+
+# Free space kept on top of a model's size when it is downloaded.
+MODEL_SPACE_MARGIN = 256 * 2**20
 
 HEARTBEAT_SECONDS = 15.0
 T = TypeVar("T")
@@ -133,6 +137,14 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         if not body.accept_licence:
             raise ApiProblem(400, "licence_not_accepted", "the licence notice must be accepted")
         model = svc.catalog.get(model_id)
+        if not svc.demo and not svc.installs.is_installed(model):
+            needed = model.size_mb * 2**20 + MODEL_SPACE_MARGIN
+            free = shutil.disk_usage(svc.paths.models.parent).free
+            if free < needed:
+                raise ApiProblem(
+                    507, "not_enough_space",
+                    f"the model needs {model.size_mb} MB and {free // 2**20} MB are free",
+                )  # fmt: skip
 
         def run() -> None:
             svc.bus.emit("model.install.started", model=model_id)
@@ -285,6 +297,25 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             raise ApiProblem(409, "job_active", "wait until the queue is idle")
         return schemas.CleanupOut(
             freed_bytes=await _db(lambda: storage.clean_up(svc.conn, svc.paths))
+        )
+
+    @app.get("/storage/temporary", response_model=schemas.TemporaryOut)
+    async def storage_temporary() -> schemas.TemporaryOut:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        entries = await asyncio.to_thread(storage.temporary, svc.paths)
+        return schemas.TemporaryOut(
+            folder=str(svc.paths.tmp),
+            total_bytes=sum(e.bytes for e in entries),
+            entries=[schemas.TempEntryOut(**e.__dict__) for e in entries],
+        )
+
+    @app.post("/storage/temporary/clear", response_model=schemas.CleanupOut)
+    async def storage_temporary_clear() -> schemas.CleanupOut:  # pyright: ignore[reportUnusedFunction]
+        svc = engine()
+        if svc.busy:
+            raise ApiProblem(409, "job_active", "wait until the queue is idle")
+        return schemas.CleanupOut(
+            freed_bytes=await asyncio.to_thread(storage.clear_temporary, svc.paths)
         )
 
     # ------------------------------------------------------------ catalogues

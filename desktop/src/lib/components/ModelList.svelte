@@ -6,6 +6,8 @@
   import RuntimeNotice from "$lib/components/RuntimeNotice.svelte";
   import { connection, isTauri, onEvent } from "$lib/connection.svelte";
   import { i18n, t } from "$lib/i18n.svelte";
+  import { formatBytes } from "$lib/library";
+  import { freeBytesFromGb, modelBytes, modelFits } from "$lib/space";
   import { stemColor } from "$lib/stems";
 
   type Model = Schemas["ModelOut"];
@@ -19,6 +21,20 @@
   // Download progress in [0, 1] per model, from model.install.progress events.
   let progress = $state<Record<string, number>>({});
   let errors = $state<Record<string, string>>({});
+  // Free disk space for the licence dialog's space check (GET /system).
+  let freeBytes = $state<number | null>(null);
+
+  async function loadFreeSpace() {
+    if (!connection.api) return;
+    const { data } = await connection.api.GET("/system");
+    freeBytes = data ? freeBytesFromGb(data.free_disk_gb) : null;
+  }
+
+  function review(model: Model) {
+    reviewing = model;
+    freeBytes = null;
+    void loadFreeSpace();
+  }
 
   // Scales for the size / VRAM meters (largest catalogue model ≈ full bar).
   const MAX_SIZE_MB = 900;
@@ -35,10 +51,22 @@
     installing = { ...installing, [model.id]: true };
     progress = { ...progress, [model.id]: 0 };
     errors = { ...errors, [model.id]: "" };
-    await connection.api.POST("/models/{model_id}/install", {
+    const { error } = await connection.api.POST("/models/{model_id}/install", {
       params: { path: { model_id: model.id } },
       body: { accept_licence: true },
     });
+    if (error) {
+      // ApiError body ({code, detail}); the generated type only knows 422.
+      const problem = error as { code?: string; detail?: unknown };
+      installing = { ...installing, [model.id]: false };
+      errors = {
+        ...errors,
+        [model.id]:
+          problem.code === "not_enough_space"
+            ? t("models.space.short")
+            : String(problem.detail ?? ""),
+      };
+    }
     reviewing = null;
     accepted = false;
   }
@@ -180,7 +208,7 @@
             class="small"
             disabled={!separationReady(bootstrap.status)}
             title={separationReady(bootstrap.status) ? "" : t("runtime.wait")}
-            onclick={() => (reviewing = model)}
+            onclick={() => review(model)}
             ><Icon name="shield" size={14} />{t("models.install")}</button
           >
         {/if}
@@ -227,7 +255,18 @@
       </dd>
       <dt>{t("models.verifiedOn")}</dt>
       <dd data-testid="verified-on">{formatDate(reviewing.verified_on)}</dd>
+      <dt>{t("models.space.download")}</dt>
+      <dd>{formatBytes(modelBytes(reviewing.size_mb))}</dd>
+      <dt>{t("models.space.free")}</dt>
+      <dd data-testid="model-free-space">
+        {freeBytes === null ? "…" : formatBytes(freeBytes)}
+      </dd>
     </dl>
+    {#if !modelFits(reviewing.size_mb, freeBytes)}
+      <p class="error" data-testid="model-no-space">
+        {t("models.space.short")}
+      </p>
+    {/if}
     <details>
       <summary>{t("models.notice")}</summary>
       <pre>{reviewing.notice}</pre>
@@ -242,7 +281,7 @@
       >
       <button
         class="primary"
-        disabled={!accepted}
+        disabled={!accepted || !modelFits(reviewing.size_mb, freeBytes)}
         onclick={() => reviewing && install(reviewing)}
       >
         <Icon name="download" size={16} />{t("models.download")}
