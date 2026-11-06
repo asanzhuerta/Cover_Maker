@@ -6,6 +6,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- A second song separated with the same model in one session no longer
+  fails with `FileNotFoundError`: the reused model wrote its stems into the
+  previous job's temporary folder.
+
 ### Changed
 - Development runs (the engine from a source checkout, `pnpm tauri dev`) keep
   their data in `%LOCALAPPDATA%\Cover_Maker.dev`, apart from the installed
