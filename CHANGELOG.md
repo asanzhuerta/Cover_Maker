@@ -6,7 +6,13 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Added
+## [1.0.0] - 2026-11-05
+
+First stable release: DAW integration (REAPER script and VST3 plugin),
+presets tuned from measured runs, model licences page, the code signing
+policy and privacy notice, and all documents at version 1.0 (M8, M10, M11).
+
+### Added (installer test)
 - First run asks before downloading: the setup screen shows the download
   size, the approximate disk space, the free space on the drive, the PyTorch
   build and the folder, and stops with a clear message when the drive is too
