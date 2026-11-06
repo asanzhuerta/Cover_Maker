@@ -232,3 +232,40 @@ def test_catalog_search_and_download_rules(
 def test_diagnostics_report(client: TestClient, service: EngineService) -> None:
     path = Path(client.post("/diagnostics").json()["path"])
     assert path.exists() and path.parent == service.paths.logs
+
+
+def test_temporary_files_are_listed_then_cleared(
+    client: TestClient, service: EngineService
+) -> None:
+    job = service.paths.tmp / "tmpjob"
+    (job / "_raw").mkdir(parents=True)
+    (job / "_raw" / "a_(vocals)_M.wav").write_bytes(b"x" * 300)
+    (service.paths.tmp / "stray.part").write_bytes(b"y" * 20)
+
+    listing = client.get("/storage/temporary").json()
+    assert listing["folder"] == str(service.paths.tmp)
+    assert listing["total_bytes"] == 320
+    assert {(e["name"], e["bytes"], e["files"]) for e in listing["entries"]} == {
+        ("tmpjob", 300, 1),
+        ("stray.part", 20, 1),
+    }
+
+    assert client.post("/storage/temporary/clear").json() == {"freed_bytes": 320}
+    assert client.get("/storage/temporary").json()["entries"] == []
+    assert service.paths.tmp.exists()
+
+
+def test_model_install_needs_free_space(
+    client: TestClient, service: EngineService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import shutil
+    from collections import namedtuple
+
+    usage = namedtuple("usage", "total used free")
+    monkeypatch.setattr(service, "demo", False)
+    monkeypatch.setattr(shutil, "disk_usage", lambda _: usage(10**12, 0, 50 * 2**20))
+
+    response = client.post("/models/bs-roformer-sw/install", json={"accept_licence": True})
+
+    assert response.status_code == 507
+    assert response.json()["code"] == "not_enough_space"

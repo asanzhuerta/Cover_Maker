@@ -517,6 +517,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/temporary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Storage Temporary */
+        get: operations["storage_temporary_storage_temporary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/temporary/clear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Storage Temporary Clear */
+        post: operations["storage_temporary_clear_storage_temporary_clear_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/system": {
         parameters: {
             query?: never;
@@ -1075,6 +1109,35 @@ export interface components {
             tier: string;
             /** Version */
             version: string;
+        };
+        /** TempEntryOut */
+        TempEntryOut: {
+            /** Bytes */
+            bytes: number;
+            /** Files */
+            files: number;
+            /**
+             * Modified
+             * Format: date-time
+             */
+            modified: string;
+            /**
+             * Name
+             * @description Folder or file name inside the temp folder.
+             */
+            name: string;
+        };
+        /** TemporaryOut */
+        TemporaryOut: {
+            /** Entries */
+            entries: components["schemas"]["TempEntryOut"][];
+            /**
+             * Folder
+             * @description The temp folder; clearing it deletes every entry.
+             */
+            folder: string;
+            /** Total Bytes */
+            total_bytes: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -2019,6 +2082,46 @@ export interface operations {
         };
     };
     storage_cleanup_storage_cleanup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CleanupOut"];
+                };
+            };
+        };
+    };
+    storage_temporary_storage_temporary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryOut"];
+                };
+            };
+        };
+    };
+    storage_temporary_clear_storage_temporary_clear_post: {
         parameters: {
             query?: never;
             header?: never;

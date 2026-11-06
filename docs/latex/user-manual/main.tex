@@ -75,7 +75,10 @@ and the date on which the project last verified it at the original source;
 the full notice you accept can be expanded below. Read the notice, tick \emph{I accept this licence notice} and press
 \emph{Download}. The model is downloaded from its original source; \CM{} never
 hosts model files. While it downloads, a green bar with the percentage replaces
-the button, so you can see that a large model is still advancing. Installing
+the button, so you can see that a large model is still advancing. The dialog
+also shows the download size and the free space on the disk; when the model
+does not fit (with 256~MB to spare), \emph{Download} stays disabled and the
+dialog says so. Installing
 models needs the separation runtime: until it is installed the buttons are
 disabled and the page shows a notice. You are responsible for respecting each model's licence.
 When the project corrects a model's licence information, the notice changes and
@@ -246,6 +249,14 @@ downloads and intermediate results; running a song again then takes longer.
 It is available while no job runs, and your exported files are never touched.
 Removing a finished job from the history lets \emph{Free space} reclaim its
 files too.
+
+\emph{Temporary files} lists the working folders that stopped or failed jobs
+left behind (finished jobs clean up after themselves), with the folder path
+and total size. \emph{Delete temporary files} first shows every entry that
+will be deleted, with its size, number of files and date, and deletes them
+only after you press \emph{Delete}; your library, saved stems and models are
+never touched. It is available while no job runs. \emph{Open folder} opens the
+temporary folder in Explorer.
 
 \section{Video links}
 Paste a video or playlist link instead of a file. Only the audio is downloaded.

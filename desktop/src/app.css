@@ -163,6 +163,17 @@ button.primary:hover:not(:disabled) {
   box-shadow: 0 8px 28px rgb(197 108 240 / 42%);
 }
 
+button.danger {
+  background: var(--danger);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+button.danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
 button.ghost {
   background: transparent;
   border-color: transparent;

@@ -6,6 +6,18 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- First run asks before downloading: the setup screen shows the download
+  size, the approximate disk space, the free space on the drive, the PyTorch
+  build and the folder, and stops with a clear message when the drive is too
+  full. The sizes come from the bundled lock files (`sizes.json`).
+- The model licence dialog shows the download size and the free disk space,
+  and the engine refuses a model download that does not fit
+  (`507 not_enough_space`).
+- Library page: *Temporary files* lists what stopped or failed jobs left
+  behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
+  `POST /storage/temporary/clear`), and opens the folder in Explorer.
+
 ### Fixed
 - A second song separated with the same model in one session no longer
   fails with `FileNotFoundError`: the reused model wrote its stems into the

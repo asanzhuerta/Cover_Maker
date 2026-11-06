@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, Field, field_validator
@@ -179,6 +179,19 @@ class StorageOut(BaseModel):
 
 class CleanupOut(BaseModel):
     freed_bytes: int
+
+
+class TempEntryOut(BaseModel):
+    name: str = Field(description="Folder or file name inside the temp folder.")
+    bytes: int
+    files: int
+    modified: datetime
+
+
+class TemporaryOut(BaseModel):
+    folder: str = Field(description="The temp folder; clearing it deletes every entry.")
+    total_bytes: int
+    entries: list[TempEntryOut]
 
 
 class CatalogFileOut(BaseModel):

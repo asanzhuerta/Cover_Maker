@@ -168,6 +168,105 @@ pub struct BootstrapStatus {
     pub separation: PhaseStatus,
     /// PyTorch build being installed or installed.
     pub torch: Option<String>,
+    /// What the runtime downloads and uses on disk, when known.
+    pub space: Option<DiskPlan>,
+}
+
+/// Download and disk space of the runtime for this machine's PyTorch build.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct DiskPlan {
+    pub torch: String,
+    pub download_bytes: u64,
+    /// Estimated size of the installed runtime.
+    pub disk_bytes: u64,
+    /// Still needed: the estimate minus what is already in the runtime folder.
+    pub needed_bytes: u64,
+    /// Free space on the runtime's drive, when it can be read.
+    pub free_bytes: Option<u64>,
+    pub folder: String,
+}
+
+impl DiskPlan {
+    /// Room for the runtime plus a margin for temporary files.
+    pub fn fits(&self) -> bool {
+        self.free_bytes
+            .is_none_or(|free| free >= self.needed_bytes + SPACE_MARGIN)
+    }
+}
+
+/// Head room kept free on top of the runtime estimate (512 MiB).
+const SPACE_MARGIN: u64 = 512 * 1024 * 1024;
+
+#[derive(Debug, Deserialize)]
+struct ProfileSize {
+    download_bytes: u64,
+    disk_bytes: u64,
+}
+
+/// `sizes.json` (written by `desktop/scripts/runtime_sizes.py`): per profile.
+fn load_sizes(layout: &Layout) -> Option<std::collections::HashMap<String, ProfileSize>> {
+    let text = fs::read_to_string(layout.bundle.join("sizes.json")).ok()?;
+    serde_json::from_str(text.trim_start_matches('\u{feff}')).ok()
+}
+
+/// Total size of the files under `dir` (0 when it does not exist).
+pub fn folder_bytes(dir: &Path) -> u64 {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return 0;
+    };
+    entries
+        .filter_map(Result::ok)
+        .map(|entry| match entry.file_type() {
+            Ok(kind) if kind.is_dir() => folder_bytes(&entry.path()),
+            Ok(_) => entry.metadata().map(|m| m.len()).unwrap_or(0),
+            Err(_) => 0,
+        })
+        .sum()
+}
+
+/// Free bytes on the drive that holds `path` (or its nearest existing parent).
+pub fn free_bytes(path: &Path) -> Option<u64> {
+    let existing = path.ancestors().find(|p| p.exists())?;
+    #[cfg(windows)]
+    {
+        use std::os::windows::ffi::OsStrExt;
+        use windows::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
+        use windows::core::PCWSTR;
+        let wide: Vec<u16> = existing
+            .as_os_str()
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+        let mut free = 0u64;
+        // SAFETY: `wide` is a NUL-terminated path that outlives the call.
+        unsafe { GetDiskFreeSpaceExW(PCWSTR(wide.as_ptr()), Some(&mut free), None, None) }.ok()?;
+        Some(free)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = existing;
+        None
+    }
+}
+
+/// The runtime's space needs for `torch`, or `None` without `sizes.json`.
+pub fn disk_plan(layout: &Layout, torch: &str) -> Option<DiskPlan> {
+    let sizes = load_sizes(layout)?;
+    let profile = sizes.get(torch)?;
+    let present = folder_bytes(&layout.root);
+    Some(DiskPlan {
+        torch: torch.to_string(),
+        download_bytes: profile.download_bytes,
+        disk_bytes: profile.disk_bytes,
+        needed_bytes: profile.disk_bytes.saturating_sub(present),
+        free_bytes: free_bytes(&layout.root),
+        folder: layout.root.display().to_string(),
+    })
+}
+
+/// True on a first run: nothing of the runtime is installed yet.
+pub fn first_run(layout: &Layout) -> bool {
+    load_state(layout).core.is_none()
 }
 
 impl BootstrapStatus {
@@ -177,6 +276,7 @@ impl BootstrapStatus {
             core: PhaseStatus::done(),
             separation: PhaseStatus::done(),
             torch: None,
+            space: None,
         }
     }
 
@@ -186,7 +286,17 @@ impl BootstrapStatus {
             core: PhaseStatus::pending(),
             separation: PhaseStatus::pending(),
             torch: None,
+            space: None,
         }
+    }
+
+    /// First run: show the space plan and wait until the user starts it.
+    pub fn awaiting_consent(plan: Option<DiskPlan>) -> Self {
+        let mut status = Self::runtime();
+        status.core.state = "consent";
+        status.torch = plan.as_ref().map(|p| p.torch.clone());
+        status.space = plan;
+        status
     }
 }
 
@@ -235,6 +345,14 @@ impl Reporter<'_> {
 
     fn fraction(&self, value: f32) {
         self.update(|phase, _| phase.fraction = Some(value));
+    }
+
+    fn space(&self, plan: Option<DiskPlan>) {
+        let Ok(mut status) = self.state.0.lock() else {
+            return;
+        };
+        status.space = plan;
+        (self.notify)(&status);
     }
 
     fn finish(&self, result: &Result<(), String>) {
@@ -465,6 +583,18 @@ fn core_steps(layout: &Layout, report: &Reporter) -> Result<(), String> {
     if current && layout.engine_exe().exists() {
         install_tool(layout, "ffmpeg", &deps.ffmpeg, report)?;
         return install_tool(layout, "deno", &deps.deno, report);
+    }
+    // Check the room for the whole runtime (PyTorch included) before the
+    // first download, so a full disk fails here and not halfway through.
+    let torch = installed.torch.clone().unwrap_or_else(torch_build);
+    let plan = disk_plan(layout, &torch);
+    report.space(plan.clone());
+    if let Some(plan) = plan.filter(|p| !p.fits()) {
+        return Err(format!(
+            "not enough disk space: the runtime needs about {} MiB more, {} MiB are free",
+            plan.needed_bytes / (1024 * 1024),
+            plan.free_bytes.unwrap_or(0) / (1024 * 1024)
+        ));
     }
     fs::create_dir_all(&layout.root).map_err(|e| format!("cannot create runtime folder: {e}"))?;
     let venv = layout.venv();
@@ -697,6 +827,37 @@ mod tests {
         assert!(data_home(true).ends_with("Cover_Maker.dev"));
         assert!(data_home(false).ends_with("Cover_Maker"));
         assert!(default_root().ends_with("Cover_Maker/runtime"));
+    }
+
+    #[test]
+    fn disk_plan_needs_room_plus_margin() {
+        let mut plan = DiskPlan {
+            torch: "cpu".into(),
+            download_bytes: 1,
+            disk_bytes: 2 * SPACE_MARGIN,
+            needed_bytes: SPACE_MARGIN,
+            free_bytes: Some(2 * SPACE_MARGIN),
+            folder: String::new(),
+        };
+        assert!(plan.fits());
+        plan.free_bytes = Some(2 * SPACE_MARGIN - 1);
+        assert!(!plan.fits());
+        plan.free_bytes = None;
+        assert!(plan.fits());
+    }
+
+    #[test]
+    fn reads_free_space_and_folder_sizes() {
+        let dir = std::env::temp_dir().join(format!("cm-size-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(dir.join("sub")).unwrap();
+        fs::write(dir.join("a.bin"), [0u8; 10]).unwrap();
+        fs::write(dir.join("sub").join("b.bin"), [0u8; 5]).unwrap();
+        assert_eq!(folder_bytes(&dir), 15);
+        assert_eq!(folder_bytes(&dir.join("missing")), 0);
+        #[cfg(windows)]
+        assert!(free_bytes(&dir.join("not").join("yet")).unwrap() > 0);
+        fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
