@@ -38,7 +38,12 @@ class AudioSeparatorBackend:
     def _load(self, request: SeparationRequest, scratch: Path) -> Any:
         key = (request.model_filename, request.precision, request.chunk_s, str(request.model_dir))
         if self._key == key and self._separator is not None:
+            # The loaded model keeps its own copy of the output folder: point
+            # both at this job's scratch, or the stems land in the last job's.
             self._separator.output_dir = str(scratch)
+            model = getattr(self._separator, "model_instance", None)
+            if model is not None:
+                model.output_dir = str(scratch)
             return self._separator
         self._release()
         from audio_separator.separator import Separator  # pyright: ignore[reportMissingImports]
