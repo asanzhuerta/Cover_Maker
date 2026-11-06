@@ -170,12 +170,10 @@ pub fn run() {
             // starts it (`bootstrap_retry`). Updates and repairs start at once.
             let consent = layout.as_ref().is_some_and(runtime::first_run);
             let status = match &layout {
-                Some(layout) if consent => {
-                    BootstrapStatus::awaiting_consent(runtime::disk_plan(
-                        layout,
-                        &runtime::torch_build(),
-                    ))
-                }
+                Some(layout) if consent => BootstrapStatus::awaiting_consent(runtime::disk_plan(
+                    layout,
+                    &runtime::torch_build(),
+                )),
                 Some(_) => BootstrapStatus::runtime(),
                 None => BootstrapStatus::development(),
             };

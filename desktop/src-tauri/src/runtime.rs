@@ -239,8 +239,7 @@ pub fn free_bytes(path: &Path) -> Option<u64> {
             .collect();
         let mut free = 0u64;
         // SAFETY: `wide` is a NUL-terminated path that outlives the call.
-        unsafe { GetDiskFreeSpaceExW(PCWSTR(wide.as_ptr()), Some(&mut free), None, None) }
-            .ok()?;
+        unsafe { GetDiskFreeSpaceExW(PCWSTR(wide.as_ptr()), Some(&mut free), None, None) }.ok()?;
         Some(free)
     }
     #[cfg(not(windows))]
