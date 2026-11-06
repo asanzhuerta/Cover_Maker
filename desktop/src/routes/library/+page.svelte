@@ -2,6 +2,7 @@
   import { SvelteSet } from "svelte/reactivity";
   import type { Schemas } from "$lib/api/client";
   import Icon from "$lib/components/Icon.svelte";
+  import TempFiles from "$lib/components/TempFiles.svelte";
   import { connection, isTauri } from "$lib/connection.svelte";
   import { sendToNewJob } from "$lib/handoff.svelte";
   import { t, type MessageKey } from "$lib/i18n.svelte";
@@ -410,6 +411,8 @@
     </div>
   </section>
 {/if}
+
+<TempFiles onchange={() => void load()} />
 
 <style>
   .add .row {

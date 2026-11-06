@@ -41,4 +41,7 @@ foreach ($name in $profiles.Keys) {
         --format pylock.toml @($profiles[$name]) -o $file -q
     if ($LASTEXITCODE -ne 0) { throw "uv export ($name) failed" }
 }
+# Download and disk sizes per profile, shown before the first-run download.
+uv run --no-project python (Join-Path $PSScriptRoot "runtime_sizes.py") $out
+if ($LASTEXITCODE -ne 0) { throw "runtime_sizes.py failed" }
 Get-ChildItem $out | Format-Table Name, Length -AutoSize

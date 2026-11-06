@@ -1333,6 +1333,63 @@
         "title": "SystemOut",
         "type": "object"
       },
+      "TempEntryOut": {
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "modified": {
+            "format": "date-time",
+            "title": "Modified",
+            "type": "string"
+          },
+          "name": {
+            "description": "Folder or file name inside the temp folder.",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "bytes",
+          "files",
+          "modified"
+        ],
+        "title": "TempEntryOut",
+        "type": "object"
+      },
+      "TemporaryOut": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/TempEntryOut"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "folder": {
+            "description": "The temp folder; clearing it deletes every entry.",
+            "title": "Folder",
+            "type": "string"
+          },
+          "total_bytes": {
+            "title": "Total Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "folder",
+          "total_bytes",
+          "entries"
+        ],
+        "title": "TemporaryOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -2548,6 +2605,42 @@
           }
         },
         "summary": "Storage Cleanup"
+      }
+    },
+    "/storage/temporary": {
+      "get": {
+        "operationId": "storage_temporary_storage_temporary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemporaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Storage Temporary"
+      }
+    },
+    "/storage/temporary/clear": {
+      "post": {
+        "operationId": "storage_temporary_clear_storage_temporary_clear_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Storage Temporary Clear"
       }
     },
     "/system": {

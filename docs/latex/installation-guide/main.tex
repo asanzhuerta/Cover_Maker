@@ -72,8 +72,18 @@ Library & 100--200~MB per processed song \\
 \end{tabularx}
 
 \chapter{First run}
-The first start installs the local engine. A \emph{Setting up Cover\_Maker}
-screen lists the steps and shows their progress:
+Before anything is downloaded, the \emph{Setting up Cover\_Maker} screen shows
+what the first run needs on this computer: the download size, the approximate
+space on disk once installed, the free space on the drive, the PyTorch build
+chosen for your hardware (CUDA for a compatible NVIDIA card, otherwise the
+processor build) and the folder it goes to. Models are extra and are only
+downloaded later, when you accept them. Press \emph{Download and install} to
+start. If the drive does not have room for the runtime plus 512~MB to spare,
+the screen says so and nothing is downloaded: free some space and press
+\emph{Check again}. Updates and repairs of an existing install start without
+asking.
+
+The setup then lists the steps and shows their progress:
 \begin{enumerate}
   \item \textbf{Python 3.12}: a private copy, not added to \texttt{PATH}.
   \item \textbf{Engine environment}: a virtual environment.
