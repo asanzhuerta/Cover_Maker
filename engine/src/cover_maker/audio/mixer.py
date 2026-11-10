@@ -59,29 +59,51 @@ def without(
     return result
 
 
+def pan_gains(pan: float) -> tuple[float, float]:
+    """Left and right gain of a stereo stem for a pan from -1 (left) to 1 (right).
+
+    Balance law, as in the desktop app's preview: the centre leaves both
+    channels at unity; turning towards one side fades the other channel
+    linearly down to silence.
+    """
+    p = min(1.0, max(-1.0, pan))
+    return (1.0 - p if p > 0 else 1.0, 1.0 + p if p < 0 else 1.0)
+
+
+def _channel_gains(gain: float, pan: float, channels: int) -> np.ndarray:
+    left, right = pan_gains(pan)
+    if channels == 2:
+        return np.array([gain * left, gain * right], dtype=np.float32)
+    return np.full(channels, gain, dtype=np.float32)
+
+
 def mix_gains(
     mix: Audio,
     stems: Mapping[Stem, Audio],
     gains: Mapping[Stem, float],
     residual: ResidualMode,
+    pans: Mapping[Stem, float] | None = None,
 ) -> Audio:
-    """Return a custom mix: every stem scaled by its linear gain (default 1).
+    """Return a custom mix: every stem scaled by its linear gain (default 1)
+    and balanced by its pan (default centre).
 
     The residual (the mix minus every stem) is added back at unity gain with
-    ``residual=keep`` and left out with ``drop``. All gains at 1 with ``keep``
-    give the original mix; gain 0 on a stem matches :func:`without`. The
-    preview mixer in the desktop app uses the same formula.
+    ``residual=keep`` and left out with ``drop``. All gains at 1 and pans at
+    the centre with ``keep`` give the original mix; gain 0 on a stem matches
+    :func:`without`. The preview mixer in the desktop app uses the same
+    formula, per channel.
     """
     frames = len(mix)
+    pans = pans or {}
     fitted = {stem: _fit(signal, frames) for stem, signal in stems.items()}
+    offset = 1.0 if residual is ResidualMode.KEEP else 0.0
     if residual is ResidualMode.KEEP:
         result = mix.astype(np.float32, copy=True)
-        for stem, signal in fitted.items():
-            result += (gains.get(stem, 1.0) - 1.0) * signal
-        return result
-    result = np.zeros_like(mix, dtype=np.float32)
+    else:
+        result = np.zeros_like(mix, dtype=np.float32)
     for stem, signal in fitted.items():
-        result += gains.get(stem, 1.0) * signal
+        channel = _channel_gains(gains.get(stem, 1.0), pans.get(stem, 0.0), signal.shape[1])
+        result += (channel - offset) * signal
     return result
 
 

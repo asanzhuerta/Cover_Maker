@@ -118,8 +118,8 @@
     place-items: center;
     width: 24px;
     height: 24px;
-    border-radius: 7px;
-    color: var(--stem);
+    border-radius: 50%;
+    color: color-mix(in oklab, var(--stem), var(--fg) var(--stem-ink-mix));
     background: color-mix(in srgb, var(--stem) 16%, transparent);
   }
 
@@ -129,7 +129,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.3rem 0.7rem;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--border-strong);
     font-size: 0.8rem;
   }
@@ -147,8 +147,8 @@
 
   .download .track {
     height: 6px;
-    border-radius: 3px;
-    background: var(--border);
+    border-radius: 2px;
+    background: var(--well);
     overflow: hidden;
   }
 

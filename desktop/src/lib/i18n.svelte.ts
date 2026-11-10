@@ -8,6 +8,35 @@ const en = {
   "nav.about": "About",
   "nav.label": "Main menu",
   "nav.skip": "Skip to content",
+  "brand.descriptor": "the cover musician's studio",
+  "dock.label": "Transport",
+  "dock.empty": "No song loaded. Open one from the Queue to play it here.",
+  "dock.open": "Open in the mixer",
+  "lcd.label": "Status display",
+  "lcd.engine": "Engine",
+  "lcd.runtime": "Runtime",
+  "lcd.demo": "Demo",
+  "lcd.bpm": "BPM",
+  "lcd.key": "Key",
+  "lcd.tuning": "Tune",
+  "lcd.soon": "Tempo, key and tuning detection arrive in a later version.",
+  "lcd.runtimeMissing": "Separation runtime not installed yet.",
+  "mixer.pan": "Pan",
+  "mixer.output": "Output level",
+  "mixer.level": "Level",
+  "shortcuts.title": "Keyboard shortcuts",
+  "shortcuts.open": "Keyboard shortcuts",
+  "shortcuts.play": "Play or pause",
+  "shortcuts.select": "Select a stem lane",
+  "shortcuts.lane": "Previous or next lane",
+  "shortcuts.mute": "Mute the selected lane",
+  "shortcuts.solo": "Solo the selected lane",
+  "shortcuts.loop": "Loop on or off",
+  "shortcuts.ab": "Switch between your mix and the original (A/B)",
+  "shortcuts.seek": "Jump back or forward 5 seconds",
+  "shortcuts.help": "Show this help",
+  "shortcuts.note": "Shortcuts do nothing while you type in a field.",
+  "shortcuts.close": "Close",
   "diag.title": "Diagnostics",
   "diag.hint":
     "Create a report to attach to a bug report: versions, hardware, recent jobs and the engine log. Your folders, links and tokens are removed; no audio is included.",
@@ -22,7 +51,7 @@ const en = {
   "hint.worker":
     "The separation process stopped. Press Retry; if it happens again, update the graphics driver or allow CPU fallback in Settings.",
   "hint.runtime":
-    "The separation runtime is still being installed. Wait until the box at the bottom left says it is installed, then press Retry.",
+    "The separation runtime is still being installed. Wait until the RUNTIME light in the display at the bottom right turns green, then press Retry.",
   "hint.model": "Install the model on the Models page, then press Retry.",
   "hint.download":
     "Check the link and your connection. Video sites change often: try Settings › Check for yt-dlp update.",
@@ -170,11 +199,11 @@ const en = {
   "bootstrap.separationFailed": "Separation runtime not installed.",
   "bootstrap.separationReady": "Separation runtime installed",
   "runtime.wait":
-    "The separation runtime is still being installed. Models can be installed and songs separated once the box at the bottom left says it is installed.",
+    "The separation runtime is still being installed. Models can be installed and songs separated once the RUNTIME light at the bottom right turns green.",
   "runtime.failed":
-    "The separation runtime could not be installed. Use Retry in the box at the bottom left.",
+    "The separation runtime could not be installed (the RUNTIME light at the bottom right is red). Press Retry.",
   "runtime.missing":
-    "Separation support is not installed yet. Wait until the box at the bottom left says the separation runtime is installed, then try again.",
+    "Separation support is not installed yet. Wait until the RUNTIME light at the bottom right turns green, then try again.",
   "updates.title": "Updates",
   "updates.app": "Cover_Maker",
   "updates.check": "Check for updates",
@@ -183,7 +212,6 @@ const en = {
   "updates.installing": "Installing",
   "updates.install": "Update",
   "welcome.title": "Welcome to",
-  "welcome.kicker": "Stem separation for musicians",
   "welcome.step.terms": "Terms of use",
   "welcome.step.hardware": "Your hardware",
   "welcome.step.engine": "Preparing your PC",
@@ -191,7 +219,7 @@ const en = {
   "tour.engineIntro":
     "Cover_Maker separates on your own PC. To do so it is now installing its local separation runtime (PyTorch and the AI tooling) in the background: about 4 GB with an NVIDIA graphics card, under 1 GB otherwise. You can keep going meanwhile.",
   "tour.engineSidebar":
-    "After this welcome you will see the same status in the box at the bottom left of the sidebar. When it says “Separation runtime installed”, you can install models and start separating songs.",
+    "After this welcome you will see the same status as the RUNTIME light in the display at the bottom right: it blinks amber while installing and turns green when the separation runtime is installed. Then you can install models and start separating songs.",
   "tour.runtimeRunning":
     "Downloading and installing. This takes a few minutes, depending on your connection.",
   "tour.runtimeReady": "Ready: you can install models and separate songs.",
@@ -205,7 +233,7 @@ const en = {
     "Example only: the Models page shows the real models, their licences and a green bar while one downloads.",
   "tour.nextTitle": "What happens next",
   "tour.next1":
-    "The separation runtime finishes installing in the background; watch the box at the bottom left.",
+    "The separation runtime finishes installing in the background; watch the RUNTIME light at the bottom right.",
   "tour.next2":
     "Open Models, read the licence of the recommended model and install it.",
   "tour.next3":
@@ -345,6 +373,37 @@ const es: Dictionary = {
   "nav.about": "Acerca de",
   "nav.label": "Menú principal",
   "nav.skip": "Saltar al contenido",
+  "brand.descriptor": "el estudio del músico de covers",
+  "dock.label": "Transporte",
+  "dock.empty":
+    "No hay ninguna canción cargada. Abre una desde la Cola para reproducirla aquí.",
+  "dock.open": "Abrir en el mezclador",
+  "lcd.label": "Pantalla de estado",
+  "lcd.engine": "Motor",
+  "lcd.runtime": "Runtime",
+  "lcd.demo": "Demo",
+  "lcd.bpm": "BPM",
+  "lcd.key": "Tono",
+  "lcd.tuning": "Afin",
+  "lcd.soon":
+    "La detección de tempo, tonalidad y afinación llegará en una versión posterior.",
+  "lcd.runtimeMissing": "El runtime de separación aún no está instalado.",
+  "mixer.pan": "Panorama",
+  "mixer.output": "Nivel de salida",
+  "mixer.level": "Nivel",
+  "shortcuts.title": "Atajos de teclado",
+  "shortcuts.open": "Atajos de teclado",
+  "shortcuts.play": "Reproducir o pausar",
+  "shortcuts.select": "Seleccionar una pista de stem",
+  "shortcuts.lane": "Pista anterior o siguiente",
+  "shortcuts.mute": "Silenciar la pista seleccionada",
+  "shortcuts.solo": "Solo de la pista seleccionada",
+  "shortcuts.loop": "Activar o desactivar el bucle",
+  "shortcuts.ab": "Alternar entre tu mezcla y el original (A/B)",
+  "shortcuts.seek": "Retroceder o avanzar 5 segundos",
+  "shortcuts.help": "Mostrar esta ayuda",
+  "shortcuts.note": "Los atajos no hacen nada mientras escribes en un campo.",
+  "shortcuts.close": "Cerrar",
   "diag.title": "Diagnóstico",
   "diag.hint":
     "Crea un informe para adjuntar a un aviso de error: versiones, equipo, trabajos recientes y el registro del motor. Se eliminan tus carpetas, enlaces y tokens; no incluye audio.",
@@ -359,7 +418,7 @@ const es: Dictionary = {
   "hint.worker":
     "El proceso de separación se ha detenido. Pulsa Reintentar; si vuelve a pasar, actualiza el driver de la tarjeta gráfica o permite pasar a CPU en Ajustes.",
   "hint.runtime":
-    "El runtime de separación aún se está instalando. Espera a que el recuadro de abajo a la izquierda indique que está instalado y pulsa Reintentar.",
+    "El runtime de separación aún se está instalando. Espera a que la luz RUNTIME de la pantalla de abajo a la derecha se ponga verde y pulsa Reintentar.",
   "hint.model": "Instala el modelo en la página Modelos y pulsa Reintentar.",
   "hint.download":
     "Revisa el enlace y tu conexión. Los sitios de vídeo cambian a menudo: prueba Ajustes › Buscar actualización de yt-dlp.",
@@ -508,11 +567,11 @@ const es: Dictionary = {
   "bootstrap.separationFailed": "Runtime de separación sin instalar.",
   "bootstrap.separationReady": "Runtime de separación instalado",
   "runtime.wait":
-    "El runtime de separación aún se está instalando. Podrás instalar modelos y separar canciones cuando el recuadro de abajo a la izquierda indique que está instalado.",
+    "El runtime de separación aún se está instalando. Podrás instalar modelos y separar canciones cuando la luz RUNTIME de abajo a la derecha se ponga verde.",
   "runtime.failed":
-    "No se ha podido instalar el runtime de separación. Usa Reintentar en el recuadro de abajo a la izquierda.",
+    "No se ha podido instalar el runtime de separación (la luz RUNTIME de abajo a la derecha está en rojo). Pulsa Reintentar.",
   "runtime.missing":
-    "El soporte de separación aún no está instalado. Espera a que el recuadro de abajo a la izquierda indique que el runtime de separación está instalado y vuelve a intentarlo.",
+    "El soporte de separación aún no está instalado. Espera a que la luz RUNTIME de abajo a la derecha se ponga verde y vuelve a intentarlo.",
   "updates.title": "Actualizaciones",
   "updates.app": "Cover_Maker",
   "updates.check": "Buscar actualizaciones",
@@ -521,7 +580,6 @@ const es: Dictionary = {
   "updates.installing": "Instalando",
   "updates.install": "Actualizar",
   "welcome.title": "Bienvenido a",
-  "welcome.kicker": "Separación de stems para músicos",
   "welcome.step.terms": "Condiciones de uso",
   "welcome.step.hardware": "Tu equipo",
   "welcome.step.engine": "Preparando tu PC",
@@ -529,7 +587,7 @@ const es: Dictionary = {
   "tour.engineIntro":
     "Cover_Maker separa en tu propio PC. Para ello está instalando ahora, en segundo plano, su runtime local de separación (PyTorch y las herramientas de IA): unos 4 GB con una tarjeta gráfica NVIDIA y menos de 1 GB en otro caso. Mientras tanto puedes seguir.",
   "tour.engineSidebar":
-    "Al terminar esta bienvenida verás el mismo estado en el recuadro de abajo a la izquierda de la barra lateral. Cuando ponga «Runtime de separación instalado», podrás instalar modelos y empezar a separar canciones.",
+    "Al terminar esta bienvenida verás el mismo estado en la luz RUNTIME de la pantalla de abajo a la derecha: parpadea en ámbar mientras se instala y se pone verde cuando el runtime de separación está instalado. Entonces podrás instalar modelos y empezar a separar canciones.",
   "tour.runtimeRunning":
     "Descargando e instalando. Tarda unos minutos, según tu conexión.",
   "tour.runtimeReady": "Listo: ya puedes instalar modelos y separar canciones.",
@@ -543,7 +601,7 @@ const es: Dictionary = {
     "Solo es un ejemplo: la página Modelos muestra los modelos reales, sus licencias y una barra verde mientras se descarga uno.",
   "tour.nextTitle": "Qué pasa ahora",
   "tour.next1":
-    "El runtime de separación termina de instalarse en segundo plano; fíjate en el recuadro de abajo a la izquierda.",
+    "El runtime de separación termina de instalarse en segundo plano; fíjate en la luz RUNTIME de abajo a la derecha.",
   "tour.next2":
     "Abre Modelos, lee la licencia del modelo recomendado e instálalo.",
   "tour.next3":

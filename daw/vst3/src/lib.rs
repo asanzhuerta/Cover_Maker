@@ -21,6 +21,7 @@ use nih_plug_egui::{create_egui_editor, egui, EguiState};
 pub mod dragdrop;
 pub mod engine;
 pub mod preview;
+pub mod theme;
 
 use engine::{Client, JobRequest, STEMS};
 use preview::Preview;
@@ -193,7 +194,18 @@ fn toggle_preview(shared: &Shared, name: &str, path: &std::path::Path) -> Result
 }
 
 fn editor_ui(ui: &mut egui::Ui, shared: &Arc<Shared>, form: &mut Form) {
-    ui.heading("Cover_Maker");
+    ui.horizontal(|ui| {
+        ui.heading("Cover");
+        ui.add_space(-ui.spacing().item_spacing.x);
+        ui.label(egui::RichText::new("_").heading().color(theme::ACCENT));
+        ui.add_space(-ui.spacing().item_spacing.x);
+        ui.heading("Maker");
+    });
+    ui.label(
+        egui::RichText::new("the cover musician's studio")
+            .small()
+            .color(theme::MUTED),
+    );
     ui.label("Separate a song with the Cover_Maker app (it must be open).");
     ui.add_space(6.0);
 
@@ -222,7 +234,11 @@ fn editor_ui(ui: &mut egui::Ui, shared: &Arc<Shared>, form: &mut Form) {
     ui.add_space(4.0);
     ui.horizontal(|ui| {
         if ui
-            .add_enabled(!busy, egui::Button::new("Separate"))
+            .add_enabled(
+                !busy,
+                egui::Button::new(egui::RichText::new("Separate").color(theme::BG))
+                    .fill(theme::ACCENT),
+            )
             .clicked()
         {
             start(shared, form);
@@ -279,7 +295,11 @@ fn editor_ui(ui: &mut egui::Ui, shared: &Arc<Shared>, form: &mut Form) {
         }
     }
     ui.add_space(8.0);
-    ui.small("Only separate audio you have the right to use.");
+    ui.label(
+        egui::RichText::new("Only separate audio you have the right to use.")
+            .small()
+            .color(theme::MUTED),
+    );
 }
 
 impl Plugin for CoverMaker {
@@ -307,7 +327,7 @@ impl Plugin for CoverMaker {
         create_egui_editor(
             self.params.editor_state.clone(),
             Form::default(),
-            |_, _| {},
+            |ctx, _| theme::apply(ctx),
             move |ctx, _setter, form| {
                 // Keep polling the job status while the window is open.
                 ctx.request_repaint_after(Duration::from_millis(250));

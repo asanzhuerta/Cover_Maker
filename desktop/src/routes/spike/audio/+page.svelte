@@ -130,6 +130,6 @@
   main {
     max-width: 40rem;
     margin: 2rem auto;
-    font-family: system-ui, "Segoe UI", sans-serif;
+    font-family: var(--font-body);
   }
 </style>

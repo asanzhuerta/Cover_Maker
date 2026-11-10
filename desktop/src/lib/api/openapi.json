@@ -1110,6 +1110,17 @@
             ],
             "description": "Defaults to the job's format."
           },
+          "pans": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Stereo balance per stem from -1 (left) to 1 (right). Missing stems stay centred.",
+            "propertyNames": {
+              "$ref": "#/components/schemas/Stem"
+            },
+            "title": "Pans",
+            "type": "object"
+          },
           "residual": {
             "$ref": "#/components/schemas/ResidualMode",
             "default": "keep",

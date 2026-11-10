@@ -25,6 +25,8 @@
   },
   "bundle": {
     "active": true,
+    "shortDescription": "Cover_Maker, the cover musician's studio",
+    "longDescription": "Cover_Maker, the cover musician's studio: local AI stem separation for practising and recording covers.",
     "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",

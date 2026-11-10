@@ -54,7 +54,7 @@
 
   rect {
     fill: var(--wave-off, var(--surface-3));
-    transition: fill 0.4s ease;
+    transition: fill var(--t) ease;
   }
 
   rect.on {

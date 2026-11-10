@@ -308,8 +308,8 @@
 
   .download .track {
     height: 6px;
-    border-radius: 3px;
-    background: var(--border);
+    border-radius: 2px;
+    background: var(--well);
     overflow: hidden;
   }
 
@@ -353,9 +353,10 @@
     flex: none;
     width: 40px;
     height: 40px;
-    border-radius: 12px;
-    background: var(--accent-soft);
-    color: var(--accent);
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--accent-ink);
   }
 
   .installed .cube {
@@ -402,8 +403,7 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgb(0 0 0 / 55%);
-    backdrop-filter: blur(4px);
+    background: rgb(12 11 10 / 60%);
     z-index: 10;
   }
 
@@ -447,8 +447,9 @@
     display: inline;
     padding: 0;
     border: none;
+    box-shadow: none;
     background: none;
-    color: var(--accent);
+    color: var(--link);
     text-align: left;
     text-decoration: underline;
     overflow-wrap: anywhere;
@@ -471,7 +472,7 @@
     font-size: 0.85rem;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     padding: 0.8rem;
   }
 

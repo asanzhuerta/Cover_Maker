@@ -60,7 +60,7 @@ milestones:
     name: Quality and 1.0
     effort: M
     goal: Hardening, accessibility, test report and the 1.0 release.
-    status: Done (v1.0.0)
+    status: Release after M13
   - id: M11
     name: DAW integration (VST3 + REAPER)
     effort: L
@@ -71,6 +71,31 @@ milestones:
     effort: S
     goal: About page with the author profile, the app description and the open-source credits, from one data file in EN/ES.
     status: Done
+  - id: M13
+    name: Visual identity (Tape & Console)
+    effort: M
+    goal: Own visual identity before 1.0 - warm hardware look, new logo and icons, icon rail and transport dock, LED meters and LCD panel, per-stem pan and keyboard shortcuts.
+    status: In progress
+  - id: M14
+    name: Practice tools
+    effort: L
+    goal: Tuning, key and tempo analysis; real-time pitch shift and time-stretch; bar-snapped loops, count-in, click stem and speed trainer; exports with key and tempo applied.
+    status: Planned
+  - id: M15
+    name: Cover studio (record audio and video)
+    effort: L
+    goal: Record takes and webcam video over the track without your instrument, in sync, and export cover videos; an "only my takes" export keeps the original master out of published material.
+    status: Planned
+  - id: M16
+    name: Rehearsal and setlists
+    effort: M
+    goal: Per-song practice settings, setlists with a rehearsal/live mode, MIDI foot-switch control, batch export and shareable song preparations without audio.
+    status: Planned
+  - id: Launch
+    name: Launch and growth
+    effort: M
+    goal: First-class repository and download (README, stable download link, signed installer, package managers, landing page, example song) and a launch in waves.
+    status: Planned
 
 risks:
   - id: R-01
@@ -113,3 +138,28 @@ risks:
     likelihood: medium
     impact: high
     mitigation: Unmodified yt-dlp as a dependency, user-pasted links only, rights confirmation, disclaimer; respond as the yt-dlp project does and, if required, move the feature to a separate optional plugin.
+  - id: R-09
+    risk: The app is perceived as a clone of an earlier app with the same video-link-to-stems base (StemKit, August 2026)
+    likelihood: medium
+    impact: medium
+    mitigation: Own visual identity in M13 before 1.0; positioning as the cover musician's studio with practice, recording and setlists (M14-M16); no code reuse in either direction.
+  - id: R-10
+    risk: Recording latency or audio/video drift in the webview makes recorded covers unusable
+    likelihood: medium
+    impact: high
+    mitigation: Spike in M15 before building features; native capture (WASAPI) as fallback; latency calibration with a recorded click.
+  - id: R-11
+    risk: Users publish covers that contain the original master recording
+    likelihood: medium
+    impact: high
+    mitigation: Separated stems act as guide tracks; an "only my takes" export for publishing; notices at export and in the User Manual.
+  - id: R-12
+    risk: Video encoding pulls in GPL codecs (x264) or patent-encumbered components
+    likelihood: low
+    impact: medium
+    mitigation: LGPL ffmpeg build with hardware or operating-system H.264 encoders and the native AAC encoder; x264 is not bundled.
+  - id: R-13
+    risk: Launch promotion draws takedowns or community bans
+    likelihood: medium
+    impact: medium
+    mitigation: Own or CC-licensed music only in all promotional material; video downloading is not used as the hook; each community's self-promotion rules are followed.

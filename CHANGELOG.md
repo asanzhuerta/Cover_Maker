@@ -8,9 +8,37 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-11-05
 
-First stable release: DAW integration (REAPER script and VST3 plugin),
-presets tuned from measured runs, model licences page, the code signing
-policy and privacy notice, and all documents at version 1.0 (M8, M10, M11).
+First stable release: the *Tape & Console* visual identity, DAW integration
+(REAPER script and VST3 plugin), presets tuned from measured runs, model
+licences page, the code signing policy and privacy notice, and all documents
+at version 1.0 (M8, M10, M11, M13).
+
+### Changed (M13: visual identity)
+- New visual identity, *Tape & Console* (warm analogue hardware), with the
+  descriptor "the cover musician's studio": warm near-black and cream
+  surfaces, one signal-orange accent, a cream-paper light theme, new stem
+  colours, bundled Archivo SemiExpanded and IBM Plex fonts (SIL OFL 1.1), a
+  tape-reel logo, new app icons and favicon, and the same colours in the VST3
+  plugin and the documents. The old violet and pink gradients are gone.
+- A 64 px icon rail replaces the side bar; page names show on hover and
+  keyboard focus.
+- Engine and runtime status are lights in the amber display at the bottom
+  right instead of a box at the bottom left of the side bar.
+
+### Added (M13: visual identity)
+- Transport dock at the bottom of every page: the song opened in the mixer
+  keeps playing while you visit other pages, with play, loop, A/B, a scrub
+  waveform, an output meter and the display (clock, and slots for tempo, key
+  and tuning that a later version fills).
+- Mixer: pan knob per stem, applied the same way in the preview and in the
+  exported mix (`RenderRequest.pans`); LED level meters per stem with
+  peak-programme ballistics; console faders.
+- Keyboard shortcuts: Space, M/S, 1-6, up/down, L, A, left/right and `?` for
+  the shortcut help. They do nothing while you type in a field.
+- Page content rises into place on every page change; all motion is off with
+  the system's reduced-motion setting.
+- *Retry* next to the runtime notice when the separation runtime failed to
+  install.
 
 ### Added (installer test)
 - First run asks before downloading: the setup screen shows the download
@@ -23,6 +51,12 @@ policy and privacy notice, and all documents at version 1.0 (M8, M10, M11).
 - Library page: *Temporary files* lists what stopped or failed jobs left
   behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
   `POST /storage/temporary/clear`), and opens the folder in Explorer.
+
+### Changed
+- Project Plan 1.1: the roadmap after a competitive review. A new visual
+  identity (M13) ships before 1.0, followed by practice tools (M14), a cover
+  studio for recording audio and video (M15) and rehearsal with setlists
+  (M16), plus a launch plan and risks R-09 to R-13.
 
 ### Fixed
 - A second song separated with the same model in one session no longer

@@ -73,12 +73,13 @@ def render_custom_mix(
     gains: dict[Stem, float],
     residual: ResidualMode,
     fmt: str | None = None,
+    pans: dict[Stem, float] | None = None,
 ) -> tuple[Path, mixer.RenderResult]:
     """Render mixer settings to a new file in the job's output folder (never overwrites)."""
     fmt = fmt or sources.spec.output_format.value
     mix = io.read(sources.mix)
     stems = {stem: io.read(path) for stem, path in sources.stems.items()}
-    result = mixer.protect_peaks(mixer.mix_gains(mix, stems, gains, residual))
+    result = mixer.protect_peaks(mixer.mix_gains(mix, stems, gains, residual, pans))
     folder = sources.spec.output_dir
     base = f"{sources.title} - custom mix"
     target = folder / f"{base}.{fmt}"

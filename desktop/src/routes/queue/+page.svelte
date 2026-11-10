@@ -303,8 +303,9 @@
     place-items: center;
     width: 40px;
     height: 40px;
-    border-radius: 12px;
-    color: var(--job);
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    color: color-mix(in oklab, var(--job), var(--fg) var(--stem-ink-mix));
     background: color-mix(in srgb, var(--job) 14%, transparent);
   }
 
@@ -349,7 +350,7 @@
     align-items: center;
     gap: 0.9rem;
     padding: 0.45rem 0.6rem;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: var(--surface);
     border: 1px solid var(--border);
   }
@@ -387,7 +388,7 @@
     height: 18px;
     border-radius: 50%;
     background: var(--ok);
-    color: #0a0a10;
+    color: var(--bg);
   }
 
   .state {
