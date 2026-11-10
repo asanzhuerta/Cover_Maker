@@ -3,6 +3,7 @@
   import { resolve } from "$app/paths";
   import { about, contactLinks, localized } from "$lib/about";
   import Icon from "$lib/components/Icon.svelte";
+  import Logo from "$lib/components/Logo.svelte";
   import { isTauri } from "$lib/connection.svelte";
   import { i18n, t } from "$lib/i18n.svelte";
 
@@ -50,9 +51,15 @@
 
   <section class="card app">
     <p class="kicker">{t("about.app")}</p>
-    <h2>
-      <span class="gradient-text">Cover_Maker</span>
-    </h2>
+    <div class="lockup">
+      <Logo size={48} />
+      <div>
+        <h2>Cover<span class="underscore">_</span>Maker</h2>
+        <p class="descriptor" data-testid="about-descriptor">
+          {t("brand.descriptor")}
+        </p>
+      </div>
+    </div>
     <p>{localized(about.app.description, i18n.locale)}</p>
     <button class="ghost small" onclick={() => void open(about.app.repository)}
       ><Icon name="external" />{t("about.source")}</button
@@ -105,16 +112,41 @@
 
   .kicker {
     margin: 0;
-    color: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-display);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
   }
 
   h2 {
     margin: 0;
     font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--fg);
+  }
+
+  .underscore {
+    color: var(--accent);
+  }
+
+  .descriptor {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 
   p {
@@ -188,6 +220,7 @@
   button.link {
     padding: 0;
     border: 0;
+    box-shadow: none;
     background: none;
     color: var(--fg);
     font-weight: 600;

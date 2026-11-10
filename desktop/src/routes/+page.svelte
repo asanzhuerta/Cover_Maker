@@ -309,8 +309,8 @@
     justify-items: center;
     padding: 2rem 1.2rem 1.5rem;
     transition:
-      border-color 0.2s ease,
-      background 0.2s ease;
+      border-color var(--t) ease,
+      background var(--t) ease;
   }
 
   .drop-wave {
@@ -326,6 +326,11 @@
     background: var(--accent-soft);
   }
 
+  .drop.dragging .drop-icon {
+    color: var(--accent-fg);
+    background: var(--accent);
+  }
+
   .drop > :not(.drop-wave) {
     position: relative;
   }
@@ -335,10 +340,13 @@
     place-items: center;
     width: 56px;
     height: 56px;
-    border-radius: 16px;
-    background: var(--gradient);
-    color: #fff;
-    box-shadow: 0 10px 30px rgb(143 123 255 / 35%);
+    border-radius: 50%;
+    background: var(--well);
+    border: 1px solid var(--border-strong);
+    color: var(--accent);
+    box-shadow:
+      inset 0 2px 6px rgb(0 0 0 / 50%),
+      0 1px 0 rgb(255 255 255 / 5%);
   }
 
   .drop-title {
@@ -355,14 +363,16 @@
     width: min(560px, 100%);
     padding: 0.25rem 0.3rem 0.25rem 0.75rem;
     border: 1px solid var(--border-strong);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     background: var(--surface-2);
     color: var(--muted);
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 18%);
   }
 
   .link input {
     flex: 1;
     border: none;
+    box-shadow: none;
     background: transparent;
     padding: 0.35rem 0;
     color: var(--fg);
@@ -378,10 +388,11 @@
 
   .count {
     margin-left: 0.3rem;
-    padding: 0 0.45rem;
-    border-radius: 999px;
+    padding: 0 0.4rem;
+    border-radius: 3px;
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
   }
 
   .empty {
@@ -403,7 +414,7 @@
     gap: 0.75rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     padding: 0.4rem 0.4rem 0.4rem 0.6rem;
   }
 
@@ -412,7 +423,7 @@
     place-items: center;
     width: 30px;
     height: 30px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: var(--surface-3);
     color: var(--muted);
   }
@@ -436,12 +447,13 @@
     gap: 0.7rem;
     padding: 0.85rem 0.9rem;
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: var(--radius);
     background: var(--surface);
+    box-shadow: var(--bevel);
     cursor: pointer;
     transition:
-      border-color 0.15s ease,
-      background 0.15s ease;
+      border-color var(--t) ease,
+      background var(--t) ease;
   }
 
   .mode:hover {
@@ -465,9 +477,12 @@
     flex: none;
     width: 36px;
     height: 36px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: var(--surface-3);
     color: var(--muted);
+    transition:
+      background var(--t) ease,
+      color var(--t) ease;
   }
 
   .mode-text {
@@ -477,12 +492,13 @@
 
   .mode.on {
     border-color: var(--accent);
-    background: linear-gradient(180deg, var(--accent-soft), var(--surface));
+    background: var(--surface-2);
+    box-shadow: inset 0 3px 0 var(--accent);
   }
 
   .mode.on .mode-icon {
-    background: var(--gradient);
-    color: #fff;
+    background: var(--accent);
+    color: var(--accent-fg);
   }
 
   .sub {
@@ -501,7 +517,11 @@
   }
 
   .field {
-    font-size: 0.85rem;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
     color: var(--muted);
   }
 
@@ -522,7 +542,7 @@
 
   .footer {
     position: sticky;
-    bottom: 1rem;
+    bottom: calc(var(--dock) + 0.8rem);
     margin-top: 1.8rem;
     display: flex;
     flex-wrap: wrap;
@@ -530,7 +550,8 @@
     justify-content: space-between;
     gap: 0.8rem;
     padding: 0.8rem 0.9rem 0.8rem 1.1rem;
-    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(8px);
   }
 
   .summary {

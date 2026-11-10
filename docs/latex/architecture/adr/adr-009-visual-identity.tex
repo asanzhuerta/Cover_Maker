@@ -1,0 +1,62 @@
+\section{ADR-009: Visual identity (Tape \& Console)}
+\textbf{Status:} accepted (M13).
+
+\textbf{Context:} in November 2026 we found StemKit, another MIT desktop app
+that turns songs into stems. No code was shared either way, but our dark
+interface looked almost the same as theirs: a near-black background with two
+radial glows (violet and pink), a 264~px left side bar with a green
+\emph{Engine ready} dot at the bottom, a gradient rounded-tile logo with
+equaliser bars, violet-to-pink gradients and Segoe UI. Users could mistake one
+app for the other. Cover\_Maker also has a clearer audience than a generic
+stem tool: musicians who practise and record covers. The identity had to
+change before version 1.0.0 was released.
+
+\textbf{Decision:} a warm analogue-hardware identity called \emph{Tape \&
+Console}, with the descriptor \emph{the cover musician's studio}
+(\emph{el estudio del músico de covers}). The name stays Cover\_Maker.
+\begin{itemize}
+  \item \textbf{Colour.} Warm near-black and cream instead of blue-black and
+        white: background \texttt{\#0c0b0a}, surfaces \texttt{\#15130f},
+        \texttt{\#1d1a16}, \texttt{\#29251f}, text \texttt{\#f1e9dc}, muted
+        \texttt{\#a59d90}, hairline borders at 10~\% of the text colour. One
+        accent, signal orange \texttt{\#ff6a3d} (pressed \texttt{\#e04e22}),
+        for fills and the active state; blue \texttt{\#5b7cff} only for links;
+        status colours \texttt{\#8fd16a}, \texttt{\#ffc04d}, \texttt{\#ff4d4d}.
+        No gradients and no background glows. A light ``cream paper'' theme
+        uses the same hues; text in the accent uses a darker orange there so
+        that every text colour meets WCAG AA in both themes.
+  \item \textbf{Stem colours.} Vocals \texttt{\#ffcf5c}, guitar
+        \texttt{\#ff8f4d}, drums \texttt{\#5fd3b5}, bass \texttt{\#6fa8dc},
+        piano \texttt{\#c8d46a}, other \texttt{\#9b948a}. In the light theme
+        stem-coloured text is mixed with the text colour to stay readable.
+  \item \textbf{Type.} Archivo SemiExpanded for headings and console labels,
+        IBM Plex Sans for text, IBM Plex Mono for readouts. All three are SIL
+        Open Font License 1.1 and bundled as WOFF2 files, never loaded from
+        the network (the app works offline and makes no third-party requests).
+  \item \textbf{Layout.} A 64~px icon rail replaces the side bar (names show on
+        hover and keyboard focus). A transport dock at the bottom holds the
+        player, so a song keeps playing on every page. Engine and runtime status
+        are LEDs in an amber-on-black LCD panel in the dock, next to the clock
+        and the slots for tempo, key and tuning that the practice tools will
+        fill (M14).
+  \item \textbf{Signature parts.} Segmented LED meters with peak-programme
+        ballistics (instant attack, 20~dB in 1.7~s fall-back, IEC~60268-10
+        type~I, and a held peak), knobs for pan, console faders, buttons with
+        an LED that lights when they are on.
+  \item \textbf{Logo.} A tape reel whose flange opens into a C; the tape
+        leaving through the gap is the underscore of the name. The app icon
+        puts it on a round dark chassis, not on a rounded tile. Two other
+        directions (a fader cap, and \texttt{C\_} as a blinking cursor) were
+        drawn and rejected by the maintainer.
+  \item \textbf{Motion.} UI transitions take 150~ms; page content rises
+        8--12~px into place with \texttt{cubic-bezier(.22,1,.36,1)} and a
+        70~ms stagger; meters are drawn from their ballistics, never eased.
+        \texttt{prefers-reduced-motion} turns all of it off.
+\end{itemize}
+
+\textbf{Consequences:} the app no longer resembles StemKit, and its look
+says what it is for. The bundled fonts add about 0.6~MB and their licences are
+listed in \texttt{THIRD\_PARTY\_NOTICES.md}. The persistent player moved from
+the mixer page into a shared store (\texttt{lib/transport}), which also made
+per-stem pan and keyboard shortcuts possible. The documentation, the VST3
+plugin's window and the LaTeX class use the same palette.

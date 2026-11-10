@@ -18,7 +18,7 @@ in-app catalogue (Models page).
   catalogue marks the HT Demucs models as non-commercial, and models whose
   authors published no licence as "none": no rights are granted for those.
 - Everything else below is under a permissive licence (MIT, BSD, Apache-2.0,
-  ISC, MPL-2.0, PSF, Unlicense) or the LGPL (FFmpeg; soxr; libsndfile inside
+  ISC, MPL-2.0, PSF, Unlicense, SIL Open Font License 1.1) or the LGPL (FFmpeg; soxr; libsndfile inside
   soundfile), which allows use as separate programs or libraries.
 
 ## Bundled in the installer
@@ -28,6 +28,7 @@ in-app catalogue (Models page).
 | [uv](https://github.com/astral-sh/uv) (`uv.exe`) | MIT or Apache-2.0 | Licence texts in `bundle\licenses\uv` of the install folder |
 | [Tauri](https://tauri.app), its plugins and the shell's Rust crates | MIT or Apache-2.0 (mostly) | Listed below |
 | [Svelte](https://svelte.dev), SvelteKit and the UI's JavaScript packages | MIT (mostly) | Listed below |
+| Archivo SemiExpanded, IBM Plex Sans and IBM Plex Mono fonts | SIL Open Font License 1.1 | Listed below |
 | Microsoft Edge WebView2 | Microsoft software licence | Not bundled: the installer downloads Microsoft's bootstrapper only when WebView2 is missing |
 
 The installer also copies this file and Cover_Maker's `LICENSE` to
@@ -477,6 +478,17 @@ runtimes that the build bundles into it.
 | openapi-typescript-helpers | 0.1.0 | MIT |
 | svelte | 5.57.3 | MIT |
 <!-- /generated:javascript -->
+
+### Fonts of the user interface
+
+Bundled as WOFF2 files in `desktop/static/fonts`, each folder with its
+licence text (`OFL.txt`). The app never loads fonts from the network.
+
+| Font | Version | Source | Licence |
+|---|---|---|---|
+| Archivo SemiExpanded (Medium, SemiBold, Bold) | 2.66, commit `2111276` | [Omnibus-Type/Archivo](https://github.com/Omnibus-Type/Archivo) | SIL OFL 1.1, Copyright 2020 The Archivo Project Authors |
+| IBM Plex Sans (Regular, Italic, Medium, SemiBold) | 1.1.0 | [IBM/plex](https://github.com/IBM/plex) | SIL OFL 1.1, Copyright 2017 IBM Corp., Reserved Font Name "Plex" |
+| IBM Plex Mono (Regular, Medium, SemiBold) | 2.5.0 | [IBM/plex](https://github.com/IBM/plex) | SIL OFL 1.1, Copyright 2017 IBM Corp., Reserved Font Name "Plex" |
 
 ## VST3 plugin
 

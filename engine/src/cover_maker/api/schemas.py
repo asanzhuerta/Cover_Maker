@@ -273,6 +273,10 @@ class RenderRequest(BaseModel):
         default_factory=dict[Stem, float],
         description="Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.",
     )
+    pans: dict[Stem, float] = Field(
+        default_factory=dict[Stem, float],
+        description="Stereo balance per stem from -1 (left) to 1 (right). Missing stems stay centred.",
+    )
     residual: ResidualMode = Field(
         ResidualMode.KEEP, description="keep: add back what no stem captured; drop: stems only."
     )
@@ -283,6 +287,13 @@ class RenderRequest(BaseModel):
     def _bounded(cls, value: dict[Stem, float]) -> dict[Stem, float]:
         if any(not 0.0 <= gain <= 4.0 for gain in value.values()):
             raise ValueError("gains must be between 0 and 4")
+        return value
+
+    @field_validator("pans")
+    @classmethod
+    def _balanced(cls, value: dict[Stem, float]) -> dict[Stem, float]:
+        if any(not -1.0 <= pan <= 1.0 for pan in value.values()):
+            raise ValueError("pans must be between -1 and 1")
         return value
 
 

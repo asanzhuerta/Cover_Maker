@@ -74,6 +74,21 @@
       "url": "https://github.com/astral-sh/uv",
       "licence": "MIT / Apache-2.0",
       "role": { "en": "Runtime installer", "es": "Instalación del runtime" }
+    },
+    {
+      "name": "Archivo",
+      "url": "https://github.com/Omnibus-Type/Archivo",
+      "licence": "OFL-1.1",
+      "role": { "en": "Display typeface", "es": "Tipografía de títulos" }
+    },
+    {
+      "name": "IBM Plex Sans and Mono",
+      "url": "https://github.com/IBM/plex",
+      "licence": "OFL-1.1",
+      "role": {
+        "en": "Text and display readout typefaces",
+        "es": "Tipografías del texto y de la pantalla"
+      }
     }
   ],
   "notices": "https://github.com/asanzhuerta/Cover_Maker/blob/main/THIRD_PARTY_NOTICES.md"

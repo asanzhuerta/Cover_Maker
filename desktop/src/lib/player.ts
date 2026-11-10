@@ -1,24 +1,31 @@
 /**
  * Preview player (ADR-007): every track of a song plays from one AudioContext
  * and every source is started with the same `start(t)` time, which keeps them
- * sample-aligned. Gains change with short ramps to avoid clicks. Tracks are
- * decoded on demand; a track added while playing joins at the same position.
+ * sample-aligned. Each track has a left and a right gain (fader and pan);
+ * gains change with short ramps to avoid clicks. Tracks are decoded on
+ * demand; a track added while playing joins at the same position. The master
+ * bus feeds two analysers for the output meter.
  */
 
-import { wrapPosition } from "./mixer";
+import { wrapPosition, type Stereo } from "./mixer";
 
 const RAMP_SECONDS = 0.015;
+const METER_WINDOW = 2048;
 
 interface Track {
   buffer: AudioBuffer;
-  gain: GainNode;
+  input: ChannelSplitterNode;
+  gains: [GainNode, GainNode];
   source: AudioBufferSourceNode | null;
 }
 
 export class Player {
   readonly context: AudioContext;
   private tracks = new Map<string, Track>();
-  private targets = new Map<string, number>();
+  private targets = new Map<string, Stereo>();
+  private master: GainNode;
+  private analysers: [AnalyserNode, AnalyserNode];
+  private samples = new Float32Array(METER_WINDOW);
   /** Context time at which `offset` was playing (only while playing). */
   private startedAt = 0;
   private offset = 0;
@@ -29,6 +36,18 @@ export class Player {
 
   constructor(sampleRate?: number) {
     this.context = new AudioContext(sampleRate ? { sampleRate } : undefined);
+    this.master = this.context.createGain();
+    this.master.connect(this.context.destination);
+    const split = this.context.createChannelSplitter(2);
+    this.master.connect(split);
+    this.analysers = [
+      this.context.createAnalyser(),
+      this.context.createAnalyser(),
+    ];
+    this.analysers.forEach((analyser, channel) => {
+      analyser.fftSize = METER_WINDOW;
+      split.connect(analyser, channel);
+    });
   }
 
   has(id: string): boolean {
@@ -39,10 +58,21 @@ export class Player {
   async add(id: string, bytes: ArrayBuffer): Promise<void> {
     if (this.tracks.has(id)) return;
     const buffer = await this.context.decodeAudioData(bytes);
-    const gain = this.context.createGain();
-    gain.gain.value = this.targets.get(id) ?? 0;
-    gain.connect(this.context.destination);
-    const track: Track = { buffer, gain, source: null };
+    const input = this.context.createChannelSplitter(2);
+    const merge = this.context.createChannelMerger(2);
+    const target = this.targets.get(id) ?? [0, 0];
+    const gains: [GainNode, GainNode] = [
+      this.context.createGain(),
+      this.context.createGain(),
+    ];
+    gains.forEach((gain, channel) => {
+      gain.gain.value = target[channel];
+      // A mono file feeds both sides.
+      input.connect(gain, buffer.numberOfChannels > 1 ? channel : 0);
+      gain.connect(merge, 0, channel);
+    });
+    merge.connect(this.master);
+    const track: Track = { buffer, input, gains, source: null };
     this.tracks.set(id, track);
     this.duration = Math.max(this.duration, buffer.duration);
     if (this.playing) {
@@ -51,13 +81,29 @@ export class Player {
     }
   }
 
-  setGain(id: string, value: number): void {
-    this.targets.set(id, value);
+  /** Set a track's gain, the same on both sides or as a left/right pair. */
+  setGain(id: string, value: number | Stereo): void {
+    const pair: Stereo = typeof value === "number" ? [value, value] : value;
+    this.targets.set(id, pair);
     const track = this.tracks.get(id);
     if (!track) return;
     const now = this.context.currentTime;
-    track.gain.gain.cancelScheduledValues(now);
-    track.gain.gain.setTargetAtTime(value, now, RAMP_SECONDS / 3);
+    track.gains.forEach((gain, channel) => {
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setTargetAtTime(pair[channel], now, RAMP_SECONDS / 3);
+    });
+  }
+
+  /** Peak of the output over the last few milliseconds, per channel. */
+  outputPeaks(): Stereo {
+    const peaks = this.analysers.map((analyser) => {
+      analyser.getFloatTimeDomainData(this.samples);
+      let peak = 0;
+      for (const sample of this.samples)
+        peak = Math.max(peak, Math.abs(sample));
+      return peak;
+    });
+    return [peaks[0], peaks[1]];
   }
 
   get position(): number {
@@ -79,7 +125,7 @@ export class Player {
       source.loopStart = this.loop.start;
       source.loopEnd = this.loop.end;
     }
-    source.connect(track.gain);
+    source.connect(track.input);
     source.start(at, Math.min(position, track.buffer.duration));
     track.source = source;
   }
