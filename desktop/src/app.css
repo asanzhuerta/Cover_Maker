@@ -402,7 +402,7 @@ a:focus-visible,
 }
 
 /* Small uppercase label, as printed on a console. */
-.label {
+.caps {
   font-family: var(--font-display);
   font-size: 0.7rem;
   font-weight: 600;
@@ -413,6 +413,16 @@ a:focus-visible,
 
 .muted {
   color: var(--muted);
+}
+
+/* Read by screen readers, not shown. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .row {

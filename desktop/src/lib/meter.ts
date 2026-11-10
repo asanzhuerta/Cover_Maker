@@ -13,6 +13,8 @@ export const RELEASE_DB_PER_S = 20 / 1.7;
 export const PEAK_HOLD_S = 1.5;
 /** Envelope resolution the meters read (points per second of audio). */
 export const METER_POINTS_PER_S = 25;
+/** Updates further apart than this are a jump, not playback. */
+const MAX_GAP_S = 0.5;
 /** Limit of the engine's peaks endpoint. */
 export const MAX_POINTS = 10_000;
 
@@ -84,10 +86,9 @@ export function envelopePeak(
       envelope.length - 1,
       Math.max(0, Math.floor((time / duration) * envelope.length)),
     );
-  let start = index(Math.min(from, to));
-  const end = index(Math.max(from, to));
-  // A jump (seek or loop) reads only the current point.
-  if (end - start > envelope.length / 20) start = end;
+  const end = index(to);
+  // A jump (seek, loop or a long pause between updates) reads only the current point.
+  const start = to < from || to - from > MAX_GAP_S ? end : index(from);
   let peak = 0;
   for (let i = start; i <= end; i++) {
     const [min, max] = envelope[i];

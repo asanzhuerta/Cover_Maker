@@ -53,7 +53,7 @@
     </div>
     <div class="unit" aria-hidden="true">
       <div class="unit-head">
-        <span class="label">Stems</span>
+        <span class="caps">Stems</span>
         <span class="unit-leds"
           ><span class="led on"></span><span class="led on"></span><span
             class="led"

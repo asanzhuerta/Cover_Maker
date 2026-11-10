@@ -14,6 +14,7 @@
     formatDb,
     formatPan,
     formatTime,
+    pans,
     peaksPath,
   } from "$lib/mixer";
   import { stemColor, type Stem } from "$lib/stems";
@@ -88,6 +89,7 @@
         params: { path: { item_id: itemId } },
         body: {
           gains: gains as Record<Stem, number>,
+          pans: pans(transport.controls) as Record<Stem, number>,
           residual: transport.residual,
         },
       },
@@ -467,6 +469,7 @@
   }
 
   .fader {
+    --cap: #d9d0c2;
     display: grid;
     gap: 0.35rem;
   }
@@ -495,6 +498,7 @@
     background: var(--well);
   }
 
+  /* The cap is cream with a line in the stem colour across its middle. */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 12px;
@@ -502,10 +506,11 @@
     margin-top: -6px;
     border-radius: 2px;
     border: 1px solid #000;
-    background:
-      linear-gradient(var(--stem), var(--stem)) center / 100% 2px no-repeat,
-      #d9d0c2;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+    background: var(--stem);
+    box-shadow:
+      inset 0 6px 0 var(--cap),
+      inset 0 -6px 0 var(--cap),
+      0 1px 2px rgb(0 0 0 / 60%);
   }
 
   input[type="range"]::-moz-range-thumb {
@@ -513,9 +518,10 @@
     height: 16px;
     border-radius: 2px;
     border: 1px solid #000;
-    background:
-      linear-gradient(var(--stem), var(--stem)) center / 100% 2px no-repeat,
-      #d9d0c2;
+    background: var(--stem);
+    box-shadow:
+      inset 0 6px 0 var(--cap),
+      inset 0 -6px 0 var(--cap);
   }
 
   .wave {

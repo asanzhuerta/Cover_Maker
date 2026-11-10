@@ -112,9 +112,9 @@
   </div>
 
   <div class="output" title={t("mixer.output")}>
-    <span class="label">L</span>
+    <span class="caps">L</span>
     <Meter meter={transport.meters.L} segments={20} />
-    <span class="label">R</span>
+    <span class="caps">R</span>
     <Meter meter={transport.meters.R} segments={20} />
   </div>
 
@@ -226,7 +226,7 @@
     gap: 0.3rem 0.45rem;
   }
 
-  .output .label {
+  .output .caps {
     font-size: 0.6rem;
   }
 

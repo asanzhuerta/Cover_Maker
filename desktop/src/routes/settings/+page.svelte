@@ -222,7 +222,7 @@
 
   .updates h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
   .updates p {

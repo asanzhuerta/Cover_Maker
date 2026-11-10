@@ -1023,6 +1023,13 @@ export interface components {
             /** @description Defaults to the job's format. */
             output_format?: components["schemas"]["OutputFormat"] | null;
             /**
+             * Pans
+             * @description Stereo balance per stem from -1 (left) to 1 (right). Missing stems stay centred.
+             */
+            pans?: {
+                [key: string]: number;
+            };
+            /**
              * @description keep: add back what no stem captured; drop: stems only.
              * @default keep
              */

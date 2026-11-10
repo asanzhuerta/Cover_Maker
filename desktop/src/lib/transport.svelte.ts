@@ -34,7 +34,6 @@ import { STEMS, type Stem } from "./stems";
 
 export const MIX = "mix";
 const WAVE_POINTS = 900;
-const SEEK_STEP = 5;
 
 export interface Region {
   start: number;
@@ -353,5 +352,3 @@ export function resetMix(): void {
   transport.residual = "keep";
   transport.original = false;
 }
-
-export { SEEK_STEP };

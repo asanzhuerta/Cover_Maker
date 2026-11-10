@@ -110,8 +110,17 @@ def test_render_writes_the_custom_mix_without_overwriting(
     rendered, _ = sf.read(first.json()["path"])
     np.testing.assert_allclose(rendered, exported, atol=1e-4)
 
+    # Guitar panned hard left: only the right channel loses it.
+    panned = client.post(f"/items/{item_id}/render", json={"pans": {"guitar": -1.0}})
+    assert panned.status_code == 200, panned.text
+    original, _ = sf.read(str(third.json()["path"]))
+    balanced, _ = sf.read(panned.json()["path"])
+    np.testing.assert_allclose(balanced[:, 0], original[:, 0], atol=1e-4)
+    np.testing.assert_allclose(balanced[:, 1], exported[:, 1], atol=1e-4)
+
 
 def test_render_rejects_bad_requests(client: TestClient) -> None:  # noqa: F811
     assert client.post("/items/999/render", json={}).status_code == 404
     assert client.post("/items/1/render", json={"gains": {"guitar": 9}}).status_code in (400, 422)
     assert client.post("/items/1/render", json={"gains": {"kazoo": 1}}).status_code in (400, 422)
+    assert client.post("/items/1/render", json={"pans": {"bass": 1.5}}).status_code in (400, 422)

@@ -30,7 +30,7 @@
 <section class="setup" data-testid="setup">
   <div class="card panel">
     <p class="kicker">{t("bootstrap.kicker")}</p>
-    <h1><span class="gradient-text">{t("bootstrap.title")}</span></h1>
+    <h1>{t("bootstrap.title")}</h1>
     <p class="muted">
       {consent ? t("bootstrap.space.intro") : t("bootstrap.intro")}
     </p>
@@ -120,11 +120,12 @@
 
   .kicker {
     margin: 0;
-    color: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-display);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
   }
 
   h1 {
@@ -161,6 +162,7 @@
 
   li.active .dot {
     background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
   }
 
   li.finished .dot {
@@ -169,15 +171,15 @@
 
   .bar {
     height: 6px;
-    border-radius: 3px;
-    background: var(--border);
+    border-radius: 2px;
+    background: var(--well);
     overflow: hidden;
   }
 
   .bar span {
     display: block;
     height: 100%;
-    background: var(--gradient);
+    background: var(--accent);
     transition: width 0.3s ease;
   }
 

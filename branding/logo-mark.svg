@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cover_Maker">
+  <path d="M27 37.5H59" fill="none" stroke="#ff6a3d" stroke-width="5"/>
+  <path d="M41.56 16.79A19 19 0 1 0 41.56 41.21" fill="none" stroke="#1d1a16" stroke-width="5"/>
+  <path fill="#1d1a16" fill-rule="evenodd" d="M16 29a11 11 0 1 0 22 0a11 11 0 1 0-22 0ZM23.8 29a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0-6.4 0Z"/>
+</svg>

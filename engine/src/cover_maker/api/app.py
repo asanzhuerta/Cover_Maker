@@ -513,7 +513,7 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         try:
             # Rendering only reads library files, so it runs outside the store lock.
             target, result = await asyncio.to_thread(
-                render_custom_mix, sources, body.gains, body.residual, fmt
+                render_custom_mix, sources, body.gains, body.residual, fmt, body.pans
             )
         except (RuntimeError, OSError) as exc:
             raise ApiProblem(500, "render_failed", str(exc)) from exc

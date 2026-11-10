@@ -309,8 +309,8 @@
     justify-items: center;
     padding: 2rem 1.2rem 1.5rem;
     transition:
-      border-color 0.2s ease,
-      background 0.2s ease;
+      border-color var(--t) ease,
+      background var(--t) ease;
   }
 
   .drop-wave {
