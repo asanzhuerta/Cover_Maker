@@ -10,14 +10,17 @@ export const STEMS = [
 
 export type Stem = (typeof STEMS)[number];
 
-/** Signature colour per stem, used for chips, icons and waveforms. */
+/**
+ * Signature colour per stem, used for chips, icons, meters and waveforms.
+ * For text in the light theme, mix with the text colour (`.stem-ink`).
+ */
 export const STEM_COLORS: Record<Stem, string> = {
-  vocals: "#ff5c8a",
-  guitar: "#ffb238",
-  drums: "#3fd0ff",
-  bass: "#9b7bff",
-  piano: "#4fe08f",
-  other: "#a7b1c8",
+  vocals: "#ffcf5c",
+  guitar: "#ff8f4d",
+  drums: "#5fd3b5",
+  bass: "#6fa8dc",
+  piano: "#c8d46a",
+  other: "#9b948a",
 };
 
 /** Colour for a stem id from the API (unknown ids fall back to "other"). */

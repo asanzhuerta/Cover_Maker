@@ -3,6 +3,7 @@
   import { resolve } from "$app/paths";
   import type { Schemas } from "$lib/api/client";
   import Icon from "$lib/components/Icon.svelte";
+  import Logo from "$lib/components/Logo.svelte";
   import ModelPreview from "$lib/components/ModelPreview.svelte";
   import RuntimeStatus from "$lib/components/RuntimeStatus.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
@@ -38,30 +39,42 @@
   }
 </script>
 
-<div class="welcome">
+<div class="welcome reveal">
   <section class="hero">
     <div class="hero-text">
-      <span class="badge accent">{t("welcome.kicker")}</span>
+      <Logo size={56} />
+      <span class="badge accent">{t("brand.descriptor")}</span>
       <h1>
         {t("welcome.title")}
-        <span class="gradient-text">Cover_Maker</span>
+        <span class="wordmark">Cover<span class="underscore">_</span>Maker</span
+        >
       </h1>
       <p class="intro">{t("welcome.intro")}</p>
     </div>
-    <div class="lanes" aria-hidden="true">
-      {#each STEMS as stem, i (stem)}
-        <div class="lane" style="--stem: {STEM_COLORS[stem]}">
-          <span class="lane-icon"><Icon name={stem} size={16} /></span>
-          <span class="lane-name">{t(`stem.${stem}`)}</span>
-          <Waveform
-            seed={`hero-${stem}`}
-            bars={44}
-            height={26}
-            progress={1 - i * 0.12}
-            color={STEM_COLORS[stem]}
-          />
-        </div>
-      {/each}
+    <div class="unit" aria-hidden="true">
+      <div class="unit-head">
+        <span class="label">Stems</span>
+        <span class="unit-leds"
+          ><span class="led on"></span><span class="led on"></span><span
+            class="led"
+          ></span></span
+        >
+      </div>
+      <div class="lanes">
+        {#each STEMS as stem, i (stem)}
+          <div class="lane" style="--stem: {STEM_COLORS[stem]}">
+            <span class="lane-icon"><Icon name={stem} size={15} /></span>
+            <span class="lane-name">{t(`stem.${stem}`)}</span>
+            <Waveform
+              seed={`hero-${stem}`}
+              bars={44}
+              height={24}
+              progress={1 - i * 0.12}
+              color={STEM_COLORS[stem]}
+            />
+          </div>
+        {/each}
+      </div>
     </div>
   </section>
 
@@ -128,7 +141,7 @@
           <div class="card tile highlight">
             <span class="tile-icon"><Icon name="mix" size={20} /></span>
             <span class="muted">{t("hw.preset")}</span>
-            <strong class="gradient-text big"
+            <strong class="accent-text big"
               >{t(`preset.${system.recommended_preset as "fast"}`)}</strong
             >
             <span class="muted">{t("hw.tier")}: {system.tier}</span>
@@ -189,14 +202,27 @@
     margin-bottom: 2.2rem;
   }
 
+  .hero-text {
+    display: grid;
+    justify-items: start;
+    gap: 0.9rem;
+    color: var(--fg);
+  }
+
   .hero h1 {
-    margin: 0.8rem 0 0.8rem;
-    font-size: 2.6rem;
+    margin: 0;
+    font-size: 2.5rem;
     line-height: 1.1;
   }
 
-  .hero h1 span {
+  .wordmark {
     display: block;
+    font-size: 3.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .underscore {
+    color: var(--accent);
   }
 
   .intro {
@@ -206,42 +232,74 @@
     max-width: 34rem;
   }
 
+  /* A small hardware unit: six stem channels in a dark well. */
+  .unit {
+    padding: 0.7rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .unit-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.1rem 0.3rem 0.6rem;
+  }
+
+  .unit-leds {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .led {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--surface-3);
+  }
+
+  .led.on {
+    background: var(--led-green);
+    box-shadow: 0 0 6px var(--led-green);
+  }
+
   .lanes {
     display: grid;
-    gap: 0.4rem;
-    padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    background: linear-gradient(180deg, var(--surface-2), var(--surface));
-    box-shadow:
-      var(--shadow),
-      0 0 60px rgb(143 123 255 / 12%);
+    gap: 0.3rem;
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--well);
+    box-shadow: inset 0 2px 8px rgb(0 0 0 / 60%);
+    --wave-off: #2a251e;
   }
 
   .lane {
     display: grid;
-    grid-template-columns: 28px 70px 1fr;
+    grid-template-columns: 26px 70px 1fr;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.3rem 0.5rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--stem) 6%, transparent);
+    padding: 0.2rem 0.3rem;
+    border-radius: 3px;
+    box-shadow: inset 2px 0 0 var(--stem);
   }
 
   .lane-icon {
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 26px;
+    height: 26px;
     color: var(--stem);
-    background: color-mix(in srgb, var(--stem) 16%, transparent);
   }
 
   .lane-name {
-    font-size: 0.82rem;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a59d90;
   }
 
   .steps {
@@ -259,11 +317,14 @@
     align-items: center;
     gap: 0.6rem;
     padding: 0.7rem 0.9rem;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--muted);
     font-weight: 500;
+    transition:
+      border-color var(--t) ease,
+      color var(--t) ease;
   }
 
   .num {
@@ -274,24 +335,26 @@
     height: 26px;
     border-radius: 50%;
     background: var(--surface-3);
+    font-family: var(--font-mono);
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .steps li.current {
     border-color: var(--accent);
     color: var(--fg);
-    background: linear-gradient(180deg, var(--accent-soft), var(--surface));
+    background: var(--surface-2);
+    box-shadow: inset 0 3px 0 var(--accent);
   }
 
   .steps li.current .num {
-    background: var(--gradient);
-    color: #fff;
+    background: var(--accent);
+    color: var(--accent-fg);
   }
 
   .steps li.done .num {
     background: var(--ok);
-    color: #0a0a10;
+    color: var(--bg);
   }
 
   .panel h4 {
@@ -302,7 +365,7 @@
   .lead {
     margin: 0 0 1rem;
     max-width: 46rem;
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
   .panel > .muted {
@@ -315,7 +378,7 @@
     padding-left: 1.3rem;
     display: grid;
     gap: 0.45rem;
-    line-height: 1.45;
+    line-height: 1.5;
   }
 
   .panel h3 {
@@ -340,9 +403,10 @@
     flex: none;
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    background: var(--accent-soft);
-    color: var(--accent);
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--accent-ink);
   }
 
   .accept {
@@ -368,6 +432,10 @@
 
   .tile.highlight {
     border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  }
+
+  .accent-text {
+    color: var(--accent-ink);
   }
 
   .big {

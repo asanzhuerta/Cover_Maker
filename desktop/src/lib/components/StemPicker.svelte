@@ -44,15 +44,19 @@
     }
   }
 
+  /* A channel button: coloured tape on top, an LED that lights when chosen. */
   .stem {
     position: relative;
     flex-direction: column;
     gap: 0.55rem;
-    padding: 0.95rem 0.6rem 0.8rem;
-    border-radius: 14px;
+    padding: 1rem 0.6rem 0.8rem;
+    border-radius: var(--radius);
     background: var(--surface);
     border-color: var(--border);
     color: var(--muted);
+    box-shadow:
+      inset 0 3px 0 color-mix(in srgb, var(--stem) 35%, transparent),
+      var(--bevel);
   }
 
   .stem:hover:not(:disabled) {
@@ -65,56 +69,58 @@
     place-items: center;
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    color: var(--stem);
-    background: color-mix(in srgb, var(--stem) 12%, transparent);
+    border-radius: 50%;
+    color: color-mix(in oklab, var(--stem), var(--fg) var(--stem-ink-mix));
+    background: var(--surface-2);
+    border: 1px solid var(--border);
     transition:
-      background 0.15s ease,
-      color 0.15s ease;
+      background var(--t) ease,
+      color var(--t) ease;
   }
 
   .label {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .check {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    display: grid;
-    place-items: center;
-    width: 18px;
-    height: 18px;
+    top: 0.55rem;
+    right: 0.55rem;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--stem);
-    color: #0a0a10;
-    opacity: 0;
-    transform: scale(0.6);
+    background: var(--surface-3);
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 40%);
     transition:
-      opacity 0.15s ease,
-      transform 0.15s ease;
+      background var(--t) ease,
+      box-shadow var(--t) ease;
+  }
+
+  .check :global(svg) {
+    display: none;
   }
 
   .stem.on {
     color: var(--fg);
     border-color: var(--stem);
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--stem) 16%, var(--surface)),
-      var(--surface)
-    );
+    background: var(--surface-2);
     box-shadow:
-      0 0 0 1px var(--stem) inset,
-      0 8px 24px color-mix(in srgb, var(--stem) 22%, transparent);
+      inset 0 3px 0 var(--stem),
+      var(--bevel);
   }
 
   .stem.on .icon {
     background: var(--stem);
-    color: #0a0a10;
+    border-color: transparent;
+    color: #0c0b0a;
   }
 
   .stem.on .check {
-    opacity: 1;
-    transform: scale(1);
+    background: var(--stem);
+    box-shadow: 0 0 6px var(--stem);
   }
 </style>

@@ -1,8 +1,9 @@
 /**
  * Pure mixer logic shared by the preview player and the render request. The
- * formula matches the engine's `mixer.mix_gains`: with `keep`, the output is
- * mix + Σ (gain − 1) · stem (the residual stays at unity); with `drop`, it is
- * Σ gain · stem.
+ * formula matches the engine's `mixer.mix_gains`, per channel: with `keep`,
+ * the output is mix + Σ (gain · balance − 1) · stem (the residual stays at
+ * unity); with `drop`, it is Σ gain · balance · stem. Balance comes from the
+ * stem's pan (see `panGains`).
  */
 
 export type Residual = "keep" | "drop";
@@ -12,7 +13,12 @@ export interface StemControl {
   db: number;
   muted: boolean;
   soloed: boolean;
+  /** Stereo balance from −1 (left) to 1 (right). */
+  pan: number;
 }
+
+/** Left/right gain pair of one track. */
+export type Stereo = [number, number];
 
 export const MIN_DB = -30;
 export const MAX_DB = 6;
@@ -45,17 +51,41 @@ export function effectiveGains(
 }
 
 /**
- * Gain-node values for the player: the decoded mix plus one node per stem.
- * `original` (A/B) plays the untouched mix.
+ * Balance law for a stereo stem (same as the engine's `pan_gains`): the
+ * centre leaves both channels at unity; turning towards one side fades the
+ * other channel linearly down to silence.
+ */
+export function panGains(pan: number): Stereo {
+  const p = Math.max(-1, Math.min(1, pan));
+  return [p > 0 ? 1 - p : 1, p < 0 ? 1 + p : 1];
+}
+
+/** Pan per stem from the controls (missing stems stay centred). */
+export function pans(
+  controls: Record<string, StemControl>,
+): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(controls).map(([stem, control]) => [stem, control.pan]),
+  );
+}
+
+/**
+ * Gain-node values for the player: the decoded mix plus one left/right pair
+ * per stem. `original` (A/B) plays the untouched mix.
  */
 export function nodeGains(
   gains: Record<string, number>,
   residual: Residual,
   original: boolean,
-): { mix: number; stems: Record<string, number> } {
-  const stems: Record<string, number> = {};
+  pan: Record<string, number> = {},
+): { mix: number; stems: Record<string, Stereo> } {
+  const stems: Record<string, Stereo> = {};
   for (const [stem, gain] of Object.entries(gains)) {
-    stems[stem] = original ? 0 : residual === "keep" ? gain - 1 : gain;
+    const [left, right] = panGains(pan[stem] ?? 0);
+    const offset = residual === "keep" ? 1 : 0;
+    stems[stem] = original
+      ? [0, 0]
+      : [gain * left - offset, gain * right - offset];
   }
   return { mix: original || residual === "keep" ? 1 : 0, stems };
 }
@@ -64,10 +94,23 @@ export function nodeGains(
 export function stemsNeeded(
   gains: Record<string, number>,
   residual: Residual,
+  pan: Record<string, number> = {},
 ): string[] {
   return Object.entries(gains)
-    .filter(([, gain]) => residual === "drop" || Math.abs(gain - 1) > 1e-6)
+    .filter(
+      ([stem, gain]) =>
+        residual === "drop" ||
+        Math.abs(gain - 1) > 1e-6 ||
+        Math.abs(pan[stem] ?? 0) > 1e-6,
+    )
     .map(([stem]) => stem);
+}
+
+/** Pan readout: "C", "L40" or "R100". */
+export function formatPan(pan: number): string {
+  const value = Math.round(Math.abs(pan) * 100);
+  if (value === 0) return "C";
+  return `${pan < 0 ? "L" : "R"}${value}`;
 }
 
 /** Decoded size in MB of `seconds` of stereo float32 audio per track. */
@@ -89,6 +132,14 @@ export function formatTime(seconds: number): string {
   const minutes = Math.floor(safe / 60);
   const rest = Math.floor(safe % 60);
   return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
+/** LCD clock: minutes, seconds and tenths ("03:07.4"). */
+export function formatClock(seconds: number): string {
+  const tenths = Math.floor(Math.max(0, seconds) * 10);
+  const minutes = Math.floor(tenths / 600);
+  const rest = (tenths % 600) / 10;
+  return `${String(minutes).padStart(2, "0")}:${rest.toFixed(1).padStart(4, "0")}`;
 }
 
 /** Playback position for a loop region, wrapping once past its end. */
