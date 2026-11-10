@@ -6,7 +6,32 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- New visual identity, *Tape & Console* (warm analogue hardware), with the
+  descriptor "the cover musician's studio": warm near-black and cream
+  surfaces, one signal-orange accent, a cream-paper light theme, new stem
+  colours, bundled Archivo SemiExpanded and IBM Plex fonts (SIL OFL 1.1), a
+  tape-reel logo, new app icons and favicon, and the same colours in the VST3
+  plugin and the documents. The old violet and pink gradients are gone.
+- A 64 px icon rail replaces the side bar; page names show on hover and
+  keyboard focus.
+- Engine and runtime status are lights in the amber display at the bottom
+  right instead of a box at the bottom left of the side bar.
+
 ### Added
+- Transport dock at the bottom of every page: the song opened in the mixer
+  keeps playing while you visit other pages, with play, loop, A/B, a scrub
+  waveform, an output meter and the display (clock, and slots for tempo, key
+  and tuning that a later version fills).
+- Mixer: pan knob per stem, applied the same way in the preview and in the
+  exported mix (`RenderRequest.pans`); LED level meters per stem with
+  peak-programme ballistics; console faders.
+- Keyboard shortcuts: Space, M/S, 1-6, up/down, L, A, left/right and `?` for
+  the shortcut help. They do nothing while you type in a field.
+- Page content rises into place on every page change; all motion is off with
+  the system's reduced-motion setting.
+- *Retry* next to the runtime notice when the separation runtime failed to
+  install.
 - First run asks before downloading: the setup screen shows the download
   size, the approximate disk space, the free space on the drive, the PyTorch
   build and the folder, and stops with a clear message when the drive is too

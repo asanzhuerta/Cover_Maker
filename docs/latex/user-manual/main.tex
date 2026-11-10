@@ -14,6 +14,7 @@
   0.3 & 2026-11-04 & Library, match review, disk space and Creative Commons sources (M8). \\
   0.4 & 2026-11-05 & Using Cover\_Maker from your DAW (M11). \\
   1.0 & 2026-11-05 & Version 1.0: model licences appendix and Auto preset tuning. \\
+  1.1 & 2026-11-10 & New look (Tape \& Console): icon rail, transport dock, pan, shortcuts (M13). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -33,9 +34,10 @@ second step on, the screen explains what happens until you can use the app:
         terms}.
   \item \emph{Preparing your PC}: the separation runtime (PyTorch and the AI
         tooling) is installed in the background, and a status card shows its
-        progress. After the welcome the same status appears in the box at the
-        bottom left of the side bar; when it says \emph{Separation runtime
-        installed} you can install models and separate songs. Below, the
+        progress. After the welcome the same status is the \textsf{RUNTIME}
+        light in the display at the bottom right: it blinks amber while
+        installing and turns green when the separation runtime is installed;
+        then you can install models and separate songs. Below, the
         application shows your processor, memory and NVIDIA graphics card, the
         hardware tier (CPU, 4, 6, 8 or 12+~GB of video memory) and the
         recommended quality preset, as one tile each, once the engine has
@@ -45,17 +47,45 @@ second step on, the screen explains what happens until you can use the app:
         steps: wait for the runtime, install the recommended model on the
         \emph{Models} page (\autoref{ch:models}), then start a job.
 \end{enumerate}
-The window has five pages in the side bar: \emph{New job}, \emph{Queue},
-\emph{Models}, \emph{Settings} and \emph{About}. The bottom of the side bar
-shows the separation runtime while it installs and whether the local engine
-is ready. Every stem has its own colour and icon (for example pink
-for vocals and amber for guitar), used on the stem picker, in the queue and in
-the model list.
+\section{The window}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/new-job-dark}
+  \caption{The \emph{New job} page, with the icon rail on the left and the
+  transport dock at the bottom.}
+  \label{fig:window}
+\end{figure}
+The window has three parts (\autoref{fig:window}):
+\begin{itemize}
+  \item \textbf{The icon rail} on the left opens the pages: \emph{New job},
+        \emph{Queue}, \emph{Library}, \emph{CC sources} and \emph{Models}
+        at the top; \emph{Settings}, \emph{About} and \texttt{?} (keyboard
+        shortcuts) at the bottom. Hover an icon, or reach it with the Tab
+        key, to see its name.
+  \item \textbf{The page} in the middle.
+  \item \textbf{The transport dock} at the bottom plays the song you opened in
+        the mixer and keeps playing while you visit other pages. It has the
+        play button, loop, A/B, the song's title (click it to go back to the
+        mixer), a waveform to jump around, the output level meter and the
+        display.
+\end{itemize}
+The amber display at the right of the dock shows two status lights:
+\textsf{ENGINE} (the local engine) and \textsf{RUNTIME} (the separation
+runtime). Green means ready, blinking amber means starting or installing and
+red means it failed; hover a light for details. The display also shows the
+playback position. The \textsf{BPM}, \textsf{KEY} and \textsf{TUNE} slots stay
+empty for now: tempo, key and tuning detection come in a later version.
+
+Every stem has its own colour and icon (for example yellow for vocals and
+orange for guitar), used on the stem picker, in the queue, in the model list
+and in the mixer.
 
 The interface is available in English and Spanish. The installed app starts
 in the language chosen in the installer (in development builds it follows the
 system); it can be changed in \emph{Settings}, together with the theme. The dark
-theme is the default; \emph{Light} and \emph{System} are also available.
+theme is the default; \emph{Light} (a cream paper look) and \emph{System} are
+also available. If your system asks for reduced motion, the app does not
+animate.
 
 \chapter{Choosing and installing models}\label{ch:models}
 \CM{} does not include any separation model. Each model in the catalogue shows
@@ -169,34 +199,75 @@ When a song is finished, the queue shows a \emph{Mixer} link next to it. The
 mixer plays the original song and every stem the models produced, in sync, so
 you can hear the separation before you use it and build your own practice mix.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/mixer-dark}
+  \caption{The mixer with guitar muted, vocals at $-6$~dB and drums panned
+  left, while the song plays.}
+  \label{fig:mixer}
+\end{figure}
+
 \section{Playing and comparing}
 \begin{itemize}
-  \item Press the round play button (or the space bar) to play and pause. The
-        time shows the position and the length of the song.
+  \item Press the round play button in the dock (or the space bar) to play
+        and pause. The display shows the position and the length of the song.
+        The song keeps playing if you go to another page; opening another
+        song in the mixer replaces it.
   \item Click any waveform to jump to that point. Drag across the waveform to
         choose a region; \emph{Loop} repeats it until you switch looping off.
         With no region chosen, \emph{Loop} repeats the whole song.
-  \item \emph{A~·~Original} plays the untouched song and \emph{B~·~Your mix}
-        plays your settings, so you can compare them at the same position.
+  \item \textbf{A} plays the untouched song and \textbf{B} plays your mix, so
+        you can compare them at the same position. The lit button shows which
+        one you hear.
 \end{itemize}
 
 \section{Shaping your mix}
-Every stem has its own row, with its colour, icon and waveform:
+Every stem has its own row (\autoref{fig:mixer}), with its name, its number,
+its controls, a level meter and its waveform:
 \begin{itemize}
   \item \textbf{M} mutes the stem; \textbf{S} plays it solo. While any stem is
         soloed, only soloed stems are heard.
-  \item The slider sets the stem's volume from silence to +6~dB; double-click
+  \item The knob sets the stem's \emph{pan}: turn it left or right (drag up
+        and down, or use the arrow keys) to move the stem towards one
+        speaker. In the centre (\textsf{C}) both channels are untouched;
+        towards one side the other channel fades out. Double-click the knob
+        to centre it.
+  \item The fader sets the stem's volume from silence to +6~dB; double-click
         it to return to 0~dB.
+  \item The LED meter under the fader shows how loud the stem plays in your
+        mix: green, then amber above $-12$~dBFS and red above $-3$~dBFS. A
+        single LED holds the latest peak for a moment.
   \item \emph{Keep what the models missed} adds back whatever no stem captured
         (the residual), exactly as in a job's export. Untick it to hear only
         the stems.
-  \item \emph{Reset} puts every stem back to 0~dB, unmuted and not soloed.
+  \item \emph{Reset} puts every stem back to 0~dB, centred, unmuted and not
+        soloed.
 \end{itemize}
 Changes are smooth, without clicks, and take effect while the song plays.
 
+\section{Keyboard shortcuts}
+Press \texttt{?} (or the \texttt{?} button at the bottom of the rail) to see
+them in the app. They do nothing while you type in a field.
+
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+\textbf{Key} & \textbf{Action} \\
+\midrule
+Space & Play or pause \\
+\texttt{1}--\texttt{6} & Select a stem row \\
+Up, Down & Previous or next row \\
+\texttt{M} & Mute the selected row \\
+\texttt{S} & Solo the selected row \\
+\texttt{L} & Loop on or off \\
+\texttt{A} & Switch between your mix and the original \\
+Left, Right & Jump back or forward 5 seconds \\
+\texttt{?} & Show the shortcuts \\
+\bottomrule
+\end{tabularx}
+
 \section{Exporting the mix}
-\emph{Export this mix} saves the current settings (volumes, mutes, solos and
-the residual option, not the A/B choice) in full quality as
+\emph{Export this mix} saves the current settings (volumes, pans, mutes, solos
+and the residual option, not the A/B choice) in full quality as
 \texttt{<song> - custom mix.<format>} in the job's output folder, in the job's
 format. An existing file is never overwritten: later exports are numbered
 \texttt{(2)}, \texttt{(3)}, and so on. If the mix would clip, its level is
@@ -383,12 +454,13 @@ environment variable \texttt{COVER\_MAKER\_DAW\_ACCESS} to \texttt{0} before
 starting the app.
 
 \chapter{About and credits}\label{ch:about}
-The \emph{About} page, at the bottom of the sidebar menu, shows:
+The \emph{About} page, near the bottom of the icon rail, shows:
 \begin{itemize}
   \item \textbf{Author}: a photo, the author's name, a short description and
   contact links (GitHub, email and website). The buttons open the system
   browser or mail program.
-  \item \textbf{The app}: what \CM{} does and a link to its source code.
+  \item \textbf{The app}: the logo, the descriptor \emph{the cover
+  musician's studio}, what \CM{} does and a link to its source code.
   \item \textbf{Credits}: the main open-source components with their
   licences, a link to the full third-party notices, and a shortcut to the
   \emph{Models} page, where each model's licence is shown before you download

@@ -17,9 +17,11 @@
 % --------------------------------------------------------------- Layout ----
 \RequirePackage[margin=2.5cm,headheight=15pt]{geometry}
 \RequirePackage{xcolor}
-\definecolor{cmaccent}{HTML}{6B4EFF}
-\definecolor{cmmuted}{HTML}{5D5D6B}
-\definecolor{cmsoft}{HTML}{EBE8FF}
+% Tape & Console (ADR-009): signal orange dark enough for text on paper,
+% warm grey and cream.
+\definecolor{cmaccent}{HTML}{A8380F}
+\definecolor{cmmuted}{HTML}{5E5649}
+\definecolor{cmsoft}{HTML}{F3EDE2}
 \addtokomafont{disposition}{\color{cmaccent}}
 
 \RequirePackage[automark]{scrlayer-scrpage}

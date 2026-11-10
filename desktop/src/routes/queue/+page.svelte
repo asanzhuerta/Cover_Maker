@@ -305,7 +305,7 @@
     height: 40px;
     border-radius: 50%;
     border: 1px solid var(--border);
-    color: var(--job);
+    color: color-mix(in oklab, var(--job), var(--fg) var(--stem-ink-mix));
     background: color-mix(in srgb, var(--job) 14%, transparent);
   }
 

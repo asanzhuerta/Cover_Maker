@@ -13,6 +13,7 @@
   0.2 & 2026-11-03 & Deployment view and final ADR-006 (M9). \\
   0.3 & 2026-11-05 & ADR-008: DAW integration and engine discovery (M11). \\
   1.0 & 2026-11-05 & Version 1.0: preset tuning from measured runs (M10). \\
+  1.1 & 2026-11-10 & Tape \& Console interface, persistent player, pan, ADR-009 (M13). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -123,28 +124,70 @@ left pending by a closed app are queued again on start-up. \texttt{cover-maker
 serve --demo} uses a fake separator and its own data folder, for UI development
 and end-to-end tests without a GPU.
 
-\chapter{User interface (M6, redesigned in M6.1)}
+\chapter{User interface (M6, redesigned in M13)}
 \begin{tabularx}{\linewidth}{@{}lY@{}}
 \toprule
 \textbf{Part} & \textbf{Responsibility} \\
 \midrule
-\texttt{routes/} & Pages: welcome (hero and a three-step wizard: terms, hardware, model choice; shown without the side bar), new job, queue, models, settings. \\
+\texttt{routes/} & Pages: welcome (hero and a three-step wizard: terms, hardware, model choice; shown without the rail and the dock), new job, queue, library, CC sources, models, mixer, settings, about. \\
+\texttt{routes/+layout} & The frame: a 64~px icon rail (names on hover and focus), the transport dock, the shortcut help and the global keyboard handler. Page content is keyed by path so it rises into place on every page change. \\
 \texttt{lib/connection} & Gets port and token from the shell (\texttt{engine\_info}); creates the typed API client; keeps the event socket open and reconnects with replay. \\
+\texttt{lib/transport} & The loaded song, outside any page so it keeps playing: preview data, per-stem controls (fader, mute, solo, pan), A/B, loop, position and the meter states. The mixer page and the dock are views of it. \\
+\texttt{lib/player}, \texttt{lib/mixer} & Web Audio player (ADR-007): one source per track, each into a left and a right gain, all started with the same \texttt{start(t)}; the master bus feeds two analysers for the output meter. \texttt{mixer} holds the pure formula shared with the engine (gains, balance law, decoding on demand; unit-tested). \\
+\texttt{lib/meter} & Peak-programme ballistics (instant attack, 20~dB in 1.7~s, 1.5~s peak hold) and the envelope reading for the stem meters (unit-tested). \\
+\texttt{lib/shortcuts} & Maps key presses to player and mixer actions and ignores them while the user types in a field (unit-tested). \\
 \texttt{lib/jobs} & Pure functions deriving item progress, step names and the file to reveal from events (unit-tested). \\
 \texttt{lib/stems}, \texttt{lib/icons}, \texttt{lib/wave} & Stem colours, hand-drawn SVG icons (no icon package) and deterministic decorative waveform shapes (unit-tested). \\
 \texttt{lib/i18n} & English and Spanish dictionaries with a reactive locale. \\
 \texttt{lib/settings} & Preferences in local storage: language, theme, output folder, format, CPU fallback. \\
-\texttt{lib/components} & Icon, Waveform (decorative bars, also used as the progress bar), stem picker and model list with the licence dialog (licence link and verification date). \\
+\texttt{lib/components} & Logo, Icon, Waveform, stem picker, model list with the licence dialog, and the console parts: transport dock, LCD panel, LED meter, knob, shortcut help. \\
 \bottomrule
 \end{tabularx}
 
-\paragraph{Visual design.} The dark theme is the primary look and the default
-(light and system remain in Settings). Colours are CSS custom properties in
-\texttt{app.css} (surfaces, borders, a violet-to-pink accent gradient, status
-colours); each stem has a signature colour used for its card, icon, tags and
-progress waveform. Waveforms are decorative: their bar heights come from a hash
-of the file name, so no audio is analysed in the UI. Motion respects
-\texttt{prefers-reduced-motion}.
+\paragraph{Visual design (Tape \& Console, ADR-009).} The look is warm
+analogue hardware: near-black and cream surfaces, one signal-orange accent,
+blue only for links, and hardware parts that stay dark in both themes (the
+amber LCD, meter wells). Colours, radii, the 150~ms transition time and the
+easing are CSS custom properties in \texttt{app.css}; the dark theme is the
+default and the light ``cream paper'' theme redefines the same properties, so
+components never hard-code a colour. Archivo SemiExpanded, IBM Plex Sans and
+IBM Plex Mono are bundled under \texttt{static/fonts}. Each stem has a
+signature colour used for its card, tags, meter, knob arc and waveform; in the
+light theme stem-coloured text is mixed with the text colour. Decorative
+waveforms come from a hash of the file name, so no audio is analysed for them;
+the mixer's waveforms and meters use the engine's peak envelopes. Motion
+respects \texttt{prefers-reduced-motion}.
+
+\paragraph{Transport dock and LCD.} The dock is fixed at the bottom of every
+page except the welcome: play and pause, loop, A/B, the song's title (a link
+back to the mixer), a scrub waveform, the output meter and the LCD panel. The
+LCD shows the engine and runtime state as LEDs (green ready, blinking amber
+starting or installing, red failed), the clock, and empty slots for tempo, key
+and tuning that M14 will fill. The player is created when a mixer page opens a
+song and stays alive until another song is opened, so navigation never stops
+playback.
+
+\paragraph{Meters.} A stem meter reads the stem's peak envelope from
+\texttt{GET /assets/\{sha\}/peaks} at 25 points per second (at most 10\,000),
+scaled by the stem's current gain and pan, so it works even for stems the
+player has not decoded (ADR-007). The output meter reads the real signal from
+the master bus analysers. Both go through the same ballistics and are drawn
+directly every 33~ms (a timer, so the end of a song is still noticed while the
+window is hidden).
+
+\paragraph{Pan.} Each stem has a pan from $-1$ to $1$. The balance law leaves
+both channels at unity in the centre and fades the opposite channel linearly to
+silence: left gain $= 1 - \max(0, p)$, right gain $= 1 + \min(0, p)$. With
+the residual kept, the player's stem nodes get gain~$\cdot$~balance~$-1$ per
+channel; the engine's \texttt{mix\_gains} applies exactly the same per-channel
+formula to \texttt{RenderRequest.pans}, so the export sounds like the preview.
+
+\paragraph{Keyboard.} Space plays and pauses, \texttt{1}--\texttt{6} and the
+up and down arrows select a lane, \texttt{M} and \texttt{S} mute and solo it,
+\texttt{L} toggles the loop, \texttt{A} switches between the original and the
+custom mix, the left and right arrows jump five seconds and \texttt{?} opens the
+help. Nothing happens while focus is in a text field, a select or an editable
+element; sliders keep their arrow keys and buttons keep Space.
 
 \paragraph{Opening the output folder.} The queue reveals the first exported
 file (or the output folder) with \texttt{revealItemInDir}, which the default
@@ -158,8 +201,9 @@ UI can run in a normal browser against \texttt{cover-maker serve --demo} by
 setting \texttt{VITE\_ENGINE\_PORT} and \texttt{VITE\_ENGINE\_TOKEN}; the
 engine's Origin allowlist includes the development server. The whole flow
 (welcome, model list, job creation, live queue progress, language and theme
-switches) was verified this way against the demo engine; the M6.1 redesign and
-the \texttt{both} export mode were verified the same way.
+switches) was verified this way against the demo engine; the M6.1 redesign,
+the \texttt{both} export mode and the M13 interface (rail, dock, meters, pan,
+shortcuts, both themes) were verified the same way.
 
 \chapter{Runtime view}
 \section{Engine start-up (M2)}
@@ -319,6 +363,7 @@ Decisions are recorded as \glspl{adr}, one per file under
 \input{adr/adr-006-bootstrap}
 \input{adr/adr-007-audio-preview}
 \input{adr/adr-008-daw-integration}
+\input{adr/adr-009-visual-identity}
 
 \chapter{Compliance}\label{ch:compliance}
 \cmnote{This chapter summarises a risk analysis carried out on 2026-11-02. It is

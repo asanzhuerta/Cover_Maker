@@ -1,6 +1,9 @@
+<img src="branding/logo.svg" alt="" width="96" align="right">
+
 # Cover_Maker
 
-**Local AI stem separation for musicians and producers, on Windows.**
+**The cover musician's studio: local AI stem separation for musicians and
+producers, on Windows.**
 
 Cover_Maker splits your audio files, or the audio of a video or playlist link
 you paste, into the stems you choose (vocals, guitar, drums, bass, piano and
