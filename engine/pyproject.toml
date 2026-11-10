@@ -82,6 +82,8 @@ testpaths = ["tests"]
 addopts = "-ra"
 
 [tool.uv]
+# Dependency cooldown: resolve only versions published at least a week ago.
+exclude-newer = "7 days"
 environments = ["sys_platform == 'win32'"]
 conflicts = [[{ extra = "cpu" }, { extra = "cu128" }]]
 

@@ -9,6 +9,8 @@ to the nodes needed for the stems a job asks for.
 
 from __future__ import annotations
 
+# The engine requires Python 3.12.
+# nosemgrep: python.lang.compatibility.python37.python37-compatibility-importlib2
 from importlib import resources
 from typing import Literal
 

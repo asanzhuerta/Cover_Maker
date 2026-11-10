@@ -28,6 +28,8 @@ TIMEOUT_S = 30
 # acts as an open proxy). ccMixter blocks automated downloads of its files, so
 # the user downloads those on its site and attaches the file (`attach`).
 DOWNLOAD_HOSTS = ("archive.org",)
+# Hosts the catalogue searches may query.
+CATALOG_HOSTS = ("ccmixter.org", "archive.org")
 DIRECT_DOWNLOAD = ("archive",)
 # Internet Archive formats, best first: lossless, then common lossy ones.
 ARCHIVE_FORMATS = ("Flac", "WAVE", "VBR MP3", "MP3", "128Kbps MP3", "Ogg Vorbis")
@@ -91,10 +93,44 @@ def licence_name_from_url(url: str) -> str:
     return url
 
 
-def _get_json(url: str) -> Any:
+def _https_opener() -> urllib.request.OpenerDirector:
+    """An opener that only speaks HTTPS: no ``file:``, ``ftp:`` or plain ``http:`` URLs."""
+    opener = urllib.request.OpenerDirector()
+    for handler in (
+        urllib.request.ProxyHandler(),
+        urllib.request.HTTPSHandler(),
+        urllib.request.HTTPRedirectHandler(),
+        urllib.request.HTTPDefaultErrorHandler(),
+        urllib.request.HTTPErrorProcessor(),
+    ):
+        opener.add_handler(handler)
+    return opener
+
+
+_OPENER = _https_opener()
+
+
+def _on_hosts(url: str, hosts: tuple[str, ...]) -> bool:
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.hostname or ""
+    return parsed.scheme == "https" and any(
+        host == allowed or host.endswith(f".{allowed}") for allowed in hosts
+    )
+
+
+def _open(url: str, hosts: tuple[str, ...]) -> Any:
+    """Open ``url`` over HTTPS after checking it points at one of ``hosts``."""
+    if not _on_hosts(url, hosts):
+        raise CatalogError(f"refusing to contact {urllib.parse.urlparse(url).hostname or url}")
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    # Scheme and host are checked above and the opener has no file or ftp handler.
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+    return _OPENER.open(request, timeout=TIMEOUT_S)
+
+
+def _get_json(url: str) -> Any:
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:
+        with _open(url, CATALOG_HOSTS) as response:
             return json.loads(response.read().decode("utf-8"))
     except Exception as exc:
         raise CatalogError(f"could not reach the catalogue: {exc}") from exc
@@ -220,7 +256,10 @@ def parse_archive_files(identifier: str, metadata: dict[str, Any]) -> list[Catal
 def archive_files(identifier: str) -> list[CatalogFile]:
     if not re.fullmatch(r"[A-Za-z0-9._-]+", identifier):
         raise CatalogError("invalid Internet Archive identifier")
-    return parse_archive_files(identifier, _get_json(f"https://archive.org/metadata/{identifier}"))
+    return parse_archive_files(
+        identifier,
+        _get_json(f"https://archive.org/metadata/{urllib.parse.quote(identifier, safe='')}"),
+    )
 
 
 # ---------------------------------------------------------------- shared
@@ -238,11 +277,7 @@ def search(source: str, query: str, limit: int = 20) -> list[CatalogEntry]:
 
 
 def allowed_download(url: str) -> bool:
-    parsed = urllib.parse.urlparse(url)
-    host = parsed.hostname or ""
-    return parsed.scheme == "https" and any(
-        host == allowed or host.endswith(f".{allowed}") for allowed in DOWNLOAD_HOSTS
-    )
+    return _on_hosts(url, DOWNLOAD_HOSTS)
 
 
 @dataclass(frozen=True)
@@ -313,10 +348,9 @@ def download(file: CatalogFile, credits: Credits, target_dir: Path) -> Path:
         raise CatalogError("only Creative Commons or public-domain audio can be downloaded")
     target = _target(credits, target_dir, Path(urllib.parse.urlparse(file.url).path).suffix)
     partial = target.with_name(f"{target.name}.partial")
-    request = urllib.request.Request(file.url, headers={"User-Agent": USER_AGENT})
     try:
         with (
-            urllib.request.urlopen(request, timeout=TIMEOUT_S) as response,
+            _open(file.url, DOWNLOAD_HOSTS) as response,
             partial.open("wb") as out,
         ):
             written = 0

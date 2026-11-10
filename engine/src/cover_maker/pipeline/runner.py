@@ -39,6 +39,12 @@ CACHE_VERSION = "1"
 _UNSAFE = re.compile(r'[<>:"/\\|?*\x00-\x1f]+')
 
 
+# Columns of `job_items` that `JobRunner._set_item` may update.
+_ITEM_COLUMNS = frozenset(
+    {"status", "error", "current_step", "title", "artist", "outputs_json", "preview_json"}
+)
+
+
 class JobCancelled(RuntimeError):
     pass
 
@@ -191,8 +197,12 @@ class JobRunner:
         self.service.cancel()
 
     def _set_item(self, item_id: int, **fields: Any) -> None:
+        unknown = fields.keys() - _ITEM_COLUMNS
+        if unknown:
+            raise ValueError(f"not a job item column: {', '.join(sorted(unknown))}")
+        # Column names come from the allowlist above; every value is a bound parameter.
         assignments = ", ".join(f"{name} = ?" for name in fields)
-        self.conn.execute(
+        self.conn.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
             f"UPDATE job_items SET {assignments}, updated_at = datetime('now') WHERE id = ?",
             (*fields.values(), item_id),
         )

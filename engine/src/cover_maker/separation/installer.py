@@ -59,7 +59,7 @@ def download_fraction(written: int, size_mb: int) -> float | None:
 
 def _run(command: list[str], on_tick: Callable[[], None]) -> subprocess.CompletedProcess[str]:
     """Run the download, calling ``on_tick`` while it is in progress."""
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosemgrep: python.lang.compatibility.python36.python36-compatibility-Popen1, python.lang.compatibility.python36.python36-compatibility-Popen2
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         text=True, encoding="utf-8", errors="replace",
     )  # fmt: skip
