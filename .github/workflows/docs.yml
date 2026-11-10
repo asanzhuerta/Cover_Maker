@@ -13,16 +13,16 @@ jobs:
     name: Build LaTeX documents
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
       - name: Check generated tables are up to date
         run: |
           uv run docs/tools/gen_tex.py
           git diff --exit-code -- docs/latex/common/generated
       - name: Compile all documents
-        uses: xu-cheng/latex-action@v4
+        uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
         with:
           root_file: "*/main.tex"
           working_directory: docs/latex
@@ -37,7 +37,7 @@ jobs:
             [ -f "$d/main.pdf" ] && cp "$d/main.pdf" "pdf/cover-maker-$name.pdf"
           done
           ls -l pdf
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: cover-maker-docs
           path: pdf/*.pdf

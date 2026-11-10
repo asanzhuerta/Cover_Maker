@@ -133,7 +133,9 @@ def migrate(conn: sqlite3.Connection) -> None:
             for statement in script.split(";"):
                 if statement.strip():
                     conn.execute(statement)
-            conn.execute(f"PRAGMA user_version = {number}")
+            # PRAGMA accepts no bound parameters; `number` is an int from enumerate().
+            # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
+            conn.execute(f"PRAGMA user_version = {int(number)}")
             conn.execute("COMMIT")
         except Exception:
             conn.execute("ROLLBACK")

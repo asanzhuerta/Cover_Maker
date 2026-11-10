@@ -115,7 +115,7 @@ def test_download_writes_file_and_credits(monkeypatch: pytest.MonkeyPatch, tmp_p
         assert "Cover_Maker" in request.headers["User-agent"]
         return io.BytesIO(b"ID3 audio")
 
-    monkeypatch.setattr(catalogs.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(catalogs._OPENER, "open", urlopen)
     file = catalogs.CatalogFile("reverie.mp3", "https://archive.org/download/x/r.mp3", "Reverie")
 
     path = catalogs.download(file, credits(), tmp_path)
@@ -153,3 +153,26 @@ def test_attach_copies_a_downloaded_file_with_credits(tmp_path: Path) -> None:
     assert catalogs.read_credits(path) == credits()
     with pytest.raises(catalogs.CatalogError):
         catalogs.attach(downloaded, credits("https://example.com/licence"), tmp_path)
+
+
+def test_requests_only_go_to_catalogue_hosts_over_https() -> None:
+    for url in (
+        "file:///C:/Windows/win.ini",
+        "http://archive.org/metadata/x",
+        "https://example.com/metadata/x",
+        "https://archive.org.evil.test/x",
+    ):
+        with pytest.raises(catalogs.CatalogError):
+            catalogs._open(url, catalogs.CATALOG_HOSTS)
+
+
+def test_opener_has_no_file_or_ftp_handler() -> None:
+    schemes = {
+        name.removesuffix("_open")
+        for handler in catalogs._OPENER.handlers  # pyright: ignore[reportAttributeAccessIssue]
+        for name in dir(handler)
+        if name.endswith("_open") and not name.startswith("_")
+    }
+    assert "file" not in schemes
+    assert "ftp" not in schemes
+    assert "https" in schemes

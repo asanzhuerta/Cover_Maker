@@ -6,6 +6,18 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- Release workflow: the tag name reaches run scripts through an environment
+  variable instead of `${{ }}` interpolation (script injection).
+- Every GitHub Action is pinned to a full commit SHA with its version in a
+  comment; Dependabot keeps the pins up to date.
+- Dependency cooldown of 7 days for Dependabot (all ecosystems) and for uv
+  resolution (`exclude-newer = "7 days"`).
+- Catalogue requests use an HTTPS-only opener (no `file:` or `ftp:` handler)
+  and may only reach the catalogue hosts; Internet Archive identifiers are
+  URL-quoted.
+- Job item updates accept only known column names.
+
 ### Changed
 - New visual identity, *Tape & Console* (warm analogue hardware), with the
   descriptor "the cover musician's studio": warm near-black and cream
