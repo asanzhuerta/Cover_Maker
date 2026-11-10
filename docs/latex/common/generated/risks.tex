@@ -12,5 +12,10 @@ R-05 & Creative Commons catalogue APIs change or close & medium & low & AudioSou
 R-06 & Separation load causes audio dropouts in a running DAW & medium & medium & Low priority, EcoQoS, thread cap, low-impact mode. \\
 R-07 & Legal exposure from user misuse or from v1 remnants & low & high & Legal-by-design constraints, rewritten history, disclaimer and export warnings. \\
 R-08 & DMCA or similar notice against the repository because of the video-link download feature & medium & high & Unmodified yt-dlp as a dependency, user-pasted links only, rights confirmation, disclaimer; respond as the yt-dlp project does and, if required, move the feature to a separate optional plugin. \\
+R-09 & The app is perceived as a clone of an earlier app with the same video-link-to-stems base (StemKit, August 2026) & medium & medium & Own visual identity in M13 before 1.0; positioning as the cover musician's studio with practice, recording and setlists (M14-M16); no code reuse in either direction. \\
+R-10 & Recording latency or audio/video drift in the webview makes recorded covers unusable & medium & high & Spike in M15 before building features; native capture (WASAPI) as fallback; latency calibration with a recorded click. \\
+R-11 & Users publish covers that contain the original master recording & medium & high & Separated stems act as guide tracks; an "only my takes" export for publishing; notices at export and in the User Manual. \\
+R-12 & Video encoding pulls in GPL codecs (x264) or patent-encumbered components & low & medium & LGPL ffmpeg build with hardware or operating-system H.264 encoders and the native AAC encoder; x264 is not bundled. \\
+R-13 & Launch promotion draws takedowns or community bans & medium & medium & Own or CC-licensed music only in all promotional material; video downloading is not used as the hook; each community's self-promotion rules are followed. \\
 \bottomrule
 \end{longtable}

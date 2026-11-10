@@ -11,6 +11,9 @@
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Initial plan approved at the start of the v2 rewrite (M0). \\
   1.0 & 2026-11-05 & Version 1.0: all milestones M0--M12 delivered; scope, backlog and status updated. \\
+  1.1 & 2026-11-10 & Re-plan after a competitive review: visual identity (M13) before the 1.0
+  release, practice tools (M14), cover studio (M15), rehearsal and setlists (M16), launch plan
+  and new risks R-09 to R-13. \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -33,11 +36,40 @@ music on streaming services was dropped; downloading the audio of video links
 pasted by the user was kept as an explicit, documented product decision
 (\autoref{ch:legal}).
 
+In November 2026 a competitive review found StemKit, an MIT-licensed desktop
+application published in August 2026 that also splits songs from pasted video
+links into stems. No code was shared in either direction, but its interface
+looked very similar to \CM{}'s at the time. The plan was therefore revised
+(\autoref{sec:positioning}): a visual identity of its own before the 1.0
+release, and a product that goes beyond separation to cover the whole path from
+a song to a recorded cover.
+
 \section{Product vision}
-\cmnote{\CM{} is a Windows desktop application that separates local audio files
-or the audio of pasted video links into the stems the user chooses (vocals, guitar, drums, bass, piano,
-other) or renders the ``track without X'' so musicians can practise, rehearse
-or record covers. Everything runs locally.}
+\cmnote{\CM{}, \emph{the cover musician's studio}, is a Windows desktop
+application that separates local audio files or the audio of pasted video links
+into the stems the user chooses (vocals, guitar, drums, bass, piano, other) or
+renders the ``track without X''. Musicians then practise it in their key and
+tempo, record their cover in audio and video, and rehearse their setlists.
+Everything runs locally.}
+
+\section{Positioning}\label{sec:positioning}
+Splitting a song into stems is no longer a differentiator on its own. \CM{}
+competes as the tool a cover musician uses from start to finish:
+\begin{description}
+  \item[Separate.] Choose the stems or the track without your instrument
+        (version 1.0).
+  \item[Practise.] Tuning, key and tempo analysis, pitch and tempo change
+        without artefacts, bar-snapped loops, count-in and a speed trainer (M14).
+  \item[Record.] Takes and webcam video over the backing track, in sync,
+        exported for video platforms; the separated stems serve as guide
+        tracks and an ``only my takes'' export keeps the original master out of
+        anything published (M15).
+  \item[Perform.] Per-song settings, setlists, a rehearsal/live mode and MIDI
+        foot-switch control (M16).
+\end{description}
+Its other strengths remain: legal by design, local processing without
+telemetry, verified model downloads with visible licences, \gls{daw}
+integration, English and Spanish, and complete documentation.
 
 \section{Target users}
 Musicians who practise or record covers, and audio producers working on a
@@ -68,14 +100,21 @@ mid-range Windows PC or laptop, usually with a dedicated GPU and often with a
         them into tracks (M11, brought forward before 1.0).
 \end{itemize}
 
-\section{Out of scope for version 1.0 (backlog)}
-Lead/backing vocal separation, drum sub-stems, de-reverb, practice tools
-(tempo and pitch change, A--B loops, DAW export with tempo and key), metadata
-and cover-art tagging, ONNX/DirectML acceleration for AMD and Intel GPUs, and
-cloud separation backends. The \emph{Future work} milestone records three
-further ideas: key detection and a pitch shifter that keeps the tempo, an
-integrated mini \gls{daw} with ASIO recording, and interface animations
-consistent with the author's portfolio site.
+\section{Planned after version 1.0}
+Version 1.0 ships after M13, the new visual identity, which also brings
+per-stem pan, keyboard shortcuts and the interface animations. Then follow
+practice tools (M14), the cover studio for recording audio and video (M15) and
+rehearsal with setlists (M16); \autoref{ch:milestones} lists their goals.
+
+\section{Backlog}
+\gls{daw} session export (REAPER and DAWproject with tempo map, markers and
+key), BWF metadata and LUFS-normalised exports, batch and headless processing,
+audio-to-MIDI per stem, chord detection, lead/backing vocal separation, drum
+sub-stems, de-reverb, a full mini \gls{daw} with ASIO recording, more interface
+languages, macOS, metadata and cover-art tagging, ONNX/DirectML acceleration
+for AMD and Intel GPUs, and cloud separation backends. Licences are checked
+before any of these is scheduled: components under GPL, AGPL or
+non-commercial terms are avoided.
 
 \section{Explicitly excluded}
 Searching, scraping or matching music on streaming services, use of their
@@ -161,8 +200,21 @@ Delivery & GitHub Actions (Windows for code, Ubuntu for documents), GitHub Relea
 \bottomrule
 \end{tabularx}
 
-\chapter{Milestones}
+\chapter{Milestones}\label{ch:milestones}
 \input{generated/milestones}
+
+\section{Launch plan}
+The repository and the download are treated as part of the product. Before
+1.0: a new README in English and Spanish with a short demonstration video and a
+download button, a stable download link to the latest installer, a signed
+installer, package-manager entries (winget, Scoop), a landing page on the
+author's website and a bundled Creative Commons example song so that a first
+separation takes minutes. The launch then runs in waves: the Spanish-speaking
+community with 1.0, practice-focused short videos with M14, and the main launch
+(technology forums, product directories, music communities and the press) with
+M15. Promotional material uses only the author's own or CC-licensed music, and
+downloading from video platforms is not used as the hook (risks R-08 and
+R-13).
 
 \chapter{Risk management}
 Risks are reviewed at the end of each milestone.
@@ -196,6 +248,13 @@ Video links (2026-11-03) & Kept in scope; risk R-08 accepted; rights confirmatio
 Models & No default model; user chooses and accepts each licence. \\
 Documentation & LaTeX in English, six documents, built in CI. \\
 Interface & English and Spanish. \\
+Competition (2026-11-09) & Position \CM{} as the cover musician's studio:
+own visual identity, practice tools, cover recording and setlists. \\
+Visual identity (2026-11-09) & ``Tape \& Console'', a warm hardware look, in M13. \\
+Name (2026-11-09) & \CM{} with the descriptor ``the cover musician's studio'';
+trademark search before marketing. \\
+Release 1.0 (2026-11-09) & Published after M13, with the new identity. \\
+Launch (2026-11-09) & In waves; own or CC-licensed music only in promotional material. \\
 \bottomrule
 \end{tabularx}
 

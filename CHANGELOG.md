@@ -18,6 +18,12 @@ project follows [Semantic Versioning](https://semver.org/).
   behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
   `POST /storage/temporary/clear`), and opens the folder in Explorer.
 
+### Changed
+- Project Plan 1.1: the roadmap after a competitive review. A new visual
+  identity (M13) ships before 1.0, followed by practice tools (M14), a cover
+  studio for recording audio and video (M15) and rehearsal with setlists
+  (M16), plus a launch plan and risks R-09 to R-13.
+
 ### Fixed
 - A second song separated with the same model in one session no longer
   fails with `FileNotFoundError`: the reused model wrote its stems into the
