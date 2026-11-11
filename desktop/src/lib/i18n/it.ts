@@ -446,4 +446,9 @@ export const it: Dictionary = {
   "lcd.tuneHint": "Cent rispetto al La 440, compresa la tua intonazione fine.",
   "shortcuts.tempo": "Tempo −/+ 5 %",
   "shortcuts.pitch": "Trasposizione −/+ 1 semitono",
+  "session.export": "Esporta sessione DAW",
+  "session.exporting": "Scrittura della sessione…",
+  "session.hint":
+    "Ogni stem su una traccia separata da 0, con mappa del tempo, sezioni e tonalità, per REAPER, DAWproject (Bitwig, Studio One, Cubase) o qualsiasi DAW tramite la mappa del tempo MIDI. Usa il tuo volume, pan e muto; tempo e intonazione originali.",
+  "session.done": "Cartella della sessione:",
 };

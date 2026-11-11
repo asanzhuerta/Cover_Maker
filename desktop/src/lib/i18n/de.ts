@@ -449,4 +449,9 @@ export const de: Dictionary = {
   "lcd.tuneHint": "Cent gegenüber A440, inklusive deiner Feinstimmung.",
   "shortcuts.tempo": "Tempo −/+ 5 %",
   "shortcuts.pitch": "Tonhöhe −/+ 1 Halbton",
+  "session.export": "DAW-Session exportieren",
+  "session.exporting": "Session wird geschrieben…",
+  "session.hint":
+    "Jeder Stem auf einer eigenen Spur ab 0, mit Tempomap, Abschnitten und Tonart, für REAPER, DAWproject (Bitwig, Studio One, Cubase) oder jede DAW über die MIDI-Tempomap. Übernimmt deine Lautstärke, dein Panorama und stummgeschaltete Spuren; Tempo und Tonhöhe bleiben original.",
+  "session.done": "Session-Ordner:",
 };

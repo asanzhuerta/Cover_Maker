@@ -441,4 +441,9 @@ export const es: Dictionary = {
   "lcd.tuneHint": "Cents respecto a La 440, con tu afinación fina incluida.",
   "shortcuts.tempo": "Tempo −/+ 5 %",
   "shortcuts.pitch": "Tono −/+ 1 semitono",
+  "session.export": "Exportar sesión DAW",
+  "session.exporting": "Escribiendo la sesión…",
+  "session.hint":
+    "Cada pista en su propia pista del DAW, desde 0, con el mapa de tempo, las secciones y la tonalidad, para REAPER, DAWproject (Bitwig, Studio One, Cubase) o cualquier DAW mediante el mapa de tempo MIDI. Usa tu volumen, panorama y silencios; tempo y tono originales.",
+  "session.done": "Carpeta de la sesión:",
 };

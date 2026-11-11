@@ -456,4 +456,9 @@ export const fr: Dictionary = {
   "lcd.tuneHint": "Écart en cents par rapport au La 440, réglage fin compris.",
   "shortcuts.tempo": "Tempo −/+ 5 %",
   "shortcuts.pitch": "Hauteur −/+ 1 demi-ton",
+  "session.export": "Exporter la session DAW",
+  "session.exporting": "Écriture de la session…",
+  "session.hint":
+    "Chaque stem sur sa propre piste à partir de 0, avec la carte de tempo, les sections et la tonalité, pour REAPER, DAWproject (Bitwig, Studio One, Cubase) ou tout autre DAW via la carte de tempo MIDI. Reprend votre volume, votre pan et vos pistes muettes ; tempo et hauteur d'origine.",
+  "session.done": "Dossier de la session :",
 };

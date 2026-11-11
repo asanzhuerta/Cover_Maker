@@ -50,6 +50,35 @@ export function effectiveGains(
   return gains;
 }
 
+/** Track settings of a stem in a DAW session (see the engine's `daw.export`). */
+export interface SessionTrack {
+  /** Linear fader gain (0 at the bottom of the fader). */
+  gain: number;
+  pan: number;
+  /** Muted in the DAW: muted here, or silenced by another stem's solo. */
+  muted: boolean;
+}
+
+/**
+ * Mixer state as DAW tracks: the fader and pan go in as they are, and mute
+ * and solo become a mute flag, so the session sounds like the preview.
+ */
+export function sessionTracks(
+  controls: Record<string, StemControl>,
+): Record<string, SessionTrack> {
+  const anySolo = Object.values(controls).some((c) => c.soloed);
+  return Object.fromEntries(
+    Object.entries(controls).map(([stem, control]) => [
+      stem,
+      {
+        gain: dbToGain(control.db),
+        pan: control.pan,
+        muted: anySolo ? !control.soloed : control.muted,
+      },
+    ]),
+  );
+}
+
 /**
  * Balance law for a stereo stem (same as the engine's `pan_gains`): the
  * centre leaves both channels at unity; turning towards one side fades the

@@ -446,4 +446,9 @@ export const ptBR: Dictionary = {
   "lcd.tuneHint": "Cents em relação ao Lá 440, incluindo o seu ajuste fino.",
   "shortcuts.tempo": "Andamento −/+ 5 %",
   "shortcuts.pitch": "Tom −/+ 1 semitom",
+  "session.export": "Exportar sessão para DAW",
+  "session.exporting": "Salvando a sessão…",
+  "session.hint":
+    "Cada stem na sua própria faixa a partir do 0, com o mapa de andamento, as seções e o tom, para REAPER, DAWproject (Bitwig, Studio One, Cubase) ou qualquer DAW pelo mapa de andamento MIDI. Usa o seu volume, pan e mudo; andamento e tom originais.",
+  "session.done": "Pasta da sessão:",
 };
