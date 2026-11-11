@@ -118,6 +118,7 @@ PyTorch.
 | pydantic-core | 2.50.2 | MIT |
 | pydub | 0.25.1 | MIT |
 | pygments | 2.21.0 | BSD-2-Clause |
+| python-stretch | 0.3.1 | MIT |
 | pyyaml | 6.0.3 | MIT |
 | requests | 2.34.2 | Apache-2.0 |
 | resampy | 0.4.3 | ISC |
@@ -476,8 +477,16 @@ runtimes that the build bundles into it.
 | @tauri-apps/plugin-updater | 2.14.1 | MIT OR Apache-2.0 |
 | openapi-fetch | 0.17.0 | MIT |
 | openapi-typescript-helpers | 0.1.0 | MIT |
+| signalsmith-stretch | 1.3.2 | MIT |
 | svelte | 5.57.3 | MIT |
 <!-- /generated:javascript -->
+
+The practice tools (M14) use the [Signalsmith Stretch](https://github.com/Signalsmith-Audio/signalsmith-stretch)
+library by Signalsmith Audio (MIT), with its Signalsmith Linear helpers (MIT):
+compiled to WebAssembly in `signalsmith-stretch` for the mixer preview, and as a
+Python extension in `python-stretch` (MIT, which also contains nanobind,
+BSD-3-Clause) for exports. No Rubber Band (GPL) or SoundTouch (LGPL) code is
+used.
 
 ### Fonts of the user interface
 

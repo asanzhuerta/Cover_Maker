@@ -1,7 +1,7 @@
 /**
  * Practice tools (M14): pitch and tempo maths, bar-snapped loops, section
  * markers, the click stem and the speed trainer. Pure functions only; the
- * transport wires them to the player (ADR-012).
+ * transport wires them to the player (ADR-010).
  */
 
 import type { Region } from "./transport.svelte";

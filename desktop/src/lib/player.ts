@@ -6,7 +6,7 @@
  * demand; a track added while playing joins at the same position. The master
  * bus feeds two analysers for the output meter.
  *
- * Practice (ADR-012): every source plays at `rate` (tempo), and one
+ * Practice (ADR-010): every source plays at `rate` (tempo), and one
  * Signalsmith Stretch node on the summed bus moves the pitch back (and by the
  * user's shift). The stretch is only in the chain while it has work to do.
  */

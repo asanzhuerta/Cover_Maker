@@ -21,5 +21,11 @@
 \texttt{FR-UI-01} & \textbf{Languages}. The user interface shall be available in English and Spanish. & must & M6 \\
 \texttt{FR-DAW-01} & \textbf{REAPER tracks}. A REAPER script shall send a song to the running engine and insert each resulting stem as a new track aligned with the source. & should & M11 \\
 \texttt{FR-DAW-02} & \textbf{VST3 plugin}. A VST3 plugin shall run a separation through the running engine and offer the stems for preview and drag-and-drop into tracks. & should & M11 \\
+\texttt{FR-PRA-01} & \textbf{Tuning and key}. The system shall estimate each song's tuning offset from A440 in cents and its key (tonic and major or minor), store them with the song and show them in the LCD panel as played after the pitch settings. & must & M14 \\
+\texttt{FR-PRA-02} & \textbf{Tempo and beat grid}. The system shall estimate each song's tempo in BPM, beat times and bar starts (4/4) once per decoded mix, store them and show the tempo in the LCD panel. & must & M14 \\
+\texttt{FR-PRA-03} & \textbf{Real-time pitch and tempo}. In the mixer the user shall shift the pitch by -12 to +12 semitones plus -50 to +50 cents and set the tempo from 50 \% to 150 \% without changing the pitch, with knob controls that work with the keyboard and in English and Spanish. & must & M14 \\
+\texttt{FR-PRA-04} & \textbf{Loops, sections, count-in and click}. Loops shall snap to bar lines of the beat grid; the user shall name section markers and loop a section; playback may start after one bar of count-in; a click stem generated from the beat grid can be heard and exported. & should & M14 \\
+\texttt{FR-PRA-05} & \textbf{Speed trainer}. The speed trainer shall raise (or lower) the tempo by a set step every N loop passes until it reaches a target, and show the tempo and the pass count in the LCD panel. & should & M14 \\
+\texttt{FR-PRA-06} & \textbf{Exports with pitch and tempo}. The custom mix, the track without X and, on request, every stem and the click shall be exported with the chosen pitch and tempo, rendered by the engine with the same algorithm as the preview. & must & M14 \\
 \bottomrule
 \end{longtable}

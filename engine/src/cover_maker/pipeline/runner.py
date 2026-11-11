@@ -105,7 +105,7 @@ def render_custom_mix(
     """Render mixer settings to a new file in the job's output folder (never overwrites).
 
     With practice settings, the mix (and each stem when ``with_stems``) is rendered at
-    the chosen tempo and pitch with the same chain as the preview (ADR-012). A click
+    the chosen tempo and pitch with the same chain as the preview (ADR-010). A click
     stem from the beat grid is mixed in at ``click_gain`` and exported with the stems.
     """
     fmt = fmt or sources.spec.output_format.value

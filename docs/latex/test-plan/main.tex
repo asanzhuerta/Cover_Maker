@@ -12,6 +12,7 @@
   0.1 & 2026-11-03 & Document skeleton (M0). \\
   0.2 & 2026-11-04 & Test report and traceability matrix (M10). \\
   1.0 & 2026-11-05 & Version 1.0: final test report and traceability matrix for v1.0.0. \\
+  1.1 & 2026-11-11 & Practice tools (M14): analysis, stretch and export tests. \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -63,6 +64,12 @@ Job runner & Extract and without-X outputs; residual modes; second run does no
 separation; a new stem reuses an earlier separation; Max ensemble order; missing
 model, missing input; crash recovery; out-of-memory ladder; opt-in CPU fallback. \\
 Store & Migrations to the latest schema. \\
+Practice (M14) & Analysis on synthetic signals only: detuned tones (tuning
+within 6 cents), sine-chord progressions with and without drum noise (key),
+click tracks at known BPM with accented bars (tempo, beats, downbeats);
+pitch, cents and tempo of exports measured on sine waves; property test that
+the stretch correction cancels the tempo resample; click stem on the grid;
+analysis stored once and computed on demand; markers. \\
 \bottomrule
 \end{tabularx}
 
@@ -96,6 +103,11 @@ Documentation (latexmk) & 6 documents & all built; generated tables up to date \
   \item[User interface] each page exercised in a browser against the engine's
   demo mode (welcome, new job, queue, mixer, library, CC sources, settings,
   about), in English and Spanish.
+  \item[Practice tools] mixer with a synthetic demo song (100 BPM, G major,
+  20 cents flat) in the demo engine: the LCD showed 99 BPM, G and $-20$; pitch,
+  tempo and Tune to A440 by keyboard and mouse; audio through the stretch
+  worklet; offline render of six stems through it at 2.8\,\% of real time on
+  one core of the i5-11400H (2026-11-11).
   \item[Catalogues] live searches on ccMixter and the Internet Archive and a
   real Internet Archive download with its credits (2026-11-04).
   \item[DAW integration] the REAPER script run against the demo engine with
@@ -119,6 +131,8 @@ Documentation (latexmk) & 6 documents & all built; generated tables up to date \
   SmartScreen warns about an unknown publisher.
   \item Listening tests are informal; the M1 report lists the blind test as
   pending.
+  \item The practice tools assume 4/4 for bars; beat tracking on real
+  recordings with tempo changes has only been checked by ear.
 \end{itemize}
 
 \section{Traceability}

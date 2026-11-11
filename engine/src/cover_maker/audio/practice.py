@@ -1,4 +1,4 @@
-"""Practice transforms for exports: tempo, pitch and the click stem (ADR-012).
+"""Practice transforms for exports: tempo, pitch and the click stem (ADR-010).
 
 The preview mixer plays every source with ``playbackRate = tempo`` (a resample,
 which also moves the pitch) and corrects the pitch on the master bus with one

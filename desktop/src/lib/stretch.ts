@@ -1,7 +1,7 @@
 /**
  * Loads the Signalsmith Stretch worklet (MIT) on demand. The module is served
  * from the app's own origin, so the CSP only needs `'wasm-unsafe-eval'` for
- * its WebAssembly and no `blob:` scripts (ADR-012).
+ * its WebAssembly and no `blob:` scripts (ADR-010).
  */
 import type { StretchNode } from "signalsmith-stretch";
 // The package only exports its entry point, so the file is imported by path.
