@@ -1367,7 +1367,9 @@
           "drums",
           "bass",
           "piano",
-          "other"
+          "other",
+          "vocals.lead",
+          "vocals.backing"
         ],
         "title": "Stem",
         "type": "string"

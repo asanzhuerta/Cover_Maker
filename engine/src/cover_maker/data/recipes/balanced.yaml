@@ -1,6 +1,8 @@
-# Balanced: one BS-RoFormer SW pass gives all six stems.
+# Balanced: one BS-RoFormer SW pass gives all six stems; the karaoke model
+# splits its vocals into lead and backing when a job asks for them.
 nodes:
   - {id: sw, model: bs-roformer-sw, input: mix}
+  - {id: lead, model: bs-roformer-karaoke-anvuew, input: "stem:sw.vocals"}
 outputs:
   vocals: sw.vocals
   guitar: sw.guitar
@@ -8,3 +10,5 @@ outputs:
   bass: sw.bass
   piano: sw.piano
   other: sw.other
+  vocals.lead: lead.vocals.lead
+  vocals.backing: lead.vocals.backing
