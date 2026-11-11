@@ -332,6 +332,33 @@ format. An existing file is never overwritten: later exports are numbered
 \texttt{(2)}, \texttt{(3)}, and so on. If the mix would clip, its level is
 lowered just enough and the mixer tells you by how much.
 
+\section{Exporting a DAW session}\label{sec:daw-session}
+\emph{Export DAW session} writes a new folder \texttt{<song> - DAW session} in
+the job's output folder, ready to open in your \gls{daw} and record over:
+\begin{description}
+  \item[Audio] one WAV file per stem, named like the stem export
+  (\texttt{<song> - Vocals.wav}), plus \emph{Residual} (what no stem captured)
+  and the \emph{Original mix}. Every file starts at 0, so they stay in sync.
+  \item[\texttt{<song>.RPP}] a REAPER project.
+  \item[\texttt{<song>.dawproject}] a DAWproject file for Bitwig Studio,
+  Studio One, Cubase and other DAWs that import the format.
+  \item[\texttt{<song> - tempo map.mid}] a MIDI file with the tempo map,
+  sections and key. In any other DAW, import it and drag the WAV files to the
+  start of the project.
+\end{description}
+Each file is on its own track with the volume, pan and mute of the mixer (a
+stem silenced by another stem's solo is muted). The Residual track is muted
+when \emph{Keep what the models missed} is off; the Original mix is always
+muted, for comparison. The projects also carry the song's tempo map, so bars
+and the metronome follow the song, the sections you marked in the Practice
+panel and, in the project notes, the key and tuning. If the song starts before
+its first full bar, the project begins with a short bar (for example 1/4) so
+that every bar line after it falls on the beat.
+
+The session keeps the original pitch and tempo; use \emph{Export this mix} for
+practice versions. The projects find the audio next to them, so move or copy
+the whole folder, not only the project file.
+
 \section{Long songs and memory}
 The preview decodes the song first and each stem only when your settings need
 it. Decoded audio takes memory (about 85~MB per stem for four minutes); for
@@ -513,6 +540,8 @@ model, especially for commercial use. The same list is in
 \chapter{Using \CM{} from your DAW}\label{ch:daw}
 \CM{} can work from inside your \gls{daw}. The app must be open: the DAW tools
 talk to the engine it runs, on this computer only.
+To take a separated song to your DAW as a ready-made project instead, use
+\emph{Export DAW session} in the mixer (section~\ref{sec:daw-session}).
 
 \section{REAPER}
 The REAPER script separates a song and inserts each stem as a new track.

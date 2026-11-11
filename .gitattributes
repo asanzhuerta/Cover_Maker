@@ -5,3 +5,5 @@
 *.pdf binary
 *.mp3 binary
 *.gif binary
+*.mid binary
+*.dawproject binary
