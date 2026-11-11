@@ -1,10 +1,12 @@
 # Max quality: average two vocal estimates, then separate the rest from the
-# instrumental (mix minus the averaged vocals) with a second SW pass.
+# instrumental (mix minus the averaged vocals) with a second SW pass. The
+# karaoke model splits the averaged vocals into lead and backing when asked.
 nodes:
   - {id: sw, model: bs-roformer-sw, input: mix}
   - {id: res, model: bs-roformer-resurrection, input: mix}
   - {id: voc, average: [sw.vocals, res.vocals], stem: vocals}
   - {id: inst, model: bs-roformer-sw, input: "mix-minus:voc.vocals"}
+  - {id: lead, model: bs-roformer-karaoke-anvuew, input: "stem:voc.vocals"}
 outputs:
   vocals: voc.vocals
   guitar: inst.guitar
@@ -12,3 +14,5 @@ outputs:
   bass: inst.bass
   piano: inst.piano
   other: inst.other
+  vocals.lead: lead.vocals.lead
+  vocals.backing: lead.vocals.backing

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from "$lib/components/Icon.svelte";
   import { t } from "$lib/i18n.svelte";
-  import { STEM_COLORS, STEMS, type Stem } from "$lib/stems";
+  import { CHOOSABLE, STEM_COLORS, type Stem } from "$lib/stems";
 
   let { selected = $bindable<Stem[]>([]) }: { selected: Stem[] } = $props();
 
@@ -13,10 +13,11 @@
 </script>
 
 <div class="stems" role="group" aria-label={t("new.stems")}>
-  {#each STEMS as stem (stem)}
+  {#each CHOOSABLE as stem (stem)}
     <button
       type="button"
       class="stem"
+      class:sub={stem.includes(".")}
       class:on={selected.includes(stem)}
       style="--stem: {STEM_COLORS[stem]}"
       aria-pressed={selected.includes(stem)}
@@ -30,18 +31,30 @@
     </button>
   {/each}
 </div>
+<p class="parts muted">{t("new.stems.parts")}</p>
 
 <style>
   .stems {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 0.6rem;
   }
 
-  @media (max-width: 1000px) {
+  @media (max-width: 1200px) {
     .stems {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
+  }
+
+  @media (max-width: 640px) {
+    .stems {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .parts {
+    margin: 0.6rem 0 0;
+    font-size: 0.8rem;
   }
 
   /* A channel button: coloured tape on top, an LED that lights when chosen. */
@@ -56,6 +69,14 @@
     color: var(--muted);
     box-shadow:
       inset 0 3px 0 color-mix(in srgb, var(--stem) 35%, transparent),
+      var(--bevel);
+  }
+
+  /* A part of another stem: a split tape on top. */
+  .stem.sub {
+    box-shadow:
+      inset 0 3px 0 color-mix(in srgb, var(--stem) 35%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--stem) 20%, transparent),
       var(--bevel);
   }
 
@@ -79,6 +100,8 @@
   }
 
   .label {
+    text-align: center;
+    line-height: 1.25;
     font-family: var(--font-display);
     font-size: 0.8rem;
     font-weight: 600;

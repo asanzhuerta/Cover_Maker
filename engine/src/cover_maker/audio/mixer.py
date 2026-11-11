@@ -4,6 +4,11 @@ With ``residual=keep`` the result is exactly the mix minus the removed stems:
 nothing the models missed is lost, at the price of some bleed of the removed
 instruments. With ``residual=drop`` the result is the sum of the remaining
 stems only, which is cleaner but loses whatever no stem captured.
+
+Sub-stems (``vocals.lead``, ``vocals.backing``) are parts of their parent
+stem. Every formula works on a set of stems that covers the song once: a stem
+is replaced by its sub-stems where the selection or the available audio asks
+for it (see :func:`cover_maker.domain.split_for` and ``finest``).
 """
 
 from __future__ import annotations
@@ -13,7 +18,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..domain import ResidualMode, Stem
+from ..domain import ResidualMode, Stem, as_parts, finest, parent_of, split_for
 from .io import Audio
 
 PEAK_LIMIT = 10 ** (-0.1 / 20)  # -0.1 dBFS
@@ -42,20 +47,30 @@ def without(
     removed: set[Stem],
     residual: ResidualMode,
 ) -> Audio:
-    """Return the song without the ``removed`` stems (float32, unclipped)."""
+    """Return the song without the ``removed`` stems (float32, unclipped).
+
+    ``keep`` needs only the removed stems; ``drop`` needs every stem that
+    remains once the song is split as finely as ``removed`` asks.
+    """
     frames = len(mix)
     if residual is ResidualMode.KEEP:
-        missing = removed - stems.keys()
+        # A sub-stem whose parent is removed too is already inside the parent.
+        outermost = {stem for stem in removed if parent_of(stem) not in removed}
+        missing = outermost - stems.keys()
         if missing:
             raise ValueError(f"missing stems for removal: {sorted(missing)}")
         result = mix.astype(np.float32, copy=True)
-        for stem in removed:
+        for stem in outermost:
             result -= _fit(stems[stem], frames)
         return result
+    parts = split_for(removed)
+    remaining = parts - as_parts(removed, parts)
+    missing = remaining - stems.keys()
+    if missing:
+        raise ValueError(f"missing stems for the sum: {sorted(missing)}")
     result = np.zeros_like(mix, dtype=np.float32)
-    for stem, signal in stems.items():
-        if stem not in removed:
-            result += _fit(signal, frames)
+    for stem in remaining:
+        result += _fit(stems[stem], frames)
     return result
 
 
@@ -92,17 +107,25 @@ def mix_gains(
     the centre with ``keep`` give the original mix; gain 0 on a stem matches
     :func:`without`. The preview mixer in the desktop app uses the same
     formula, per channel.
+
+    When every sub-stem of a stem is available, the sub-stems take its place
+    (the desktop mixer shows them as lanes). A gain or pan set on the parent
+    still applies to them: the gains multiply and a sub-stem without its own
+    pan takes the parent's.
     """
     frames = len(mix)
     pans = pans or {}
-    fitted = {stem: _fit(signal, frames) for stem, signal in stems.items()}
     offset = 1.0 if residual is ResidualMode.KEEP else 0.0
     if residual is ResidualMode.KEEP:
         result = mix.astype(np.float32, copy=True)
     else:
         result = np.zeros_like(mix, dtype=np.float32)
-    for stem, signal in fitted.items():
-        channel = _channel_gains(gains.get(stem, 1.0), pans.get(stem, 0.0), signal.shape[1])
+    for stem in finest(stems):
+        signal = _fit(stems[stem], frames)
+        top = parent_of(stem)
+        gain = gains.get(stem, 1.0) * (gains.get(top, 1.0) if top else 1.0)
+        pan = pans.get(stem, pans.get(top, 0.0) if top else 0.0)
+        channel = _channel_gains(gain, pan, signal.shape[1])
         result += (channel - offset) * signal
     return result
 

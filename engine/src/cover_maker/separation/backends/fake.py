@@ -21,6 +21,9 @@ WEIGHTS: dict[Stem, float] = {
     Stem.BASS: 0.1,
     Stem.PIANO: 0.1,
     Stem.OTHER: 0.1,
+    # A lead/backing model splits the vocals it is given (weights add up to one).
+    Stem.VOCALS_LEAD: 0.7,
+    Stem.VOCALS_BACKING: 0.3,
 }
 
 

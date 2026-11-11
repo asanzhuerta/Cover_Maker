@@ -175,7 +175,8 @@ def separate(
         list[str], typer.Argument(help="Audio files, folders, or video/playlist links you pasted.")
     ],
     stems: Annotated[
-        str, typer.Option(help="Comma-separated stems, e.g. vocals,guitar.")
+        str,
+        typer.Option(help="Comma-separated stems, e.g. vocals,guitar or vocals.lead."),
     ] = "vocals",
     mode: Annotated[
         Mode, typer.Option(help="extract the stems, render the song without them, or both.")

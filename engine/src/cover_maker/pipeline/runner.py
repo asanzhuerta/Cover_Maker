@@ -21,12 +21,21 @@ from typing import Any
 import numpy as np
 
 from ..audio import analysis, io, mixer, practice
-from ..domain import ALL_STEMS, JobSpec, Mode, Preset, ResidualMode, Stem
+from ..domain import (
+    ALL_STEMS,
+    JobSpec,
+    Mode,
+    Preset,
+    ResidualMode,
+    Stem,
+    split_for,
+    stem_label,
+)
 from ..library.matching import read_track
 from ..paths import Paths
 from ..separation import recipes
 from ..separation.catalog import Catalog, Installs, ModelSpec
-from ..separation.recipes import MINUS, Node, Recipe, Ref
+from ..separation.recipes import MINUS, STEM, Node, Recipe, Ref
 from ..separation.service import GPU_LADDER, SeparationService, with_ladder
 from ..separation.tuning import Tuning
 from ..separation.types import Cancelled, SeparationRequest
@@ -125,7 +134,9 @@ def render_custom_mix(
     if with_stems:
         stem_dir = _free_path(folder, f"{sources.title} - stems{label}", "")
         stem_dir.mkdir(parents=True)
-        tracks: dict[str, io.Audio] = {stem.value: audio for stem, audio in stems.items()}
+        tracks: dict[str, io.Audio] = {
+            stem_label(stem).lower(): audio for stem, audio in stems.items()
+        }
         if click is not None:
             tracks["click"] = click
         for name, audio in tracks.items():
@@ -151,7 +162,8 @@ def stems_to_separate(spec: JobSpec) -> set[Stem]:
     """Stems the models must produce for this job."""
     selected = set(spec.stems)
     if spec.mode is not Mode.EXTRACT and spec.residual is ResidualMode.DROP:
-        return set(ALL_STEMS)  # the remaining stems are summed
+        # The remaining stems are summed, split as finely as the selection.
+        return split_for(selected) | selected
     return selected  # extract, or without+keep (mix minus the selected stems)
 
 
@@ -501,6 +513,8 @@ class JobRunner:
         return produced[ref.node][ref.stem]
 
     def _node_input(self, node: Node, mix_sha: str, produced: dict[str, dict[Stem, str]]) -> str:
+        if node.input.startswith(STEM):  # a stem of an earlier node, e.g. the vocals
+            return self._resolve(Ref.parse(node.input.removeprefix(STEM)), produced)
         if not node.input.startswith(MINUS):
             return mix_sha
         stem_sha = self._resolve(Ref.parse(node.input.removeprefix(MINUS)), produced)
@@ -601,13 +615,13 @@ class JobRunner:
             for stem in spec.stems:
                 sha = stems[stem]
                 export(
-                    stem.value.capitalize(),
+                    stem_label(stem),
                     lambda sha=sha: io.read(self.assets.require(sha)),
                     [sha],
                 )
         if spec.mode in (Mode.WITHOUT, Mode.BOTH):
             removed = set(spec.stems)
-            label = "without " + ", ".join(stem.value for stem in spec.stems)
+            label = "without " + ", ".join(stem_label(stem).lower() for stem in spec.stems)
 
             def render() -> io.Audio:
                 mix = io.read(self.assets.require(mix_sha))

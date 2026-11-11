@@ -1322,7 +1322,7 @@ export interface components {
          * Stem
          * @enum {string}
          */
-        Stem: "vocals" | "guitar" | "drums" | "bass" | "piano" | "other";
+        Stem: "vocals" | "guitar" | "drums" | "bass" | "piano" | "other" | "vocals.lead" | "vocals.backing";
         /** StorageOut */
         StorageOut: {
             /** Library Bytes */
