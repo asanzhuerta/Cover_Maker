@@ -306,6 +306,28 @@ class AnalysisOut(BaseModel):
     markers: list[MarkerIn] = Field(description="Named section markers, sorted by time.")
 
 
+class MidiRequest(BaseModel):
+    stems: list[str] = Field(
+        min_length=1, max_length=12, description="Stem ids to convert, e.g. vocals, bass, drums."
+    )
+
+
+class MidiFileOut(BaseModel):
+    stem: str
+    path: str = Field(description="The MIDI file, next to the stem exports.")
+    notes: int = Field(description="Notes found (0: nothing pitched or no hits).")
+    cached: bool = Field(description="True when the file was made before and reused.")
+
+
+class MidiOut(BaseModel):
+    item_id: int
+    bpm: float = Field(description="Tempo of the song from the analysis (120 without a beat grid).")
+    tempo_from_analysis: bool = Field(
+        description="False when the song has no beat grid: one default tempo (120 BPM)."
+    )
+    files: list[MidiFileOut]
+
+
 class PeaksOut(BaseModel):
     asset: str
     points: int

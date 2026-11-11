@@ -353,6 +353,16 @@ class JobRunner:
             (step, key, json.dumps(value)),
         )
 
+    # Step cache for steps that run outside a job (audio-to-MIDI, pipeline/midi.py).
+    def cached(self, step: str, key: str) -> Any | None:
+        return self._cached(step, key)
+
+    def remembered(self, step: str, key: str) -> Any | None:
+        return self._remembered(step, key)
+
+    def store(self, step: str, key: str, value: Any) -> None:
+        self._store(step, key, value)
+
     # ------------------------------------------------------------ item steps
 
     def _run_item(
