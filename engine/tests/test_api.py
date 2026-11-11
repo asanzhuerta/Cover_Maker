@@ -64,7 +64,25 @@ def test_system_reports_tier_and_preset(client: TestClient) -> None:
 
     assert body["tier"] == "4gb"
     assert body["recommended_preset"] == "balanced"
+    assert body["recommended_models"] == ["bs-roformer-sw"]
     assert body["demo"] is True
+
+
+def test_example_song_is_described_then_added_to_the_library(
+    client: TestClient, service: EngineService
+) -> None:
+    info = client.get("/example").json()
+    assert info["artist"] == "Josh Woodward"
+    assert info["licence_url"] == "https://creativecommons.org/licenses/by/4.0/"
+    assert 0 < info["size_bytes"] <= 2 * 1024 * 1024
+    assert 0 < info["duration_s"] <= 30
+
+    added = client.post("/example").json()
+    path = Path(added["path"])
+
+    assert path.is_relative_to(service.paths.home / "library" / "example")
+    assert path.with_name(f"{path.name}.credits.json").is_file()
+    assert Path(added["output_dir"]).is_relative_to(service.paths.home / "library" / "example")
 
 
 def test_models_need_licence_acceptance(client: TestClient) -> None:

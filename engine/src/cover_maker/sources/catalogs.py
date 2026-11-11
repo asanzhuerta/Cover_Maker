@@ -288,6 +288,8 @@ class Credits:
     licence_url: str
     page_url: str
     source: str
+    # What was changed from the original (CC BY asks to say so), if anything.
+    changes: str = ""
 
     def text(self) -> str:
         lines = [
@@ -295,6 +297,8 @@ class Credits:
             f"Source: {self.page_url}",
             f"Licence: {self.licence_name} ({self.licence_url})",
         ]
+        if self.changes:
+            lines.append(f"Changes: {self.changes}")
         restrictions = licence_restrictions(self.licence_url)
         if "ND" in restrictions:
             lines.append("Note: no-derivatives licence; do not share stems or mixes made from it.")
