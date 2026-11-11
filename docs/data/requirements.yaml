@@ -97,6 +97,11 @@ functional:
     text: The user interface shall be available in English and Spanish.
     priority: must
     milestone: M6
+  - id: FR-UI-02
+    title: First-run quick start
+    text: On first run the system shall install the models recommended for the detected hardware with one action, once the user accepts their licence notices, and offer a bundled example song (CC0 or CC BY, under 30 s and 2 MB) whose stems keep its attribution, so that the first stems are ready within minutes of setup.
+    priority: should
+    milestone: Launch
   - id: FR-DAW-01
     title: REAPER tracks
     text: A REAPER script shall send a song to the running engine and insert each resulting stem as a new track aligned with the source.

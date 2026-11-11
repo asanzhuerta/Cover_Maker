@@ -32,6 +32,10 @@ class SystemOut(BaseModel):
     gpu: GpuOut | None
     tier: str
     recommended_preset: str
+    recommended_models: list[str] = Field(
+        default_factory=list[str],
+        description="Models the recommended preset runs to produce every stem.",
+    )
     measured_speed: dict[str, float | None] = Field(
         default_factory=dict,
         description="Seconds of work per second of audio measured for each preset (None: no runs yet).",
@@ -225,6 +229,24 @@ class CatalogAttachRequest(BaseModel):
 
 class CatalogAttachOut(BaseModel):
     path: str
+
+
+class ExampleOut(BaseModel):
+    title: str
+    artist: str
+    licence_name: str
+    licence_url: str
+    page_url: str
+    changes: str
+    duration_s: float
+    size_bytes: int
+
+
+class ExampleAdded(BaseModel):
+    path: str = Field(description="The example's copy in the library, ready to use as a job input.")
+    output_dir: str = Field(
+        description="Suggested folder for its stems when the user has not chosen one yet."
+    )
 
 
 class CatalogDownloadRequest(BaseModel):

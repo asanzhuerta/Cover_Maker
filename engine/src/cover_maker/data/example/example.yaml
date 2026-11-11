@@ -1,0 +1,11 @@
+# The example song offered on first run ("Try it with the example song").
+# CC0 or CC BY only, under 30 s and 2 MB (tests/test_example.py). The same
+# attribution is listed in THIRD_PARTY_NOTICES.md.
+file: josh-woodward-airplane-mode-excerpt.mp3
+duration_s: 28.0
+title: Airplane Mode (excerpt)
+artist: Josh Woodward
+licence_name: CC BY 4.0
+licence_url: https://creativecommons.org/licenses/by/4.0/
+page_url: https://www.joshwoodward.com/song/AirplaneMode
+changes: "28-second excerpt with short fades, re-encoded as MP3 (256 kbps)."

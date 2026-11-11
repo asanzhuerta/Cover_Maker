@@ -423,6 +423,74 @@
         "title": "DiagnosticsOut",
         "type": "object"
       },
+      "ExampleAdded": {
+        "properties": {
+          "output_dir": {
+            "description": "Suggested folder for its stems when the user has not chosen one yet.",
+            "title": "Output Dir",
+            "type": "string"
+          },
+          "path": {
+            "description": "The example's copy in the library, ready to use as a job input.",
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "output_dir"
+        ],
+        "title": "ExampleAdded",
+        "type": "object"
+      },
+      "ExampleOut": {
+        "properties": {
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "changes": {
+            "title": "Changes",
+            "type": "string"
+          },
+          "duration_s": {
+            "title": "Duration S",
+            "type": "number"
+          },
+          "licence_name": {
+            "title": "Licence Name",
+            "type": "string"
+          },
+          "licence_url": {
+            "title": "Licence Url",
+            "type": "string"
+          },
+          "page_url": {
+            "title": "Page Url",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "artist",
+          "licence_name",
+          "licence_url",
+          "page_url",
+          "changes",
+          "duration_s",
+          "size_bytes"
+        ],
+        "title": "ExampleOut",
+        "type": "object"
+      },
       "FolderRequest": {
         "properties": {
           "path": {
@@ -1308,6 +1376,14 @@
             "title": "Ram Gb",
             "type": "number"
           },
+          "recommended_models": {
+            "description": "Models the recommended preset runs to produce every stem.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Recommended Models",
+            "type": "array"
+          },
           "recommended_preset": {
             "title": "Recommended Preset",
             "type": "string"
@@ -1724,6 +1800,42 @@
           }
         },
         "summary": "Create Diagnostics"
+      }
+    },
+    "/example": {
+      "get": {
+        "description": "The Creative Commons example clip offered on first run.",
+        "operationId": "example_info_example_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Example Info"
+      },
+      "post": {
+        "description": "Copy the example clip into the library, with its credits for the export.",
+        "operationId": "example_add_example_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleAdded"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Example Add"
       }
     },
     "/health": {

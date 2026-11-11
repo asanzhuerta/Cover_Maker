@@ -6,6 +6,7 @@
   import RuntimeNotice from "$lib/components/RuntimeNotice.svelte";
   import StemPicker from "$lib/components/StemPicker.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
+  import { errorMessage } from "$lib/api/client";
   import { connection, isTauri } from "$lib/connection.svelte";
   import { t } from "$lib/i18n.svelte";
   import type { IconName } from "$lib/icons";
@@ -89,6 +90,19 @@
     if (typeof chosen !== "string") return;
     if (target === "input") add([chosen]);
     else outputDir = chosen;
+  }
+
+  // The Creative Commons example clip that ships with the engine.
+  async function addExample() {
+    if (!connection.api) return;
+    error = "";
+    const { data, error: problem } = await connection.api.POST("/example");
+    if (!data) {
+      error = errorMessage(problem);
+      return;
+    }
+    add([data.path]);
+    if (!outputDir.trim()) outputDir = data.output_dir;
   }
 
   async function start() {
@@ -187,7 +201,16 @@
   {#if inputs.length}<span class="count">{inputs.length}</span>{/if}
 </h2>
 {#if inputs.length === 0}
-  <p class="muted empty">{t("new.noInputs")}</p>
+  <div class="row empty">
+    <p class="muted">{t("new.noInputs")} {t("new.exampleHint")}</p>
+    <button
+      class="small"
+      disabled={connection.status !== "ready"}
+      onclick={() => void addExample()}
+      data-testid="add-example"
+      ><Icon name="cc" size={14} />{t("new.example")}</button
+    >
+  </div>
 {:else}
   <ul class="inputs">
     {#each inputs as input (input)}
@@ -396,6 +419,11 @@
   }
 
   .empty {
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .empty p {
     margin: 0;
   }
 

@@ -94,6 +94,12 @@ FR-UI-01:
   - "ui:jobs.test.ts > has every key translated"
   - "ui:about.test.ts > has every user-facing text in English and Spanish"
   - "shell:locale::maps_windows_language_ids"
+FR-UI-02:
+  - "engine:test_example.py::test_example_clip_is_short_small_and_cc0_or_cc_by"
+  - "engine:test_example.py::test_stems_of_the_example_come_with_credits"
+  - "engine:test_api.py::test_system_reports_tier_and_preset"
+  - "ui:quickstart.test.ts > waits for the engine, then the runtime, before installing"
+  - "ui:quickstart.test.ts > separates the example song into every stem"
 FR-DAW-01:
   - "manual: daw/reaper/tests/e2e_demo.py runs the script against the demo engine with a stubbed reaper API (2026-11-05)"
   - "manual: daw/reaper/tests/check_script.py checks the script's JSON and stem parsing"

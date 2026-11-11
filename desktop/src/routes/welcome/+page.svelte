@@ -5,6 +5,7 @@
   import Icon from "$lib/components/Icon.svelte";
   import Logo from "$lib/components/Logo.svelte";
   import ModelPreview from "$lib/components/ModelPreview.svelte";
+  import QuickStart from "$lib/components/QuickStart.svelte";
   import RuntimeStatus from "$lib/components/RuntimeStatus.svelte";
   import Waveform from "$lib/components/Waveform.svelte";
   import { connection } from "$lib/connection.svelte";
@@ -32,10 +33,10 @@
 
   const canNext = $derived(step > 0 || accepted);
 
-  function finish() {
+  function finish(to: "/" | "/queue" = "/") {
     settings.welcomed = true;
     saveSettings();
-    void goto(resolve("/"));
+    void goto(resolve(to));
   }
 </script>
 
@@ -151,15 +152,19 @@
         <p class="muted">{t("tour.scanning")}</p>
       {/if}
     {:else}
-      <h3>{t("welcome.models")}</h3>
-      <p class="lead">{t("tour.modelsIntro")}</p>
-      <ModelPreview />
-      <h4>{t("tour.nextTitle")}</h4>
-      <ol class="next">
-        <li>{t("tour.next1")}</li>
-        <li>{t("tour.next2")}</li>
-        <li>{t("tour.next3")}</li>
-      </ol>
+      <QuickStart onstarted={() => finish("/queue")} />
+      {#if connection.status !== "ready"}
+        <!-- Without the engine, explain the Models page with a mock instead. -->
+        <h4>{t("welcome.models")}</h4>
+        <p class="lead">{t("tour.modelsIntro")}</p>
+        <ModelPreview />
+        <h4>{t("tour.nextTitle")}</h4>
+        <ol class="next">
+          <li>{t("tour.next1")}</li>
+          <li>{t("tour.next2")}</li>
+          <li>{t("tour.next3")}</li>
+        </ol>
+      {/if}
     {/if}
 
     <div class="row nav">
@@ -178,8 +183,13 @@
           >{t("welcome.next")}<Icon name="arrowRight" size={16} /></button
         >
       {:else}
-        <button class="ghost" onclick={finish}>{t("welcome.skip")}</button>
-        <button class="primary" onclick={finish} data-testid="welcome-finish"
+        <button class="ghost" onclick={() => finish()}
+          >{t("welcome.skip")}</button
+        >
+        <button
+          class:primary={connection.status !== "ready"}
+          onclick={() => finish()}
+          data-testid="welcome-finish"
           >{t("welcome.finish")}<Icon name="arrowRight" size={16} /></button
         >
       {/if}
