@@ -210,6 +210,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/items/{item_id}/midi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Item Midi
+         * @description Convert stems to MIDI files with the song's tempo map (FR-MIDI-01).
+         *
+         *     Stems run one after another on a CPU thread; ``midi.progress`` events report
+         *     the stem being converted. Stems converted before are reused from the cache.
+         */
+        post: operations["item_midi_items__item_id__midi_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/items/{item_id}/preview": {
         parameters: {
             query?: never;
@@ -1101,6 +1124,51 @@ export interface components {
              */
             path?: string | null;
         };
+        /** MidiFileOut */
+        MidiFileOut: {
+            /**
+             * Cached
+             * @description True when the file was made before and reused.
+             */
+            cached: boolean;
+            /**
+             * Notes
+             * @description Notes found (0: nothing pitched or no hits).
+             */
+            notes: number;
+            /**
+             * Path
+             * @description The MIDI file, next to the stem exports.
+             */
+            path: string;
+            /** Stem */
+            stem: string;
+        };
+        /** MidiOut */
+        MidiOut: {
+            /**
+             * Bpm
+             * @description Tempo of the song from the analysis (120 without a beat grid).
+             */
+            bpm: number;
+            /** Files */
+            files: components["schemas"]["MidiFileOut"][];
+            /** Item Id */
+            item_id: number;
+            /**
+             * Tempo From Analysis
+             * @description False when the song has no beat grid: one default tempo (120 BPM).
+             */
+            tempo_from_analysis: boolean;
+        };
+        /** MidiRequest */
+        MidiRequest: {
+            /**
+             * Stems
+             * @description Stem ids to convert, e.g. vocals, bass, drums.
+             */
+            stems: string[];
+        };
         /**
          * Mode
          * @enum {string}
@@ -1777,6 +1845,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MarkerIn"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    item_midi_items__item_id__midi_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MidiRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MidiOut"];
                 };
             };
             /** @description Validation Error */

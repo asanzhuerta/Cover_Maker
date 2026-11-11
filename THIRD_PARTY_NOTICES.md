@@ -5,9 +5,11 @@ first run, third-party software that keeps its own licence. This file lists
 them. It was reviewed on 2026-11-03 (milestone M9.2) and is not legal advice.
 The tables of packages are generated with `docs/tools/notices.py`.
 
-AI model weights are **not** distributed with Cover_Maker. You download them
-from their original sources after reviewing each model's licence in the
-in-app catalogue (Models page).
+Separation model weights are **not** distributed with Cover_Maker. You
+download them from their original sources after reviewing each model's licence
+in the in-app catalogue (Models page). The one bundled model is the small
+Basic Pitch note-transcription model (Apache-2.0) used for audio to MIDI; see
+[Basic Pitch](#basic-pitch).
 
 ## Licences that restrict how you may use the app
 
@@ -30,6 +32,7 @@ in-app catalogue (Models page).
 | [Svelte](https://svelte.dev), SvelteKit and the UI's JavaScript packages | MIT (mostly) | Listed below |
 | Archivo SemiExpanded, IBM Plex Sans and IBM Plex Mono fonts | SIL Open Font License 1.1 | Listed below |
 | Example song: "Airplane Mode" by Josh Woodward, 28-second excerpt with fades | CC BY 4.0 | In the engine package; see [Example song](#example-song) |
+| [Basic Pitch](https://github.com/spotify/basic-pitch) model (`nmp.onnx`) and ported transcription code, by Spotify | Apache-2.0 | In the engine package; see [Basic Pitch](#basic-pitch) |
 | Microsoft Edge WebView2 | Microsoft software licence | Not bundled: the installer downloads Microsoft's bootstrapper only when WebView2 is missing |
 
 The installer also copies this file and Cover_Maker's `LICENSE` to
@@ -533,6 +536,28 @@ on first run:
 Stems and mixes made from the clip are adaptations under the same terms: every
 export writes this attribution, with the changes, to a `CREDITS.txt` next to
 the stems.
+
+### Basic Pitch
+
+Audio to MIDI uses Basic Pitch by Spotify's Audio Intelligence Lab,
+<https://github.com/spotify/basic-pitch>, commit `fa5997a`:
+
+- **Model:** `engine/src/cover_maker/data/basic_pitch/nmp.onnx`, the ICASSP
+  2022 model in its published ONNX form, unmodified.
+- **Code:** `engine/src/cover_maker/midi/basic_pitch.py` is a modified port of
+  `basic_pitch/inference.py` and `basic_pitch/note_creation.py`; the changes are
+  listed at the top of the file.
+- **Licence:** Apache License 2.0. The licence text and Basic Pitch's `NOTICE`
+  file are next to the model (`LICENSE`, `NOTICE`) and ship in the engine
+  package.
+
+```
+Basic Pitch
+Copyright 2022 Spotify AB
+
+This product includes software developed at
+Spotify AB (http://www.spotify.com/).
+```
 
 ## VST3 plugin
 
