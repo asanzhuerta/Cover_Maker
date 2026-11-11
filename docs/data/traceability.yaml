@@ -56,7 +56,7 @@ FR-SRC-06:
 FR-SEP-01:
   - "engine:test_runner.py::test_extract_exports_selected_stem"
   - "engine:test_runner.py::test_new_stem_reuses_previous_separation"
-  - "ui:stems.test.ts > lists the six selectable stems"
+  - "ui:stems.test.ts > lists the six top-level stems"
 FR-SEP-02:
   - "engine:test_runner.py::test_without_vocals_keep_residual"
   - "engine:test_runner.py::test_without_drop_residual_needs_all_stems"
@@ -66,6 +66,15 @@ FR-SEP-03:
   - "engine:test_recipes_catalog.py::test_every_preset_covers_all_stems_with_catalogue_models"
   - "engine:test_runner.py::test_max_preset_runs_ensemble"
   - "engine:test_api.py::test_system_reports_tier_and_preset"
+FR-SEP-04:
+  - "engine:test_runner.py::test_lead_and_backing_split_the_vocals"
+  - "engine:test_runner.py::test_without_lead_keeps_the_backing"
+  - "engine:test_runner.py::test_lead_reuses_the_cached_vocals"
+  - "engine:test_recipes_catalog.py::test_lead_and_backing_run_on_the_vocals_stem"
+  - "engine:test_mixer.py::test_removing_the_lead_keeps_the_backing"
+  - "engine:test_mixer.py::test_sub_stems_at_one_gain_sound_like_their_parent"
+  - "ui:stems.test.ts > shows lead and backing lanes in place of the vocals"
+  - "manual: benchmark of the lead/backing model on the RTX 3050 Laptop 4 GB (2026-11-11)"
 FR-MOD-01:
   - "engine:test_recipes_catalog.py::test_catalogue_has_licence_and_notice_for_every_model"
   - "engine:test_installer.py::test_download_calls_the_cli_entry_point"

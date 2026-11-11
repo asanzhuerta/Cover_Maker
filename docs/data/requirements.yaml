@@ -67,6 +67,11 @@ functional:
     text: The system shall offer Fast, Balanced and Max quality presets adapted to the detected hardware tier.
     priority: must
     milestone: M3
+  - id: FR-SEP-04
+    title: Lead and backing vocals
+    text: The user shall split the vocals into lead and backing vocals and extract or remove either one (for example a track without the lead vocals that keeps the backing vocals). The split shall run on the separated vocals, so vocals already separated are reused, and the mixer shall show lead and backing lanes in place of the vocals.
+    priority: should
+    milestone: Future work
   - id: FR-MOD-01
     title: Model catalogue
     text: The system shall list available models with licence class, provenance, size and estimated memory, and download only models the user explicitly accepts.

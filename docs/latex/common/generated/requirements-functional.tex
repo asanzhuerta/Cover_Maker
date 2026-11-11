@@ -13,6 +13,7 @@
 \texttt{FR-SEP-01} & \textbf{Stem selection}. The user shall choose any subset of the stems vocals, guitar, drums, bass, piano and other. & must & M3 \\
 \texttt{FR-SEP-02} & \textbf{Track without X}. The system shall render a mix of the song without the stems the user selects, optionally keeping the residual. & must & M3 \\
 \texttt{FR-SEP-03} & \textbf{Presets}. The system shall offer Fast, Balanced and Max quality presets adapted to the detected hardware tier. & must & M3 \\
+\texttt{FR-SEP-04} & \textbf{Lead and backing vocals}. The user shall split the vocals into lead and backing vocals and extract or remove either one (for example a track without the lead vocals that keeps the backing vocals). The split shall run on the separated vocals, so vocals already separated are reused, and the mixer shall show lead and backing lanes in place of the vocals. & should & Future work \\
 \texttt{FR-MOD-01} & \textbf{Model catalogue}. The system shall list available models with licence class, provenance, size and estimated memory, and download only models the user explicitly accepts. & must & M3 \\
 \texttt{FR-JOB-01} & \textbf{Job queue}. The system shall queue jobs, show per-song step progress, and support pause, resume, cancel and retry. & must & M3 \\
 \texttt{FR-LIB-01} & \textbf{Library and re-sync}. The system shall keep a library of processed recordings and reprocess only new or changed inputs on re-sync. & must & M4 \\

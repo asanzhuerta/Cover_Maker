@@ -174,8 +174,10 @@ Max quality & BS-RoFormer SW and BS-RoFormer Resurrection. \\
   \item On \emph{New job}, drop audio files or folders on the dashed area, use
         \emph{Add files} or \emph{Add folder}, or paste a video or playlist link
         and press \emph{Add link}.
-  \item Select the stems by clicking their cards: Vocals, Guitar, Drums, Bass,
-        Piano, Other. A selected card is lit in the stem's colour.
+  \item Select the stems by clicking their cards: Vocals, Lead vocals,
+        Backing vocals, Guitar, Drums, Bass, Piano, Other. A selected card is
+        lit in the stem's colour. Lead and backing vocals are explained in
+        \autoref{sec:lead-backing}.
   \item Choose what to export:
         \begin{itemize}
           \item \emph{The selected stems}: one file per stem;
@@ -222,8 +224,30 @@ fallback when the graphics card runs out of memory, installing a missing
 model, or checking for a yt-dlp update when a video link stops working.
 Fix the cause and press \emph{Retry}.
 
+\section{Lead and backing vocals}\label{sec:lead-backing}
+The \emph{Lead vocals} and \emph{Backing vocals} cards split the vocals in
+two: the main singer, and the choir or harmonies behind them. Use them to:
+\begin{itemize}
+  \item sing the lead over the original backing vocals: choose \emph{Lead
+        vocals} and \emph{The song without them};
+  \item sing the harmonies over the lead: do the same with \emph{Backing
+        vocals};
+  \item study a harmony part on its own: choose \emph{Backing vocals} and
+        \emph{The selected stems}.
+\end{itemize}
+The split needs one more model, \emph{BS-RoFormer karaoke (lead/backing
+vocals, anvuew)}, which you install from \emph{Models} like the others (about
+200~MB; its licence is GPL-3.0). It runs on the vocals that the preset has
+already separated, so a song whose vocals are done only needs this extra
+step: about 15 seconds per minute of song on a 4~GB graphics card. In the
+mixer, a song with the split shows \emph{Lead vocals} and \emph{Backing
+vocals} lanes in place of \emph{Vocals}. A duet, or a choir singing the
+melody, may be treated as lead: listen in the mixer before you rely on the
+result.
+
 \section{File names}
-Stems are saved as \texttt{<song> - <Stem>.<format>} and backing tracks as
+Stems are saved as \texttt{<song> - <Stem>.<format>} (for example
+\texttt{<song> - Lead vocals.wav}) and backing tracks as
 \texttt{<song> - without <stems>.<format>}; the \emph{Both} mode writes both
 kinds.
 
@@ -626,7 +650,7 @@ cover-maker separate song.flac --stems vocals --mode without -o backing
 \toprule
 \textbf{Option of \texttt{separate}} & \textbf{Meaning} \\
 \midrule
-\texttt{--stems} & Comma-separated: vocals, guitar, drums, bass, piano, other. \\
+\texttt{--stems} & Comma-separated: vocals, guitar, drums, bass, piano, other, vocals.lead (lead vocals), vocals.backing (backing vocals). \\
 \texttt{--mode} & \texttt{extract} (default) writes the stems; \texttt{without} writes the song without them; \texttt{both} writes both. \\
 \texttt{--residual} & For \texttt{without} and \texttt{both}: \texttt{keep} (default) or \texttt{drop}. \\
 \texttt{--preset} & \texttt{auto} (default), \texttt{fast}, \texttt{balanced} or \texttt{max}. \\
