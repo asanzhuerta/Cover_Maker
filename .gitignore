@@ -59,6 +59,9 @@ docs/latex/**/build/
 *.pth
 *.onnx
 *.safetensors
+# ...except the short Creative Commons example song offered on first run
+# (CC0 or CC BY, under 30 s and 2 MB; credited in THIRD_PARTY_NOTICES.md).
+!engine/src/cover_maker/data/example/*.mp3
 
 # OS / editors
 Thumbs.db

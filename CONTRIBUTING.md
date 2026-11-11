@@ -21,6 +21,8 @@ Thanks for your interest in improving Cover_Maker.
 | `engine/` | Python engine (uv project): pipeline, library, API, CLI |
 | `desktop/` | Tauri 2 shell + SvelteKit/TypeScript UI |
 | `docs/latex/` | Project documentation (LaTeX) |
+| `packaging/` | winget and Scoop packaging notes and manifests |
+| `branding/` | Logo, social preview and their sources |
 
 ## Development setup (Windows)
 

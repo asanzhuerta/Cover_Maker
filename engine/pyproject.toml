@@ -60,6 +60,9 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cover_maker"]
+# The example song is an MP3, which the repository's .gitignore excludes
+# everywhere else; hatchling would otherwise leave it out of the wheel.
+artifacts = ["src/cover_maker/data/example/*.mp3"]
 
 [tool.ruff]
 line-length = 100

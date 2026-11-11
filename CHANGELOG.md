@@ -8,10 +8,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-11-05
 
-First stable release: the *Tape & Console* visual identity, DAW integration
-(REAPER script and VST3 plugin), presets tuned from measured runs, model
-licences page, the code signing policy and privacy notice, and all documents
-at version 1.0 (M8, M10, M11, M13).
+First stable release: the *Tape & Console* visual identity, a first-run quick
+start with a Creative Commons example song, a stable download link, DAW
+integration (REAPER script and VST3 plugin), presets tuned from measured runs,
+model licences page, the code signing policy and privacy notice, security
+hardening, and all documents at version 1.0 (M8, M10, M11, M13).
 
 ### Security
 - Release workflow: the tag name reaches run scripts through an environment
@@ -63,6 +64,34 @@ at version 1.0 (M8, M10, M11, M13).
 - Library page: *Temporary files* lists what stopped or failed jobs left
   behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
   `POST /storage/temporary/clear`), and opens the folder in Explorer.
+
+### Added (Launch: download and repository)
+- First-run quick start (#95): the last welcome step shows the model, or
+  models, that the recommended preset uses on this PC with their licence
+  notices, installs them with one click once accepted, then offers *Try it
+  with the example song*, which separates a bundled Creative Commons clip
+  ("Airplane Mode" by Josh Woodward, CC BY 4.0, a 28 s excerpt with fades) into all six stems and
+  opens the queue. *Use the example song* on *New job* adds the same clip.
+  Its stems come with a `CREDITS.txt` that also states the changes made.
+  API: `GET /example`, `POST /example` and `SystemOut.recommended_models`
+  (FR-UI-02).
+- Stable download link (#93): every release also carries the installer as
+  `Cover_Maker_x64-setup.exe`, so
+  `https://github.com/asanzhuerta/Cover_Maker/releases/latest/download/Cover_Maker_x64-setup.exe`
+  always serves the newest version, plus `SHA256SUMS.txt`. The versioned
+  installer and `latest.json` stay for the updater.
+- winget and Scoop (#94): publishing a draft release runs `wingetcreate
+  update` (pinned, hash-checked) when a `WINGET_TOKEN` secret exists, and
+  `packaging/scoop/cover-maker.json` is ready for the Extras bucket, with
+  `checkver` and `autoupdate`. `packaging/README.md` lists the one-time setup.
+- New README (#91) in English and Spanish (`README.es.md`): download button,
+  demo and screenshots made with the demo engine and the example song, the
+  three promises, a feature grid, a comparison with subscription apps and
+  basic splitters, measured timings, FAQ, contributing and credits.
+- Social preview image (#92): `branding/social-preview.png` (1280 x 640) and
+  its HTML source.
+- Installation Guide 1.1 and User Manual 1.2: the stable link, checksums,
+  package managers and the quick start.
 
 ### Changed
 - Project Plan 1.1: the roadmap after a competitive review. A new visual
