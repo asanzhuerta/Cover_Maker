@@ -60,7 +60,7 @@ project follows [Semantic Versioning](https://semver.org/).
   models, that the recommended preset uses on this PC with their licence
   notices, installs them with one click once accepted, then offers *Try it
   with the example song*, which separates a bundled Creative Commons clip
-  ("Airplane Mode" by Josh Woodward, CC BY 4.0, 28 s) into all six stems and
+  ("Airplane Mode" by Josh Woodward, CC BY 4.0, a 28 s excerpt with fades) into all six stems and
   opens the queue. *Use the example song* on *New job* adds the same clip.
   Its stems come with a `CREDITS.txt` that also states the changes made.
   API: `GET /example`, `POST /example` and `SystemOut.recommended_models`

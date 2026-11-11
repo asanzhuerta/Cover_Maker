@@ -166,8 +166,10 @@ commercial audio in issues, tests or screenshots.
   AI), run through [python-audio-separator](https://github.com/nomadkaraoke/python-audio-separator)
   and [PyTorch](https://pytorch.org). Licences and provenance in
   [MODEL_LICENCES.md](MODEL_LICENCES.md).
-- Example song: "Airplane Mode" by [Josh Woodward](https://www.joshwoodward.com/),
-  CC BY 4.0, a 28-second excerpt.
+- Example song: ["Airplane Mode"](https://www.joshwoodward.com/song/AirplaneMode)
+  by Josh Woodward, licensed under
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the app ships a
+  28-second excerpt with fades.
 - Built with [Tauri](https://tauri.app), [Svelte](https://svelte.dev),
   [FastAPI](https://fastapi.tiangolo.com), [yt-dlp](https://github.com/yt-dlp/yt-dlp)
   and [ffmpeg](https://ffmpeg.org); fonts Archivo and IBM Plex (SIL OFL 1.1).

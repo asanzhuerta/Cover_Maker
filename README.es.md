@@ -174,8 +174,10 @@ diseño: nada de audio comercial en issues, tests ni capturas.
   ejecutados con [python-audio-separator](https://github.com/nomadkaraoke/python-audio-separator)
   y [PyTorch](https://pytorch.org). Licencias y procedencia en
   [MODEL_LICENCES.md](MODEL_LICENCES.md).
-- Canción de ejemplo: «Airplane Mode» de [Josh Woodward](https://www.joshwoodward.com/),
-  CC BY 4.0, un fragmento de 28 segundos.
+- Canción de ejemplo: [«Airplane Mode»](https://www.joshwoodward.com/song/AirplaneMode)
+  de Josh Woodward, con licencia
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); la aplicación
+  incluye un fragmento de 28 segundos con fundidos.
 - Hecho con [Tauri](https://tauri.app), [Svelte](https://svelte.dev),
   [FastAPI](https://fastapi.tiangolo.com), [yt-dlp](https://github.com/yt-dlp/yt-dlp)
   y [ffmpeg](https://ffmpeg.org); fuentes Archivo e IBM Plex (SIL OFL 1.1).
