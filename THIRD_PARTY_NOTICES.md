@@ -29,6 +29,7 @@ in-app catalogue (Models page).
 | [Tauri](https://tauri.app), its plugins and the shell's Rust crates | MIT or Apache-2.0 (mostly) | Listed below |
 | [Svelte](https://svelte.dev), SvelteKit and the UI's JavaScript packages | MIT (mostly) | Listed below |
 | Archivo SemiExpanded, IBM Plex Sans and IBM Plex Mono fonts | SIL Open Font License 1.1 | Listed below |
+| Example song: "Airplane Mode" by Josh Woodward, 28-second excerpt with fades | CC BY 4.0 | In the engine package; see [Example song](#example-song) |
 | Microsoft Edge WebView2 | Microsoft software licence | Not bundled: the installer downloads Microsoft's bootstrapper only when WebView2 is missing |
 
 The installer also copies this file and Cover_Maker's `LICENSE` to
@@ -498,6 +499,26 @@ licence text (`OFL.txt`). The app never loads fonts from the network.
 | Archivo SemiExpanded (Medium, SemiBold, Bold) | 2.66, commit `2111276` | [Omnibus-Type/Archivo](https://github.com/Omnibus-Type/Archivo) | SIL OFL 1.1, Copyright 2020 The Archivo Project Authors |
 | IBM Plex Sans (Regular, Italic, Medium, SemiBold) | 1.1.0 | [IBM/plex](https://github.com/IBM/plex) | SIL OFL 1.1, Copyright 2017 IBM Corp., Reserved Font Name "Plex" |
 | IBM Plex Mono (Regular, Medium, SemiBold) | 2.5.0 | [IBM/plex](https://github.com/IBM/plex) | SIL OFL 1.1, Copyright 2017 IBM Corp., Reserved Font Name "Plex" |
+
+### Example song
+
+The engine package includes a short clip for *Try it with the example song*
+on first run:
+`engine/src/cover_maker/data/example/josh-woodward-airplane-mode-excerpt.mp3`.
+
+- **Work:** "Airplane Mode" by Josh Woodward,
+  <https://www.joshwoodward.com/song/AirplaneMode>
+- **Licence:** Creative Commons Attribution 4.0 International (CC BY 4.0),
+  <https://creativecommons.org/licenses/by/4.0/>
+- **Changes:** this is a modified version: an excerpt from 0:45 to 1:13
+  (28 s) with a fade-in and a fade-out, re-encoded as MP3 (256 kbps).
+- **Obtained from:** the Internet Archive copy of the single,
+  <https://archive.org/details/jamendo-124697>, which lists CC BY 3.0; the
+  author's site offers the song under CC BY 4.0.
+
+Stems and mixes made from the clip are adaptations under the same terms: every
+export writes this attribution, with the changes, to a `CREDITS.txt` next to
+the stems.
 
 ## VST3 plugin
 

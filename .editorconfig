@@ -13,3 +13,7 @@ indent_size = 4
 
 [*.md]
 trim_trailing_whitespace = false
+
+# Scoop manifests follow the Scoop buckets' 4-space style.
+[packaging/scoop/*.json]
+indent_size = 4

@@ -16,6 +16,7 @@
   0.4 & 2026-11-05 & Using Cover\_Maker from your DAW (M11). \\
   1.0 & 2026-11-05 & Version 1.0: model licences appendix and Auto preset tuning. \\
   1.1 & 2026-11-10 & New look (Tape \& Console): icon rail, transport dock, pan, shortcuts (M13). \\
+  1.2 & 2026-11-11 & First-run quick start and the example song (Launch). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -43,11 +44,42 @@ second step on, the screen explains what happens until you can use the app:
         hardware tier (CPU, 4, 6, 8 or 12+~GB of video memory) and the
         recommended quality preset, as one tile each, once the engine has
         scanned your PC.
-  \item \emph{Models}: an illustrative preview of the \emph{Models} page (not
-        your real list, which needs the scan and the runtime) and the next
-        steps: wait for the runtime, install the recommended model on the
-        \emph{Models} page (\autoref{ch:models}), then start a job.
+  \item \emph{Models}: the quick start described below, so that you hear
+        your first stems a few minutes after setup. If the engine is not
+        running yet, an illustrative preview of the \emph{Models} page is
+        shown instead.
 \end{enumerate}
+\emph{Continue} and \emph{Choose later} close the welcome; you can install
+models on the \emph{Models} page (\autoref{ch:models}) at any time.
+
+\section{Your first stems: the example song}
+The last welcome step shows the model, or models, that the recommended preset
+uses on your hardware: for example \emph{BS-RoFormer SW} on an NVIDIA card with
+4~GB of video memory, or \emph{Hybrid Transformer Demucs (6 stems)} without a
+compatible card. For each one you see its licence, a link to the licence's
+source, its download size and the full notice you accept.
+\begin{enumerate}
+  \item Read the notices and tick \emph{I have read these licence notices and
+        accept them}.
+  \item Press \emph{Install the recommended model}. The button stays disabled,
+        with a note, until the separation runtime is installed; a green bar
+        then shows the download.
+  \item When the model is installed, the \emph{Try it with the example song}
+        card appears. It shows the song (``Airplane Mode'' by Josh Woodward),
+        its licence (CC BY 4.0), its source page, its length and size, what
+        was changed (an excerpt from 0:45 to 1:13 with fades) and the folder
+        the stems go to: your output folder from \emph{Settings}, or
+        \texttt{library\textbackslash example\textbackslash stems} in the data
+        folder if you have not chosen one.
+  \item Press \emph{Try it with the example song}. \CM{} separates the clip
+        into all six stems with the recommended preset and opens the
+        \emph{Queue}; open the result in the mixer when it is done.
+\end{enumerate}
+The clip ships with the app, so trying it downloads nothing. Like every
+Creative Commons song, its stems come with a \texttt{CREDITS.txt} that names
+the artist, the source, the licence and the changes made. On \emph{New job},
+\emph{Use the example song} adds the same clip to the inputs whenever you want
+to try other settings.
 \section{The window}
 \begin{figure}[htbp]
   \centering

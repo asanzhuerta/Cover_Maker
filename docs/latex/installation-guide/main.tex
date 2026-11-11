@@ -13,6 +13,8 @@
   0.2 & 2026-11-03 & Installation, first run, updates, removal and
   troubleshooting (M9). \\
   1.0 & 2026-11-05 & Version 1.0 for release v1.0.0, with the DAW plugin and script. \\
+  1.1 & 2026-11-11 & Stable download link, checksums, winget and Scoop, first-run
+  quick start with the example song (Launch). \\
 \end{revisionhistory}
 
 \tableofcontents
@@ -38,8 +40,12 @@ the app.
 
 \chapter{Installation}
 \begin{enumerate}
-  \item Download \texttt{Cover\_Maker\_<version>\_x64-setup.exe} from the
-  project's GitHub Releases page.
+  \item Download the installer. This link always serves the newest version:
+  \url{https://github.com/asanzhuerta/Cover_Maker/releases/latest/download/Cover_Maker_x64-setup.exe}.
+  The project's GitHub Releases page has the same file for every version as
+  \texttt{Cover\_Maker\_<version>\_x64-setup.exe}, and
+  \texttt{SHA256SUMS.txt} lists the SHA-256 hash of both names, so you can
+  check a download with \texttt{Get-FileHash} in PowerShell.
   \item Run it and choose the language, English or Spanish. The app uses it as
   its default language; you can change it later in \emph{Settings}. The
   installer works per user and does not ask for administrator rights. It installs into
@@ -51,6 +57,15 @@ the app.
 \end{enumerate}
 
 For an unattended install, run the installer with \texttt{/S}.
+
+\section{Package managers}
+Once the packages are published, \CM{} can also be installed with
+\texttt{winget install asanzhuerta.CoverMaker} or, from Scoop's Extras
+bucket, with \texttt{scoop install cover-maker}. The winget package runs the
+same installer. The Scoop package unpacks the app into Scoop's folder instead;
+update it with \texttt{scoop update cover-maker} rather than from the app,
+which would install a second copy. Both keep the runtime and your data in
+\texttt{\%LOCALAPPDATA\%\textbackslash Cover\_Maker}.
 
 \section{Disk space}
 The installer is small; most space is used on first run (measured in M2):
@@ -93,7 +108,12 @@ The setup then lists the steps and shows their progress:
   (used by yt-dlp for some video sites), checked against pinned SHA-256 hashes.
 \end{enumerate}
 This takes one to a few minutes, depending on the connection. When it is done
-the usual welcome screen appears.
+the usual welcome screen appears. Its last step, \emph{Models}, gets you to
+your first stems quickly: it shows the model recommended for your hardware with
+its licence notice; once you accept it, one button downloads it, and
+\emph{Try it with the example song} separates a 28-second Creative Commons
+clip that comes with the app (no download needed). The User Manual describes
+this step.
 
 The \textbf{separation runtime} (PyTorch and audio-separator) is installed
 next, in the background; the sidebar shows \emph{Installing the separation

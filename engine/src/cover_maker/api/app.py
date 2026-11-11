@@ -37,7 +37,7 @@ from ..separation import recipes
 from ..separation.hardware import Tier
 from ..separation.installer import InstallError, install, separation_available
 from ..separation.tuning import Tuning
-from ..sources import catalogs
+from ..sources import catalogs, example
 from ..sources.expand import expand_inputs
 from ..sources.links import InputKind, UnsupportedInput, parse_input
 from ..sources.youtube import DownloadError
@@ -96,14 +96,15 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         tuning = Tuning(svc.conn)
         recommended, speed = await _db(
             lambda: (
-                resolve_preset("auto", hw.tier is not Tier.CPU, tuning).value,
+                resolve_preset("auto", hw.tier is not Tier.CPU, tuning),
                 tuning.summary(preset_models()),
             )
         )
         return schemas.SystemOut(
             version=__version__, data_dir=str(svc.paths.home), cpu=hw.cpu_name,
             physical_cores=hw.physical_cores, ram_gb=hw.ram_gb, gpu=gpu, tier=hw.tier.value,
-            recommended_preset=recommended, measured_speed=speed,
+            recommended_preset=recommended.value,
+            recommended_models=sorted(preset_models()[recommended]), measured_speed=speed,
             free_disk_gb=hw.free_disk_gb, on_battery=hw.on_battery, daws=hw.daws,
             ffmpeg=ffmpeg_path() is not None,
             separation_available=svc.demo or separation_available(), demo=svc.demo,
@@ -393,6 +394,26 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
 
         threading.Thread(target=run, daemon=True).start()
         return {"status": "started"}
+
+    # ------------------------------------------------------------ example song
+
+    @app.get("/example", response_model=schemas.ExampleOut)
+    async def example_info() -> schemas.ExampleOut:  # pyright: ignore[reportUnusedFunction]
+        """The Creative Commons example clip offered on first run."""
+        clip = await asyncio.to_thread(example.load)
+        credits = clip.credits
+        return schemas.ExampleOut(
+            title=credits.title, artist=credits.artist, licence_name=credits.licence_name,
+            licence_url=credits.licence_url, page_url=credits.page_url, changes=credits.changes,
+            duration_s=clip.duration_s, size_bytes=clip.size_bytes,
+        )  # fmt: skip
+
+    @app.post("/example", response_model=schemas.ExampleAdded)
+    async def example_add() -> schemas.ExampleAdded:  # pyright: ignore[reportUnusedFunction]
+        """Copy the example clip into the library, with its credits for the export."""
+        library = engine().paths.home / "library"
+        path = await asyncio.to_thread(example.add, library)
+        return schemas.ExampleAdded(path=str(path), output_dir=str(library / "example" / "stems"))
 
     # ------------------------------------------------------------ library
 

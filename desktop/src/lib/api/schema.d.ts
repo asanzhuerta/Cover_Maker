@@ -132,6 +132,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/example": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Example Info
+         * @description The Creative Commons example clip offered on first run.
+         */
+        get: operations["example_info_example_get"];
+        put?: never;
+        /**
+         * Example Add
+         * @description Copy the example clip into the library, with its credits for the export.
+         */
+        post: operations["example_add_example_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -819,6 +843,38 @@ export interface components {
              */
             path: string;
         };
+        /** ExampleAdded */
+        ExampleAdded: {
+            /**
+             * Output Dir
+             * @description Suggested folder for its stems when the user has not chosen one yet.
+             */
+            output_dir: string;
+            /**
+             * Path
+             * @description The example's copy in the library, ready to use as a job input.
+             */
+            path: string;
+        };
+        /** ExampleOut */
+        ExampleOut: {
+            /** Artist */
+            artist: string;
+            /** Changes */
+            changes: string;
+            /** Duration S */
+            duration_s: number;
+            /** Licence Name */
+            licence_name: string;
+            /** Licence Url */
+            licence_url: string;
+            /** Page Url */
+            page_url: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Title */
+            title: string;
+        };
         /** FolderRequest */
         FolderRequest: {
             /**
@@ -1243,6 +1299,11 @@ export interface components {
             physical_cores: number;
             /** Ram Gb */
             ram_gb: number;
+            /**
+             * Recommended Models
+             * @description Models the recommended preset runs to produce every stem.
+             */
+            recommended_models?: string[];
             /** Recommended Preset */
             recommended_preset: string;
             /** Separation Available */
@@ -1512,6 +1573,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DiagnosticsOut"];
+                };
+            };
+        };
+    };
+    example_info_example_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleOut"];
+                };
+            };
+        };
+    };
+    example_add_example_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleAdded"];
                 };
             };
         };

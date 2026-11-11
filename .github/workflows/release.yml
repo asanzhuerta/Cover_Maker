@@ -1,12 +1,17 @@
 name: Release
 
 # Builds the signed NSIS installer and the updater manifest on a version tag
-# and attaches them, the ffmpeg mirror, the DAW plugin and script and the six
-# PDF documents to a draft GitHub release. Publishing the draft stays a manual step.
+# and attaches them, a copy of the installer under a stable name, the SHA-256
+# checksums, the ffmpeg mirror, the DAW plugin and script and the six PDF
+# documents to a draft GitHub release. Publishing the draft stays a manual
+# step; publishing it as a full release submits the new version to winget
+# when a WINGET_TOKEN secret exists.
 
 on:
   push:
     tags: ["v*"]
+  release:
+    types: [released]
 
 permissions:
   contents: write
@@ -19,6 +24,7 @@ env:
 jobs:
   installer:
     name: Windows installer
+    if: github.event_name == 'push'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -86,6 +92,29 @@ jobs:
         run: gh release upload "$env:REF_NAME" (Get-ChildItem mirror/*.zip).FullName --clobber
         shell: pwsh
 
+      # A copy without the version in its name, so that
+      # https://github.com/asanzhuerta/Cover_Maker/releases/latest/download/Cover_Maker_x64-setup.exe
+      # always serves the newest published installer (README, website, videos).
+      # The versioned installer and latest.json stay for the updater, winget and
+      # Scoop, and SHA256SUMS.txt lets Scoop's autoupdate read the hash.
+      - name: Attach the installer under a stable name and the checksums
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = $env:REF_NAME.TrimStart("v")
+          $installer = "desktop/src-tauri/target/release/bundle/nsis/Cover_Maker_${version}_x64-setup.exe"
+          if (-not (Test-Path $installer)) { throw "installer not found: $installer" }
+          New-Item -ItemType Directory -Force stable | Out-Null
+          Copy-Item $installer stable/
+          Copy-Item $installer stable/Cover_Maker_x64-setup.exe
+          $lines = Get-ChildItem stable/*.exe | Sort-Object Name | ForEach-Object {
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
+          }
+          Set-Content stable/SHA256SUMS.txt -Value $lines -Encoding ascii
+          Get-Content stable/SHA256SUMS.txt
+          gh release upload "$env:REF_NAME" stable/Cover_Maker_x64-setup.exe stable/SHA256SUMS.txt --clobber
+
   daw:
     name: DAW plugin and script
     needs: installer
@@ -142,3 +171,31 @@ jobs:
           ls -l pdf
           test "$(ls pdf/*.pdf | wc -l)" -eq 6
           gh release upload "$REF_NAME" pdf/*.pdf --clobber
+
+  winget:
+    name: winget submission
+    # Runs when the draft is published as a full release (or a pre-release is
+    # promoted to one), like notify-website.yml.
+    if: github.event_name == 'release'
+    runs-on: windows-latest
+    env:
+      # Optional: a classic personal access token with the public_repo scope,
+      # used by wingetcreate to open the pull request on microsoft/winget-pkgs.
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      WINGET_ID: asanzhuerta.CoverMaker
+      WINGETCREATE_URL: https://github.com/microsoft/winget-create/releases/download/v1.12.13.0/wingetcreate.exe
+      WINGETCREATE_SHA256: 24042bd37915805615e6cf969ac57c6439124c3fe85823327f5f3fb24bd9ffea
+    steps:
+      - name: Skip without a WINGET_TOKEN secret
+        if: env.WINGET_TOKEN == ''
+        run: echo "::notice::No WINGET_TOKEN secret, so nothing is submitted to winget."
+      - name: Submit the new version to winget-pkgs
+        if: env.WINGET_TOKEN != ''
+        shell: pwsh
+        run: |
+          $version = $env:REF_NAME.TrimStart("v")
+          $url = "https://github.com/asanzhuerta/Cover_Maker/releases/download/$env:REF_NAME/Cover_Maker_${version}_x64-setup.exe"
+          Invoke-WebRequest $env:WINGETCREATE_URL -OutFile wingetcreate.exe
+          $hash = (Get-FileHash wingetcreate.exe -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $env:WINGETCREATE_SHA256) { throw "wingetcreate hash mismatch: $hash" }
+          ./wingetcreate.exe update $env:WINGET_ID --version $version --urls $url --submit --token $env:WINGET_TOKEN
