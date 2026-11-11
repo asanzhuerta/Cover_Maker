@@ -1,0 +1,65 @@
+\section{ADR-012: Audio to MIDI per stem}
+\textbf{Status:} accepted and implemented (Future work, FR-MIDI-01).
+
+\textbf{Context.} Musicians who learn or arrange a cover want the notes of a
+part, not only its sound. The separated stems are clean input for automatic
+transcription, and the beat grid of the analysis (ADR-010) gives the bars.
+
+\textbf{Pitched stems: Basic Pitch on ONNX Runtime.} Spotify's Basic Pitch
+(ICASSP 2022) is a small polyphonic note model trained across instruments;
+its code and weights are Apache-2.0. The \texttt{basic-pitch} package cannot
+be installed: its last release (0.4.0, 2024) requires TensorFlow
+\textless\,2.15.1 on Windows with Python 3.12, which has no wheels for it. So
+the engine ports the inference and the note decoding (about 300 lines, with
+Spotify's notice and a list of changes) to numpy, and runs the unmodified
+ONNX model (230\,KB) with ONNX Runtime (MIT), which the separation runtime
+already installed and which is now a base dependency (15\,MB wheel for
+cp312). The model ships in the engine package with its \texttt{LICENSE} and
+\texttt{NOTICE}: the one bundled model, kept because it is tiny and
+permissively licensed; separation models stay a user download. Pitch bends
+are not written. Each stem has a profile: a frequency range (vocals 65--1400\,Hz,
+bass 30--420\,Hz, guitar 75--1500\,Hz), a General MIDI program, and for
+vocals and bass a monophonic pass (the louder of two overlapping notes wins),
+which also drops the octave overtones that the model reports on loud notes.
+
+\textbf{Drums: signal processing only.} No permissively licensed drum
+transcription model was found to bundle. The drum stem's power spectrum is
+summed in three bands (kick 30--150\,Hz, snare 150--4000\,Hz, hi-hat
+6--11\,kHz); a candidate hit is a sharp rise of any band, and a drum sounds
+when its band gained at least a tenth of its typical hit and 40\,\% of the
+strongest band's share at that moment, because a kick's beater click leaks
+into the snare band. Notes go to channel 10 (36, 38, 42). Everything is
+librosa (ISC) and numpy (BSD).
+
+\textbf{Where it runs.} On CPU threads of the engine process (4 intra-op
+threads), not in the GPU worker: the model is small, the worker stays free for
+separation, and the work needs no PyTorch. On the target laptop
+(i5-11400H) a 4-minute stem takes about 3.5\,s (2.2\,s of model and 1.2\,s of
+note decoding), 66 times faster than real time; all 12 threads gain only
+5\,\%.
+
+\textbf{Tempo map and file.} The files are Standard MIDI Files, format 1,
+960 ticks per quarter note: a conductor track with the song title, time
+signatures and tempo changes, then the stem's track with its name and
+program. The tempo map is fitted to the downbeats of the analysis with the
+algorithm of the DAW session export (ADR-011): one tempo for steady songs,
+one per bar otherwise, and a pickup bar before the first downbeat; without a
+grid, one 120\,BPM tempo. Note times in seconds become ticks through the same
+map, so a DAW that follows the file's tempo plays each note where it sounds in
+the stem. Until both changes are merged the algorithm lives in
+\texttt{midi/tempo.py}; afterwards one copy remains.
+
+\textbf{Pipeline step and API.} \texttt{POST /items/\{id\}/midi} takes the
+stem ids; the engine plans the work on the database, transcribes each stem on
+a thread and emits \texttt{midi.progress} events (stem, index, total,
+fraction). The step \texttt{midi} has its own cache key: the stem's asset
+SHA-256, the transcription version and a digest of the tempo map. The MIDI
+file is kept in the asset store and copied to the job's output folder as
+\texttt{<title> - <Stem>.mid}, next to the stem exports, so asking again
+never transcribes a stem twice.
+
+\textbf{Consequences.} Transcription is automatic: polyphonic stems keep some
+octave overtones, fast or quiet notes can be missed, and drums other than
+kick, snare and hi-hat are left out or merged. The bundled model adds 230\,KB
+and a licence notice; the README and the notices now say that separation
+weights, not all weights, are never bundled.

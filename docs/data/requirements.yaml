@@ -142,6 +142,11 @@ functional:
     text: The custom mix, the track without X and, on request, every stem and the click shall be exported with the chosen pitch and tempo, rendered by the engine with the same algorithm as the preview.
     priority: must
     milestone: M14
+  - id: FR-MIDI-01
+    title: Audio to MIDI per stem
+    text: From a separated song the user shall convert chosen stems (vocal melody, bass, guitar, piano, other and drums) to Standard MIDI Files named like the stem exports, carrying the tempo map fitted to the song's beat grid (one 120 BPM tempo without a grid), on the CPU, with the progress shown in the mixer and each stem converted only once.
+    priority: should
+    milestone: Future work
 
 non_functional:
   - id: NFR-PERF-01

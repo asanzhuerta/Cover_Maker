@@ -7,6 +7,15 @@ project follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Audio to MIDI per stem (FR-MIDI-01, ADR-012). The mixer's *MIDI* card
+  converts chosen stems to Standard MIDI Files named like the stem exports
+  (`My Song - Bass.mid`), with the song's tempo map from the beat grid
+  (120 BPM without one). Pitched stems use Spotify's Basic Pitch model
+  (Apache-2.0, 230 KB, bundled) on ONNX Runtime, now a base engine
+  dependency, on the CPU: about 3.5 s for a 4-minute stem on an i5-11400H.
+  Vocals and bass are kept to one note at a time; drums become kick, snare
+  and hi-hat with signal processing only. `POST /items/{id}/midi` reports
+  `midi.progress` events and caches each stem's file.
 - Practice tools (M14). The engine analyses each song once, after decoding:
   tuning offset from A440 in cents, key (major or minor), tempo, beats and bar
   starts, with librosa (no model weights). Results are stored in SQLite
