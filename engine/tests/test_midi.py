@@ -9,10 +9,10 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
+from cover_maker.daw.tempo import beats_at, tempo_map
 from cover_maker.midi import convert, smf
 from cover_maker.midi.basic_pitch import BasicPitch, frame_times
 from cover_maker.midi.notes import Note, monophonic
-from cover_maker.midi.tempo import beats_at, tempo_map
 
 SR = 44_100
 ONSET_TOLERANCE = 0.05  # seconds

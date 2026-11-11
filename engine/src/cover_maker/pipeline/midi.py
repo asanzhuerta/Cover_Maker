@@ -23,9 +23,10 @@ from pathlib import Path
 
 from ..audio import io
 from ..audio.analysis import Analysis
+from ..daw.model import TempoPoint
+from ..daw.tempo import tempo_map
 from ..midi import convert as midi
 from ..midi.basic_pitch import BasicPitch
-from ..midi.tempo import TempoPoint, tempo_map
 from .runner import CACHE_VERSION, JobRunner, safe_title
 
 STEP = "midi"

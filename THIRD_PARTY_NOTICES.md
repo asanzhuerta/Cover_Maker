@@ -492,6 +492,20 @@ Python extension in `python-stretch` (MIT, which also contains nanobind,
 BSD-3-Clause) for exports. No Rubber Band (GPL) or SoundTouch (LGPL) code is
 used.
 
+### File formats of the DAW session export
+
+*Export DAW session* writes REAPER projects (`.RPP`, Cockos' plain-text
+format), [DAWproject](https://github.com/bitwig/dawproject) files (open format
+by Bitwig, specification and XML Schema under the MIT licence, Copyright 2020
+Bitwig) and Standard MIDI Files with the engine's own Python code: no
+third-party library or code from those projects is shipped. The tests validate
+the DAWproject XML against copies of `Project.xsd` and `MetaData.xsd` from
+commit `ee4dcdd` of that repository, kept with its licence in
+`engine/tests/schemas/dawproject` (not part of the installer), using
+[xmlschema](https://github.com/sissaschool/xmlschema) 4.3.2 and its dependency
+[elementpath](https://github.com/sissaschool/elementpath) 5.1.4 (both MIT),
+which are development-only dependencies.
+
 ### Fonts of the user interface
 
 Bundled as WOFF2 files in `desktop/static/fonts`, each folder with its

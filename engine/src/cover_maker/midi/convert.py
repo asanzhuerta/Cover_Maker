@@ -10,10 +10,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..audio.analysis import to_mono
+from ..daw.model import TempoPoint
 from . import drums, smf
 from .basic_pitch import SAMPLE_RATE, BasicPitch, Settings
 from .notes import Note, monophonic
-from .tempo import TempoPoint
 
 # Bump when the transcription changes so cached MIDI files are made again.
 MIDI_VERSION = 1

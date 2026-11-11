@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field, field_validator
 
+from ..daw.model import DawFormat
 from ..domain import Mode, OutputFormat, ResidualMode, Stem
 
 
@@ -304,6 +305,34 @@ class AnalysisOut(BaseModel):
     beats: list[float] = Field(description="Beat times in seconds.")
     downbeats: list[float] = Field(description="Bar starts in seconds (4/4 assumed).")
     markers: list[MarkerIn] = Field(description="Named section markers, sorted by time.")
+
+
+class SessionTrackIn(BaseModel):
+    gain: float = Field(1.0, ge=0, le=4, description="Linear fader gain (1 = 0 dB).")
+    pan: float = Field(0.0, ge=-1, le=1, description="Stereo balance from -1 (left) to 1 (right).")
+    muted: bool = Field(False, description="Muted track (after mute and solo in the mixer).")
+
+
+class SessionRequest(BaseModel):
+    tracks: dict[Stem, SessionTrackIn] = Field(
+        default_factory=dict[Stem, SessionTrackIn],
+        description="Mixer settings per stem. Missing stems are at 0 dB, centred and audible.",
+    )
+    residual: ResidualMode = Field(
+        ResidualMode.KEEP,
+        description="keep: the Residual track plays; drop: it is muted.",
+    )
+    formats: list[DawFormat] = Field(
+        default_factory=lambda: list(DawFormat),
+        min_length=1,
+        description="Project files to write next to the stems (all by default).",
+    )
+
+
+class SessionOut(BaseModel):
+    folder: str = Field(description="New folder with the audio files and the project files.")
+    projects: dict[DawFormat, str] = Field(description="Path of each project file written.")
+    tracks: list[str] = Field(description="Track names, in project order.")
 
 
 class MidiRequest(BaseModel):

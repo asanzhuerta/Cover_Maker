@@ -19,6 +19,7 @@
     pans,
     dbToGain,
     peaksPath,
+    sessionTracks,
   } from "$lib/mixer";
   import { formatShift, formatTempo } from "$lib/practice";
   import { stemColor, type Stem } from "$lib/stems";
@@ -42,6 +43,9 @@
   let rendering = $state(false);
   let rendered = $state<Schemas["RenderOut"] | null>(null);
   let renderError = $state("");
+  let exporting = $state(false);
+  let session = $state<Schemas["SessionOut"] | null>(null);
+  let sessionError = $state("");
   let withStems = $state(false);
 
   $effect(() => {
@@ -109,6 +113,34 @@
     rendering = false;
     if (data) rendered = data;
     else renderError = errorMessage(error);
+  }
+
+  async function exportSession() {
+    if (!connection.api) return;
+    exporting = true;
+    session = null;
+    sessionError = "";
+    const { data, error } = await connection.api.POST(
+      "/items/{item_id}/session",
+      {
+        params: { path: { item_id: itemId } },
+        body: {
+          tracks: sessionTracks(transport.controls) as Record<
+            Stem,
+            Schemas["SessionTrackIn"]
+          >,
+          residual: transport.residual,
+        },
+      },
+    );
+    exporting = false;
+    if (data) session = data;
+    else sessionError = errorMessage(error);
+  }
+
+  /** A file inside the session folder, so the file manager opens the folder itself. */
+  function sessionFile(out: Schemas["SessionOut"]): string {
+    return Object.values(out.projects)[0] ?? out.folder;
   }
 
   async function reveal(path: string) {
@@ -325,6 +357,29 @@
       </div>
     {/if}
     {#if renderError}<p class="error">{renderError}</p>{/if}
+    <div class="session" data-testid="session">
+      <button
+        onclick={exportSession}
+        disabled={exporting}
+        data-testid="session-export"
+        ><Icon name="mix" size={16} />{exporting
+          ? t("session.exporting")
+          : t("session.export")}</button
+      >
+      <p class="muted export-hint">{t("session.hint")}</p>
+      {#if session}
+        <div class="rendered" data-testid="session-done">
+          <span class="muted">{t("session.done")}</span>
+          <code>{session.folder}</code>
+          {#if isTauri()}
+            <button class="small" onclick={() => reveal(sessionFile(session!))}
+              ><Icon name="folder" size={14} />{t("queue.open")}</button
+            >
+          {/if}
+        </div>
+      {/if}
+      {#if sessionError}<p class="error">{sessionError}</p>{/if}
+    </div>
   </section>
 
   <MidiExport {itemId} {stems} />
@@ -635,6 +690,20 @@
   .export-hint {
     margin: 0;
     font-size: 0.85rem;
+  }
+
+  .session {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem;
+    flex-basis: 100%;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .session .export-hint {
+    flex: 1 1 20rem;
   }
 
   .rendered {

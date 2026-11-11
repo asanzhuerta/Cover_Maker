@@ -1,27 +1,26 @@
-"""Tempo map for the MIDI files, fitted to the beat grid of the analysis (M14).
+"""Tempo map from the beat grid of the musical analysis (ADR-011).
 
-The stems keep their timing (every stem starts at 0), so the map is fitted to
-the audio. This is the algorithm of the DAW session export (ADR-011), so MIDI
-notes and a session share one bar grid:
+The audio stays where it is (every stem starts at 0), so the map is fitted to
+the audio, never the other way round:
 
 - **Steady songs** (every downbeat within :data:`STEADY_TOLERANCE` of a straight
-  bar grid) get one tempo.
+  bar grid, which is what a click-tracked recording gives) get one tempo.
 - **Other songs** get one tempo per bar, so every bar line falls on a detected
   downbeat.
 - **Pickup**: when the first downbeat is not at 0, the time before it becomes a
-  pickup bar (whole beats, in its own time signature). A pickup too short to be
-  a bar is merged into the first bar.
-
-Without a beat grid the map is a single tempo (120 BPM when none is known).
+  pickup bar (whole beats, in its own time signature) so the bar lines that
+  follow land on the downbeats. A pickup too short to be a bar is merged into
+  the first bar.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 from itertools import pairwise
 
 import numpy as np
+
+from .model import TempoPoint
 
 BEATS_PER_BAR = 4
 DEFAULT_BPM = 120.0
@@ -29,14 +28,6 @@ MIN_BPM = 20.0
 MAX_BPM = 960.0  # REAPER's limit
 MIN_PICKUP = 60.0 / MAX_BPM  # seconds: a one-beat bar at the highest tempo
 STEADY_TOLERANCE = 0.04  # seconds; the beat tracker works on ~23 ms frames
-
-
-@dataclass(frozen=True)
-class TempoPoint:
-    time: float  # seconds
-    bpm: float  # quarter notes per minute from here on
-    bar_start: bool = True  # a bar line falls on this point
-    numerator: int = BEATS_PER_BAR  # time signature numerator/4 from here on
 
 
 def _clamp(bpm: float) -> float:
@@ -102,12 +93,18 @@ def beats_at(tempo: Sequence[TempoPoint], time: float) -> float:
     return total
 
 
-def time_signature_changes(tempo: Sequence[TempoPoint]) -> list[TempoPoint]:
-    """Points where a time signature starts (the first point, and any numerator change)."""
-    changes: list[TempoPoint] = []
+def signature_flags(tempo: Sequence[TempoPoint]) -> list[bool]:
+    """Whether each point starts a new time signature (the first point always does)."""
+    flags: list[bool] = []
     current: int | None = None
     for point in tempo:
-        if current is None or (point.bar_start and point.numerator != current):
+        starts = current is None or (point.bar_start and point.numerator != current)
+        if starts:
             current = point.numerator
-            changes.append(point)
-    return changes
+        flags.append(starts)
+    return flags
+
+
+def time_signature_changes(tempo: Sequence[TempoPoint]) -> list[TempoPoint]:
+    """Points where a time signature starts (the first point, and any numerator change)."""
+    return [point for point, starts in zip(tempo, signature_flags(tempo), strict=True) if starts]

@@ -485,6 +485,15 @@
         "title": "Created",
         "type": "object"
       },
+      "DawFormat": {
+        "enum": [
+          "reaper",
+          "dawproject",
+          "midi"
+        ],
+        "title": "DawFormat",
+        "type": "string"
+      },
       "DiagnosticsOut": {
         "properties": {
           "path": {
@@ -1443,6 +1452,100 @@
         "title": "ResidualMode",
         "type": "string"
       },
+      "SessionOut": {
+        "properties": {
+          "folder": {
+            "description": "New folder with the audio files and the project files.",
+            "title": "Folder",
+            "type": "string"
+          },
+          "projects": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Path of each project file written.",
+            "propertyNames": {
+              "$ref": "#/components/schemas/DawFormat"
+            },
+            "title": "Projects",
+            "type": "object"
+          },
+          "tracks": {
+            "description": "Track names, in project order.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tracks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "folder",
+          "projects",
+          "tracks"
+        ],
+        "title": "SessionOut",
+        "type": "object"
+      },
+      "SessionRequest": {
+        "properties": {
+          "formats": {
+            "description": "Project files to write next to the stems (all by default).",
+            "items": {
+              "$ref": "#/components/schemas/DawFormat"
+            },
+            "minItems": 1,
+            "title": "Formats",
+            "type": "array"
+          },
+          "residual": {
+            "$ref": "#/components/schemas/ResidualMode",
+            "default": "keep",
+            "description": "keep: the Residual track plays; drop: it is muted."
+          },
+          "tracks": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SessionTrackIn"
+            },
+            "description": "Mixer settings per stem. Missing stems are at 0 dB, centred and audible.",
+            "propertyNames": {
+              "$ref": "#/components/schemas/Stem"
+            },
+            "title": "Tracks",
+            "type": "object"
+          }
+        },
+        "title": "SessionRequest",
+        "type": "object"
+      },
+      "SessionTrackIn": {
+        "properties": {
+          "gain": {
+            "default": 1.0,
+            "description": "Linear fader gain (1 = 0 dB).",
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Gain",
+            "type": "number"
+          },
+          "muted": {
+            "default": false,
+            "description": "Muted track (after mute and solo in the mixer).",
+            "title": "Muted",
+            "type": "boolean"
+          },
+          "pan": {
+            "default": 0.0,
+            "description": "Stereo balance from -1 (left) to 1 (right).",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Pan",
+            "type": "number"
+          }
+        },
+        "title": "SessionTrackIn",
+        "type": "object"
+      },
       "Stem": {
         "enum": [
           "vocals",
@@ -2322,6 +2425,56 @@
           }
         },
         "summary": "Render"
+      }
+    },
+    "/items/{item_id}/session": {
+      "post": {
+        "description": "Write a DAW session: every stem on its own track at 0, with the tempo map,\nsection markers and key (REAPER, DAWproject and a MIDI tempo map).",
+        "operationId": "item_session_items__item_id__session_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Item Session"
       }
     },
     "/jobs": {

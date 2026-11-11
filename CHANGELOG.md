@@ -36,6 +36,15 @@ project follows [Semantic Versioning](https://semver.org/).
   `python-stretch`, MIT), and can also write every stem and the click.
 - Practice chapter in the User Manual, ADR-010, requirements FR-PRA-01 to
   FR-PRA-06 and NFR-PERF-05.
+- DAW session export: *Export DAW session* in the mixer
+  (`POST /items/{id}/session`) writes a folder with every stem, the residual
+  and the original mix as WAV files aligned at 0, a REAPER project (`.RPP`), a
+  DAWproject file (Bitwig Studio, Studio One, Cubase) and a MIDI tempo map for
+  any other DAW. Tracks keep the mixer's volume, pan and mute; the projects
+  carry the tempo map fitted to the beat grid (with a pickup bar when the song
+  starts mid-bar), the section markers and the key. Pure-Python writers; the
+  DAWproject XML is validated against the official schema in the tests
+  (`xmlschema`, development only). ADR-011, requirement FR-DAW-03.
 
 ### Security
 - Release workflow: the tag name reaches run scripts through an environment

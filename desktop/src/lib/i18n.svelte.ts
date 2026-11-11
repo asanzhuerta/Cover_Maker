@@ -446,6 +446,11 @@ const en = {
   "lcd.tuneHint": "Cents from A440, including your fine tune.",
   "shortcuts.tempo": "Tempo −/+ 5 %",
   "shortcuts.pitch": "Pitch −/+ 1 semitone",
+  "session.export": "Export DAW session",
+  "session.exporting": "Writing session…",
+  "session.hint":
+    "Every stem on its own track at 0 with the tempo map, sections and key, for REAPER, DAWproject (Bitwig, Studio One, Cubase) or any DAW through the MIDI tempo map. Uses your volume, pan and mute; original tempo and pitch.",
+  "session.done": "Session folder:",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -900,6 +905,11 @@ const es: Dictionary = {
   "lcd.tuneHint": "Cents respecto a La 440, con tu afinación fina incluida.",
   "shortcuts.tempo": "Tempo −/+ 5 %",
   "shortcuts.pitch": "Tono −/+ 1 semitono",
+  "session.export": "Exportar sesión DAW",
+  "session.exporting": "Escribiendo la sesión…",
+  "session.hint":
+    "Cada pista en su propia pista del DAW, desde 0, con el mapa de tempo, las secciones y la tonalidad, para REAPER, DAWproject (Bitwig, Studio One, Cubase) o cualquier DAW mediante el mapa de tempo MIDI. Usa tu volumen, panorama y silencios; tempo y tono originales.",
+  "session.done": "Carpeta de la sesión:",
 };
 
 export const LOCALES = { en: "English", es: "Español" } as const;

@@ -46,8 +46,9 @@ algorithm of the DAW session export (ADR-011): one tempo for steady songs,
 one per bar otherwise, and a pickup bar before the first downbeat; without a
 grid, one 120\,BPM tempo. Note times in seconds become ticks through the same
 map, so a DAW that follows the file's tempo plays each note where it sounds in
-the stem. Until both changes are merged the algorithm lives in
-\texttt{midi/tempo.py}; afterwards one copy remains.
+the stem. The tempo map and the file's building blocks (variable-length
+quantities, meta events, track chunks) are shared with the session's
+\texttt{daw/tempo.py} and \texttt{daw/midi.py}, so there is one bar grid.
 
 \textbf{Pipeline step and API.} \texttt{POST /items/\{id\}/midi} takes the
 stem ids; the engine plans the work on the database, transcribes each stem on

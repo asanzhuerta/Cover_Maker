@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Project version="1.0">
+  <Application name="Cover_Maker" version="test" />
+  <Transport>
+    <Tempo id="tempo" name="Tempo" unit="bpm" value="98" min="20" max="960" />
+    <TimeSignature id="time-signature" name="Time Signature" numerator="4" denominator="4" />
+  </Transport>
+  <Structure>
+    <Track id="track-master" name="Master" contentType="audio" loaded="true">
+      <Channel id="channel-master" role="master" audioChannels="2">
+        <Mute value="false" />
+        <Pan unit="normalized" value="0.5" min="0" max="1" />
+        <Volume unit="linear" value="1" min="0" max="2" />
+      </Channel>
+    </Track>
+    <Track id="track-1" name="Vocals" contentType="audio" loaded="true">
+      <Channel id="channel-1" role="regular" audioChannels="2" destination="channel-master">
+        <Mute value="false" />
+        <Pan unit="normalized" value="0.375" min="0" max="1" />
+        <Volume unit="linear" value="0.5" min="0" max="2" />
+      </Channel>
+    </Track>
+    <Track id="track-2" name="Drums" contentType="audio" loaded="true">
+      <Channel id="channel-2" role="regular" audioChannels="2" destination="channel-master">
+        <Mute value="false" />
+        <Pan unit="normalized" value="0.5" min="0" max="1" />
+        <Volume unit="linear" value="1.4125375446" min="0" max="2" />
+      </Channel>
+    </Track>
+    <Track id="track-3" name="Bass" contentType="audio" loaded="true">
+      <Channel id="channel-3" role="regular" audioChannels="1" destination="channel-master">
+        <Mute value="true" />
+        <Pan unit="normalized" value="0.5" min="0" max="1" />
+        <Volume unit="linear" value="1" min="0" max="2" />
+      </Channel>
+    </Track>
+    <Track id="track-4" name="Residual" contentType="audio" loaded="true">
+      <Channel id="channel-4" role="regular" audioChannels="2" destination="channel-master">
+        <Mute value="false" />
+        <Pan unit="normalized" value="0.5" min="0" max="1" />
+        <Volume unit="linear" value="1" min="0" max="2" />
+      </Channel>
+    </Track>
+    <Track id="track-5" name="Original mix" contentType="audio" loaded="true">
+      <Channel id="channel-5" role="regular" audioChannels="2" destination="channel-master">
+        <Mute value="true" />
+        <Pan unit="normalized" value="0.5" min="0" max="1" />
+        <Volume unit="linear" value="1" min="0" max="2" />
+      </Channel>
+    </Track>
+  </Structure>
+  <Arrangement id="arrangement">
+    <Lanes timeUnit="seconds">
+      <Lanes track="track-1">
+        <Clips>
+          <Clip time="0" duration="12.5" playStart="0" contentTimeUnit="seconds" name="Vocals">
+            <Audio channels="2" duration="12.5" sampleRate="44100">
+              <File path="Demo - Vocals.wav" external="true" />
+            </Audio>
+          </Clip>
+        </Clips>
+      </Lanes>
+      <Lanes track="track-2">
+        <Clips>
+          <Clip time="0" duration="12.5" playStart="0" contentTimeUnit="seconds" name="Drums">
+            <Audio channels="2" duration="12.5" sampleRate="44100">
+              <File path="Demo - Drums.wav" external="true" />
+            </Audio>
+          </Clip>
+        </Clips>
+      </Lanes>
+      <Lanes track="track-3">
+        <Clips>
+          <Clip time="0" duration="12.5" playStart="0" contentTimeUnit="seconds" name="Bass">
+            <Audio channels="1" duration="12.5" sampleRate="44100">
+              <File path="Demo - Bass.wav" external="true" />
+            </Audio>
+          </Clip>
+        </Clips>
+      </Lanes>
+      <Lanes track="track-4">
+        <Clips>
+          <Clip time="0" duration="12.5" playStart="0" contentTimeUnit="seconds" name="Residual">
+            <Audio channels="2" duration="12.5" sampleRate="44100">
+              <File path="Demo - Residual.wav" external="true" />
+            </Audio>
+          </Clip>
+        </Clips>
+      </Lanes>
+      <Lanes track="track-5">
+        <Clips>
+          <Clip time="0" duration="12.5" playStart="0" contentTimeUnit="seconds" name="Original mix">
+            <Audio channels="2" duration="12.5" sampleRate="44100">
+              <File path="Demo - Original mix.wav" external="true" />
+            </Audio>
+          </Clip>
+        </Clips>
+      </Lanes>
+    </Lanes>
+    <Markers timeUnit="seconds">
+      <Marker time="0" name="Intro" />
+      <Marker time="3" name="Verse &quot;A&quot;" />
+      <Marker time="8.1" name="Chorus &amp; más" />
+    </Markers>
+    <TempoAutomation unit="bpm" timeUnit="seconds">
+      <Target parameter="tempo" />
+      <RealPoint time="0" value="100" interpolation="hold" />
+      <RealPoint time="0.6" value="100" interpolation="hold" />
+      <RealPoint time="3" value="88.8889" interpolation="hold" />
+      <RealPoint time="5.7" value="100" interpolation="hold" />
+      <RealPoint time="8.1" value="88.8889" interpolation="hold" />
+    </TempoAutomation>
+    <TimeSignatureAutomation timeUnit="seconds">
+      <Target parameter="time-signature" />
+      <TimeSignaturePoint time="0" numerator="1" denominator="4" />
+      <TimeSignaturePoint time="0.6" numerator="4" denominator="4" />
+    </TimeSignatureAutomation>
+  </Arrangement>
+</Project>

@@ -7,3 +7,4 @@
 *.gif binary
 *.onnx binary
 *.mid binary
+*.dawproject binary

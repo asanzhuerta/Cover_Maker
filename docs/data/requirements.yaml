@@ -112,6 +112,11 @@ functional:
     text: A VST3 plugin shall run a separation through the running engine and offer the stems for preview and drag-and-drop into tracks.
     priority: should
     milestone: M11
+  - id: FR-DAW-03
+    title: DAW session export
+    text: From a separated song the system shall write a new folder with every stem, the residual and the original mix as WAV files aligned at 0, a REAPER project (.RPP), a DAWproject file and a Standard MIDI File that put each file on its own track with the mixer's volume, pan and mute, plus the tempo map fitted to the beat grid, the section markers and the key.
+    priority: should
+    milestone: Future work
   - id: FR-PRA-01
     title: Tuning and key
     text: The system shall estimate each song's tuning offset from A440 in cents and its key (tonic and major or minor), store them with the song and show them in the LCD panel as played after the pitch settings.
