@@ -2,7 +2,7 @@
   // M2 spike: play six synthetic stems from one AudioContext, sample-aligned,
   // and measure decoded-buffer memory for a typical song length.
   import { resolve } from "$app/paths";
-  import { STEMS, stemLabel, type Stem } from "$lib/stems";
+  import { STEMS, stemLabel, type TopStem as Stem } from "$lib/stems";
 
   const SECONDS = 240;
   const RATE = 44_100;
