@@ -1,0 +1,63 @@
+\section{ADR-011: DAW session export}
+\textbf{Status:} accepted and implemented (future work, FR-DAW-03).
+
+\textbf{Context.} A cover musician who records over the stems wants them in a
+DAW project, not as loose files: every stem on its own track starting at 0, the
+mixer's balance, and a bar grid that matches the song so the metronome, loops
+and quantising work. M14 already stores the tempo, beat grid, section markers
+and key of every song (ADR-010).
+
+\textbf{Decision.} \texttt{POST /items/\{id\}/session} writes a new folder
+\texttt{<title> - DAW session} (never overwriting) with:
+\begin{itemize}
+  \item the audio: every stem, the \emph{Residual} (the mix minus every stem;
+  muted when the mixer drops it) and the \emph{Original mix} (muted, for A/B),
+  as 32-bit float WAV named like the stem export
+  (\texttt{<title> - Vocals.wav}). WAV keeps every file sample-aligned at 0;
+  MP3 would add encoder delay;
+  \item \texttt{<title>.RPP}: REAPER's documented plain-text format, written
+  line by line (track \texttt{VOLPAN} and \texttt{MUTESOLO}, one item per track
+  at position 0, \texttt{MARKER} lines, a \texttt{TEMPOENVEX} chunk with square
+  tempo points and time signatures);
+  \item \texttt{<title>.dawproject}: the open DAWproject format (version 1.0,
+  specification and XML Schema under the MIT licence by Bitwig), read by
+  Bitwig Studio, Studio One and Cubase. The arrangement uses a seconds
+  timeline, so clips, markers and tempo points sit exactly where the audio has
+  them; the audio is referenced next to the file (\texttt{external="true"})
+  instead of embedded, so the formats share one copy;
+  \item \texttt{<title> - tempo map.mid}: a Standard MIDI File (format 0, meta
+  events only: tempo, time signature, key signature, markers) for any other
+  DAW: import it and drop the WAV files at 0.
+\end{itemize}
+All three writers are pure Python with no third-party code. Fader gain, pan and
+mute (after solo) come from the mixer; pitch and tempo changes from the
+practice tools are not applied, because the session is for recording over the
+original.
+
+\textbf{Tempo map.} The audio is never moved or stretched, so the grid is fitted
+to it. If a straight bar grid is within 40~ms of every detected downbeat (a
+click-tracked recording; the beat tracker works on 23~ms frames) the song gets
+one tempo; otherwise one tempo per bar, so every bar line falls on a downbeat.
+The time before the first downbeat becomes a pickup bar of whole beats in its
+own time signature (for example 1/4), so the following bar lines land on the
+downbeats; a pickup shorter than one beat at 960~BPM (REAPER's limit) joins the
+first bar. Neither RPP nor DAWproject has a key signature field, so the key goes
+in the REAPER project notes and the DAWproject metadata comment; the MIDI file
+carries it as a key signature event.
+
+\textbf{Alternatives.} Embedding the audio in the \texttt{.dawproject} ZIP
+makes one portable file but stores every stem twice next to the RPP. A beats
+timeline for DAWproject (what Bitwig writes) would need the audio warped to the
+tempo map. Ableton Live, Logic Pro and Pro Tools projects are proprietary and
+undocumented, so they are reached through the MIDI tempo map. No library was
+needed: the only DAWproject library is Java, and the RPP Python parsers read
+rather than write.
+
+\textbf{Consequences.} Tests compare each writer with golden files built from a
+synthetic session and validate the DAWproject XML against the official
+\texttt{Project.xsd} and \texttt{MetaData.xsd} (copied into the tests, MIT,
+checked with \texttt{xmlschema}, a development-only dependency). The projects
+reference their audio by relative path, so the folder must stay together.
+Pan is written as a balance value; a DAW's own pan law may make an off-centre
+stem slightly louder or softer than in the preview. Songs in other metres get
+4/4 bars, as in ADR-010.
