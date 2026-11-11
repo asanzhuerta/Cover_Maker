@@ -122,6 +122,7 @@ The system language is detected automatically: a Dutch Windows starts in
 | stem | stem | stem | stem | Stem | stem |
 | backing track (the song without the selected stems) | pista | base | piste d'accompagnement | Playback | base |
 | song | canción | música | morceau | Song | brano |
+| lead / backing vocals | voz principal / coros | voz principal / backing vocal | voix lead / chœurs | Leadgesang / Backgrounds | voce solista / cori |
 | job | trabajo | tarefa | tâche | Auftrag | lavoro |
 | queue | cola | fila | file d'attente | Warteschlange | coda |
 | mixer | mezclador | mixer | table de mixage | Mixer | mixer |

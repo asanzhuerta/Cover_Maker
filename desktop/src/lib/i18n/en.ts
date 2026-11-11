@@ -447,6 +447,10 @@ export const en = {
   "session.hint":
     "Every stem on its own track at 0 with the tempo map, sections and key, for REAPER, DAWproject (Bitwig, Studio One, Cubase) or any DAW through the MIDI tempo map. Uses your volume, pan and mute; original tempo and pitch.",
   "session.done": "Session folder:",
+  "new.stems.parts":
+    "Lead and backing vocals split the vocals with one more model, so you can keep the choir and sing the lead, or the other way round.",
+  "stem.vocals.lead": "Lead vocals",
+  "stem.vocals.backing": "Backing vocals",
 } as const;
 
 /** A key of the English source: the only keys `t()` accepts. */

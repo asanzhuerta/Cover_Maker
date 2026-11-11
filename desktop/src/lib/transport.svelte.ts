@@ -45,7 +45,7 @@ import {
   trainerTempo,
   type Marker,
 } from "./practice";
-import { STEMS, type Stem } from "./stems";
+import { mixerStems, type Stem } from "./stems";
 
 export const MIX = "mix";
 export const CLICK = "click";
@@ -116,10 +116,13 @@ let timer: ReturnType<typeof setInterval> | null = null;
 let lastTick = 0;
 let lastPosition = 0;
 
-/** Stems of the loaded song, in the usual order. */
+/**
+ * Stems of the loaded song, in the usual order. Lead and backing vocals take
+ * the place of the vocals when the song has them.
+ */
 export function lanes(): Stem[] {
   const preview = transport.preview;
-  return preview ? STEMS.filter((stem) => stem in preview.stems) : [];
+  return preview ? mixerStems(Object.keys(preview.stems)) : [];
 }
 
 async function fetchAudio(sha: string): Promise<ArrayBuffer> {
@@ -159,8 +162,10 @@ export async function openItem(itemId: number): Promise<void> {
   }
   transport.preview = data;
   void loadAnalysis(itemId);
+  // One control per lane: with lead and backing vocals, the vocals have none,
+  // so they are never played on top of their parts.
   transport.controls = Object.fromEntries(
-    Object.keys(data.stems).map((stem) => [stem, freshControl()]),
+    mixerStems(Object.keys(data.stems)).map((stem) => [stem, freshControl()]),
   );
   transport.meters = {};
   try {

@@ -461,4 +461,8 @@ export const fr: Dictionary = {
   "session.hint":
     "Chaque stem sur sa propre piste à partir de 0, avec la carte de tempo, les sections et la tonalité, pour REAPER, DAWproject (Bitwig, Studio One, Cubase) ou tout autre DAW via la carte de tempo MIDI. Reprend votre volume, votre pan et vos pistes muettes ; tempo et hauteur d'origine.",
   "session.done": "Dossier de la session :",
+  "new.stems.parts":
+    "Voix lead et chœurs séparent la voix avec un modèle de plus : vous pouvez garder les chœurs et chanter la voix lead, ou l'inverse.",
+  "stem.vocals.lead": "Voix lead",
+  "stem.vocals.backing": "Chœurs",
 };

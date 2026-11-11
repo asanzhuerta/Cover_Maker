@@ -52,6 +52,22 @@ models:
     source: https://huggingface.co/KimberleyJSN/melbandroformer
     recommended_for: [max]
 
+  - id: bs-roformer-karaoke-anvuew
+    name: BS-RoFormer karaoke (lead/backing vocals, anvuew)
+    filename: bs_roformer_karaoke_anvuew.ckpt
+    architecture: bs-roformer
+    # Runs on the separated vocals: "Vocals" is the lead, the rest is the backing.
+    stems: {Vocals: vocals.lead, Instrumental: vocals.backing}
+    size_mb: 195
+    vram_mb_fp16: 1300
+    sha256: 206d04757cb5f75ca3b55f8a0a48f5c26aa2351d4ff3c7adbfc9affa30ea3ae4
+    licence_class: copyleft
+    licence: GPL-3.0, declared in the author's model card metadata. The card credits the training dataset to becruily; its contents are not published.
+    licence_url: https://huggingface.co/anvuew/karaoke_bs_roformer/blob/main/README.md
+    verified_on: 2026-11-11
+    source: https://huggingface.co/anvuew/karaoke_bs_roformer
+    recommended_for: []
+
   - id: htdemucs
     name: Hybrid Transformer Demucs (4 stems)
     filename: htdemucs.yaml

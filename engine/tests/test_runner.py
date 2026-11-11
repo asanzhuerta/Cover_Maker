@@ -6,7 +6,7 @@ import pytest
 import soundfile as sf
 
 from cover_maker.audio import io
-from cover_maker.domain import JobSpec, Mode, Preset, ResidualMode, Stem
+from cover_maker.domain import ALL_STEMS, JobSpec, Mode, Preset, ResidualMode, Stem
 from cover_maker.paths import Paths
 from cover_maker.pipeline.runner import JobRunner, ModelNotInstalled
 from cover_maker.separation.backends.fake import WEIGHTS, FakeBackend
@@ -54,7 +54,7 @@ def test_without_drop_residual_needs_all_stems(
     runner.run(job)
 
     assert (tmp_path / "out" / "My Song - without drums.wav").exists()
-    assert set(backend.calls[0].stems.values()) == set(Stem)
+    assert set(backend.calls[0].stems.values()) == set(ALL_STEMS)
 
 
 def test_both_exports_stems_and_song_without_them(
@@ -91,7 +91,7 @@ def test_both_with_drop_residual_needs_all_stems(
     out = tmp_path / "out"
     assert (out / "My Song - Drums.wav").exists()
     assert (out / "My Song - without drums.wav").exists()
-    assert set(backend.calls[0].stems.values()) == set(Stem)
+    assert set(backend.calls[0].stems.values()) == set(ALL_STEMS)
 
 
 def test_second_run_does_no_separation(
@@ -113,6 +113,60 @@ def test_new_stem_reuses_previous_separation(
     runner.run(runner.submit(spec(song, tmp_path, stems=[Stem.BASS])))
 
     assert len(backend.calls) == 1  # SW already produced bass in the first pass
+
+
+LEAD, BACKING = Stem.VOCALS_LEAD, Stem.VOCALS_BACKING
+KARAOKE_FILE = "bs_roformer_karaoke_anvuew.ckpt"
+
+
+def test_lead_and_backing_split_the_vocals(
+    runner: JobRunner, song: Path, tmp_path: Path, backend: FakeBackend
+) -> None:
+    job = runner.submit(spec(song, tmp_path, stems=[LEAD, BACKING]))
+
+    assert runner.run(job) == "done"
+
+    out = tmp_path / "out"
+    assert sorted(p.name for p in out.iterdir()) == [
+        "My Song - Backing vocals.wav",
+        "My Song - Lead vocals.wav",
+    ]
+    vocals = io.read(song) * WEIGHTS[Stem.VOCALS]
+    np.testing.assert_allclose(
+        io.read(out / "My Song - Lead vocals.wav"), vocals * WEIGHTS[LEAD], atol=1e-4
+    )
+    np.testing.assert_allclose(
+        io.read(out / "My Song - Backing vocals.wav"), vocals * WEIGHTS[BACKING], atol=1e-4
+    )
+    assert [call.model_filename for call in backend.calls] == ["BS-Roformer-SW.ckpt", KARAOKE_FILE]
+    preview = runner.preview(runner.items(job)[0]["id"])
+    assert preview is not None
+    assert {"vocals", "vocals.lead", "vocals.backing"} <= preview["stems"].keys()
+
+
+@pytest.mark.parametrize("residual", list(ResidualMode))
+def test_without_lead_keeps_the_backing(
+    runner: JobRunner, song: Path, tmp_path: Path, residual: ResidualMode
+) -> None:
+    job = runner.submit(spec(song, tmp_path, mode=Mode.WITHOUT, stems=[LEAD], residual=residual))
+
+    assert runner.run(job) == "done"
+
+    result = io.read(tmp_path / "out" / "My Song - without lead vocals.wav")
+    lead = WEIGHTS[Stem.VOCALS] * WEIGHTS[LEAD]
+    np.testing.assert_allclose(result, io.read(song) * (1 - lead), atol=1e-4)
+
+
+def test_lead_reuses_the_cached_vocals(
+    runner: JobRunner, song: Path, tmp_path: Path, backend: FakeBackend
+) -> None:
+    runner.run(runner.submit(spec(song, tmp_path, stems=[Stem.VOCALS])))
+    runner.run(runner.submit(spec(song, tmp_path, stems=[LEAD])))
+    runner.run(runner.submit(spec(song, tmp_path, stems=[BACKING], mode=Mode.WITHOUT)))
+
+    # SW once for the vocals, the karaoke model once on them; the rest is cached.
+    assert [call.model_filename for call in backend.calls] == ["BS-Roformer-SW.ckpt", KARAOKE_FILE]
+    assert backend.calls[1].stems == {"Vocals": LEAD, "Instrumental": BACKING}
 
 
 def test_max_preset_runs_ensemble(

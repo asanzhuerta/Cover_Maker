@@ -7,6 +7,16 @@ project follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Lead and backing vocals: new stems `vocals.lead` and `vocals.backing` that
+  split the vocals with the BS-RoFormer karaoke model by anvuew (GPL-3.0,
+  about 200 MB, downloaded on request like every model). Each preset runs it
+  on its separated vocals, so the split is cached and reuses vocals already
+  separated. Extract either part or remove it ("track without lead vocals"
+  keeps the backing vocals); the mixer shows lead and backing lanes in place
+  of the vocals, and the mixer maths treat sub-stems as parts of their parent
+  with both residual modes. New stem cards and colours in New job (English
+  and Spanish), requirement FR-SEP-04, a User Manual section and a benchmark
+  row for the RTX 3050 Laptop.
 - Practice tools (M14). The engine analyses each song once, after decoding:
   tuning offset from A440 in cents, key (major or minor), tempo, beats and bar
   starts, with librosa (no model weights). Results are stored in SQLite

@@ -451,4 +451,8 @@ export const it: Dictionary = {
   "session.hint":
     "Ogni stem su una traccia separata da 0, con mappa del tempo, sezioni e tonalità, per REAPER, DAWproject (Bitwig, Studio One, Cubase) o qualsiasi DAW tramite la mappa del tempo MIDI. Usa il tuo volume, pan e muto; tempo e intonazione originali.",
   "session.done": "Cartella della sessione:",
+  "new.stems.parts":
+    "Voce solista e cori separano la voce con un modello in più: puoi tenere i cori e cantare la voce solista, o il contrario.",
+  "stem.vocals.lead": "Voce solista",
+  "stem.vocals.backing": "Cori",
 };

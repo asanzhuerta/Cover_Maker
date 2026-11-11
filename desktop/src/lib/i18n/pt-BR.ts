@@ -451,4 +451,8 @@ export const ptBR: Dictionary = {
   "session.hint":
     "Cada stem na sua própria faixa a partir do 0, com o mapa de andamento, as seções e o tom, para REAPER, DAWproject (Bitwig, Studio One, Cubase) ou qualquer DAW pelo mapa de andamento MIDI. Usa o seu volume, pan e mudo; andamento e tom originais.",
   "session.done": "Pasta da sessão:",
+  "new.stems.parts":
+    "Voz principal e backing vocal separam a voz com mais um modelo: você pode manter o backing vocal e cantar a voz principal, ou o contrário.",
+  "stem.vocals.lead": "Voz principal",
+  "stem.vocals.backing": "Backing vocal",
 };

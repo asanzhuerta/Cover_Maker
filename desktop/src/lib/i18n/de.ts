@@ -454,4 +454,8 @@ export const de: Dictionary = {
   "session.hint":
     "Jeder Stem auf einer eigenen Spur ab 0, mit Tempomap, Abschnitten und Tonart, für REAPER, DAWproject (Bitwig, Studio One, Cubase) oder jede DAW über die MIDI-Tempomap. Übernimmt deine Lautstärke, dein Panorama und stummgeschaltete Spuren; Tempo und Tonhöhe bleiben original.",
   "session.done": "Session-Ordner:",
+  "new.stems.parts":
+    "Leadgesang und Backgrounds trennen den Gesang mit einem weiteren Modell: So kannst du die Backgrounds behalten und selbst die Lead-Stimme singen oder umgekehrt.",
+  "stem.vocals.lead": "Leadgesang",
+  "stem.vocals.backing": "Backgrounds",
 };

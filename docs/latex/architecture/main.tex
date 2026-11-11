@@ -528,6 +528,9 @@ Kim Mel-Band (vocals), fp16, default & 13.1 & 3150 & 1763 & 52 s \\
 Kim Mel-Band (vocals), fp32, default & 72.8 & 3514 & 2179 & 4 min 51 s$^{*}$ \\
 HT Demucs (4 stems) & 7.7 & 866 & 1742 & 31 s \\
 HT Demucs 6s (6 stems) & 7.3 & 961 & 1892 & 29 s \\
+Karaoke lead/backing (anvuew), fp16, default$^{\dagger}$ & 15.3 & 1248 & 1563 & 1 min 1 s \\
+Karaoke lead/backing (anvuew), fp16, 8 s chunk$^{\dagger}$ & 15.0 & 882 & 1556 & 1 min \\
+Karaoke lead/backing (anvuew), fp32, default$^{\dagger}$ & 68.8 & 2327 & 1428 & 4 min 35 s \\
 \multicolumn{5}{@{}l}{\textit{CPU only (i5-11400H)}} \\
 HT Demucs (4 stems) & 40.8 & -- & 1712 & 2 min 43 s \\
 HT Demucs 6s (6 stems) & 33.5 & -- & 1821 & 2 min 14 s \\
@@ -537,6 +540,10 @@ BS-RoFormer-SW, fp32, 8 s chunk & 259.3 & -- & 2753 & 17 min 17 s \\
 
 $^{*}$~Spilled into shared system memory (driver \emph{CUDA Sysmem Fallback}):
 the run did not fail but became several times slower.
+$^{\dagger}$~Measured on 2026-11-11 with the same software through the
+engine's separation backend. Input: the CC~BY~4.0 example song looped to
+60~s. In a job the model runs on the separated vocals, which takes the same
+time as a full mix of the same length.
 
 \paragraph{Findings.}
 \begin{itemize}
@@ -550,6 +557,9 @@ the run did not fail but became several times slower.
         takes about 17 minutes and is offered as an opt-in ``overnight'' mode.
   \item The Max-quality recipe (SW + Resurrection + a second SW pass) costs
         about 3.5--4 minutes per song on the reference GPU.
+  \item Splitting the vocals into lead and backing (FR-SEP-04) adds about one
+        minute per 4-minute song in fp16 and needs about 1.25~GB of
+        \gls{vram}, so it fits the 4~GB tier with room to spare.
 \end{itemize}
 
 \paragraph{Quality.} The synthetic input only verifies that separation runs: the

@@ -446,4 +446,8 @@ export const es: Dictionary = {
   "session.hint":
     "Cada pista en su propia pista del DAW, desde 0, con el mapa de tempo, las secciones y la tonalidad, para REAPER, DAWproject (Bitwig, Studio One, Cubase) o cualquier DAW mediante el mapa de tempo MIDI. Usa tu volumen, panorama y silencios; tempo y tono originales.",
   "session.done": "Carpeta de la sesión:",
+  "new.stems.parts":
+    "La voz principal y los coros separan la voz con un modelo más: puedes quedarte con los coros y cantar la principal, o al revés.",
+  "stem.vocals.lead": "Voz principal",
+  "stem.vocals.backing": "Coros",
 };
