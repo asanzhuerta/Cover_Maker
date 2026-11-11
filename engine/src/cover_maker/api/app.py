@@ -11,6 +11,7 @@ import json
 import shutil
 import threading
 from collections.abc import Callable
+from functools import partial
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -24,7 +25,12 @@ from ..audio.analysis import analyse as analyse_audio
 from ..audio.io import ffmpeg_path
 from ..audio.peaks import compute_peaks
 from ..audio.practice import Practice
+from ..daw import export as daw_export
+from ..daw.tempo import DEFAULT_BPM
 from ..domain import JobSpec
+from ..midi.basic_pitch import BasicPitch
+from ..pipeline import midi as midi_step
+from ..pipeline.events import EventBus
 from ..pipeline.runner import (
     BeatGrid,
     RightsNotConfirmed,
@@ -50,6 +56,8 @@ from .security import AccessMiddleware, AccessPolicy
 MODEL_SPACE_MARGIN = 256 * 2**20
 
 HEARTBEAT_SECONDS = 15.0
+# Audio-to-MIDI threads: about as fast as all cores, and playback keeps a core free.
+MIDI_THREADS = 4
 T = TypeVar("T")
 
 
@@ -59,6 +67,14 @@ class ApiProblem(Exception):
     ) -> None:
         super().__init__(detail)
         self.status, self.code, self.detail, self.models = status, code, detail, models or []
+
+
+def _midi_progress(
+    bus: EventBus, item: int, stem: str, index: int, total: int, fraction: float
+) -> None:
+    bus.emit(
+        "midi.progress", item=item, stem=stem, index=index, total=total, fraction=round(fraction, 3)
+    )
 
 
 def create_app(policy: AccessPolicy, service: EngineService | None = None) -> FastAPI:
@@ -587,23 +603,81 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             raise ApiProblem(404, "no_preview", f"item {item_id} has no analysed mix yet")
         return mix
 
+    async def _ensure_analysis(mix: str) -> Analysis:
+        """The stored analysis of a mix; computed now for items separated before M14."""
+        stored = await _db(lambda: analyses.load(engine().conn, mix))
+        if stored is not None:
+            return stored
+        path = await _db(lambda: engine().jobs.assets.require(mix))
+        try:
+            result = await asyncio.to_thread(
+                lambda: analyse_audio(audio_io.read(path), audio_io.SAMPLE_RATE)
+            )
+        except (RuntimeError, OSError, ValueError) as exc:
+            raise ApiProblem(500, "analysis_failed", str(exc)) from exc
+        await _db(lambda: analyses.save(engine().conn, mix, result))
+        return result
+
     @app.get("/items/{item_id}/analysis", response_model=schemas.AnalysisOut)
     async def item_analysis(item_id: int) -> schemas.AnalysisOut:  # pyright: ignore[reportUnusedFunction]
         """Tuning, key, tempo and beat grid; computed now for items separated before M14."""
         mix = await _db(lambda: _item_mix(item_id))
-        stored = await _db(lambda: analyses.load(engine().conn, mix))
-        if stored is None:
-            path = await _db(lambda: engine().jobs.assets.require(mix))
-            try:
-                stored = await asyncio.to_thread(
-                    lambda: analyse_audio(audio_io.read(path), audio_io.SAMPLE_RATE)
-                )
-            except (RuntimeError, OSError, ValueError) as exc:
-                raise ApiProblem(500, "analysis_failed", str(exc)) from exc
-            result = stored
-            await _db(lambda: analyses.save(engine().conn, mix, result))
-        final = stored
+        final = await _ensure_analysis(mix)
         return await _db(lambda: _analysis_out(item_id, mix, final))
+
+    @app.post("/items/{item_id}/midi", response_model=schemas.MidiOut)
+    async def item_midi(item_id: int, body: schemas.MidiRequest) -> schemas.MidiOut:  # pyright: ignore[reportUnusedFunction]
+        """Convert stems to MIDI files with the song's tempo map (FR-MIDI-01).
+
+        Stems run one after another on a CPU thread; ``midi.progress`` events report
+        the stem being converted. Stems converted before are reused from the cache.
+        """
+        mix = await _db(lambda: _item_mix(item_id))
+        analysis: Analysis | None
+        try:
+            analysis = await _ensure_analysis(mix)
+        except ApiProblem as exc:
+            if exc.code != "analysis_failed":
+                raise
+            analysis = None  # no beat grid: the files get one default tempo
+        try:
+            plan = await _db(lambda: midi_step.plan(engine().jobs, item_id, body.stems, analysis))
+        except midi_step.StemNotAvailable as exc:
+            raise ApiProblem(400, "stem_not_available", str(exc)) from exc
+        if plan is None:
+            raise ApiProblem(404, "no_preview", f"item {item_id} has no stems yet")
+        bus = engine().bus
+        total = len(plan.tasks)
+        model: BasicPitch | None = None
+        files: list[schemas.MidiFileOut] = []
+        for index, task in enumerate(plan.tasks):
+            progress = partial(_midi_progress, bus, item_id, task.stem, index, total)
+            progress(0.0)
+            sha, notes = task.cached, task.notes
+            if sha is None:
+                if model is None and midi_step.midi.profile(task.stem).settings is not None:
+                    model = await asyncio.to_thread(BasicPitch, threads=MIDI_THREADS)
+                try:
+                    data, notes = await asyncio.to_thread(
+                        midi_step.convert, task, plan, model=model, progress=progress
+                    )
+                except (RuntimeError, OSError, ValueError) as exc:
+                    raise ApiProblem(500, "midi_failed", f"{task.stem}: {exc}") from exc
+                sha = await _db(partial(midi_step.finish, engine().jobs, task, data, notes))
+            source = await _db(partial(engine().jobs.assets.require, sha))
+            target = await asyncio.to_thread(midi_step.export, source, task.target)
+            progress(1.0)
+            files.append(
+                schemas.MidiFileOut(
+                    stem=task.stem, path=str(target), notes=notes, cached=task.cached is not None
+                )
+            )
+        return schemas.MidiOut(
+            item_id=item_id,
+            bpm=analysis.bpm if analysis and plan.from_analysis else DEFAULT_BPM,
+            tempo_from_analysis=plan.from_analysis,
+            files=files,
+        )
 
     @app.put("/items/{item_id}/markers", response_model=list[schemas.MarkerIn])
     async def item_markers(item_id: int, body: schemas.MarkersIn) -> list[schemas.MarkerIn]:  # pyright: ignore[reportUnusedFunction]
@@ -617,6 +691,37 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
             return [schemas.MarkerIn(name=m.name, time=m.time) for m in saved]
 
         return await _db(run)
+
+    # ------------------------------------------------------------ DAW session
+
+    @app.post("/items/{item_id}/session", response_model=schemas.SessionOut)
+    async def item_session(item_id: int, body: schemas.SessionRequest) -> schemas.SessionOut:  # pyright: ignore[reportUnusedFunction]
+        """Write a DAW session: every stem on its own track at 0, with the tempo map,
+        section markers and key (REAPER, DAWproject and a MIDI tempo map)."""
+        sources = await _db(lambda: engine().jobs.mix_sources(item_id))
+        if sources is None:
+            raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to export yet")
+        mix = await _db(lambda: _item_mix(item_id))
+        analysis = await _ensure_analysis(mix)
+        markers = await _db(lambda: analyses.load_markers(engine().conn, mix))
+        settings = {
+            stem: daw_export.TrackSettings(gain=track.gain, pan=track.pan, muted=track.muted)
+            for stem, track in body.tracks.items()
+        }
+        try:
+            # Writing only reads library files, so it runs outside the store lock.
+            files = await asyncio.to_thread(
+                lambda: daw_export.export_session(
+                    sources, settings, body.residual, analysis, markers, set(body.formats)
+                )
+            )
+        except (RuntimeError, OSError, ValueError) as exc:
+            raise ApiProblem(500, "session_failed", str(exc)) from exc
+        return schemas.SessionOut(
+            folder=str(files.folder),
+            projects={fmt: str(path) for fmt, path in files.projects.items()},
+            tracks=files.tracks,
+        )
 
     def _asset_path(sha: str) -> Path:
         # Only files registered in the library can be served (no arbitrary paths).

@@ -29,7 +29,8 @@
   de agua.
 - **100 % local.** La separación se hace en tu ordenador. Sin cuenta, sin
   telemetría, sin subir nada.
-- **En tu idioma.** Toda la aplicación está en español y en inglés.
+- **En tu idioma.** Toda la aplicación está en español y en inglés, y además en
+  portugués (Brasil), francés, alemán e italiano, traducidos con la comunidad.
 
 ## Descarga
 
@@ -78,7 +79,7 @@ editor desconocido; consulta la [política de firma de código](README.md#code-s
       <img src="docs/screenshots/readme/es/quick-start.png" alt="Primera ejecución: modelo recomendado y canción de ejemplo">
       <strong>Modelos con transparencia.</strong> Cada modelo de IA muestra su
       licencia y su procedencia antes de descargarlo; Cover_Maker recomienda
-      el que encaja con tu equipo y nunca incluye los pesos.
+      el que encaja con tu equipo y nunca incluye los pesos de separación.
     </td>
   </tr>
 </table>
@@ -102,7 +103,7 @@ oscuro y claro.
 | Lotes, carpetas vigiladas, resincronización | Sí | Limitado | No |
 | Licencias de los modelos antes de descargar | Sí | No aplica | Rara vez |
 | Integración con DAW (REAPER, VST3) | Sí | Algunas | No |
-| Interfaz en español e inglés | Sí | Depende | Depende |
+| Interfaz en español, inglés, portugués, francés, alemán e italiano | Sí | Depende | Depende |
 
 ## ¿Qué velocidad tiene?
 
@@ -163,8 +164,9 @@ PDF a cada versión. Los cambios se recogen en el [CHANGELOG](CHANGELOG.md).
 Los informes de errores, las ideas y los pull requests son bienvenidos; lee
 antes [CONTRIBUTING.md](CONTRIBUTING.md). **Las traducciones son
 especialmente bienvenidas:** los textos de la interfaz están en
-[`desktop/src/lib/i18n.svelte.ts`](desktop/src/lib/i18n.svelte.ts), un
-diccionario por idioma. Ayúdanos a mantener el proyecto legal desde el
+[`desktop/src/lib/i18n/`](desktop/src/lib/i18n), un archivo por idioma, y
+[docs/TRANSLATING.md](docs/TRANSLATING.md) explica (en inglés) cómo mejorar
+una traducción o añadir un idioma. Ayúdanos a mantener el proyecto legal desde el
 diseño: nada de audio comercial en issues, tests ni capturas.
 
 ## Créditos
@@ -189,8 +191,9 @@ diseño: nada de audio comercial en issues, tests ni capturas.
 Cover_Maker nunca busca, rastrea ni empareja música en servicios de streaming.
 El audio en línea solo se obtiene de enlaces que pegas tú, después de
 confirmar que tienes derecho a usar ese contenido. Este proyecto nunca incluye
-ni aloja pesos de modelos de IA; la licencia de cada modelo se muestra antes de
-descargarlo. Las capturas, los tests y los ejemplos usan solo audio sintético o
+ni aloja pesos de modelos de separación; la licencia de cada modelo se muestra
+antes de descargarlo. El único modelo incluido es el de transcripción de notas
+de Basic Pitch (230 KB, Apache-2.0), para pasar audio a MIDI. Las capturas, los tests y los ejemplos usan solo audio sintético o
 Creative Commons.
 
 ## Privacidad

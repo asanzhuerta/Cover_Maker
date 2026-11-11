@@ -20,6 +20,27 @@ export const ICONS = {
       "M8.5 21h7",
     ],
   },
+  // One microphone in the spotlight: the lead singer.
+  "vocals.lead": {
+    stroke: [
+      "M10 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z",
+      "M3.5 11a6.5 6.5 0 0 0 13 0",
+      "M10 17.5V21",
+      "M6.5 21h7",
+    ],
+    fill: ["M19 2l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"],
+  },
+  // Two microphones side by side: the backing singers.
+  "vocals.backing": {
+    stroke: [
+      "M7 3.5a2.5 2.5 0 0 0-2.5 2.5v4a2.5 2.5 0 0 0 5 0V6A2.5 2.5 0 0 0 7 3.5z",
+      "M17 3.5a2.5 2.5 0 0 0-2.5 2.5v4a2.5 2.5 0 0 0 5 0V6A2.5 2.5 0 0 0 17 3.5z",
+      "M7 15v5",
+      "M17 15v5",
+      "M4.5 20.5h5",
+      "M14.5 20.5h5",
+    ],
+  },
   guitar: {
     stroke: [
       "M11 13l9-9",

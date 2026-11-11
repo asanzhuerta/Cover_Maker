@@ -27,7 +27,8 @@
 - **Free and open source.** MIT licence, no paid tier, no watermark.
 - **100 % local.** Separation runs on your computer. No account, no
   telemetry, no uploads.
-- **In your language.** The whole app speaks English and Spanish.
+- **In your language.** The whole app speaks English and Spanish, plus
+  Portuguese (Brazil), French, German and Italian translated with the community.
 
 ## Download
 
@@ -73,7 +74,7 @@ publisher; see the [code signing policy](#code-signing-policy).
       <img src="docs/screenshots/readme/en/quick-start.png" alt="First run: recommended model and the example song">
       <strong>Honest models.</strong> Each AI model shows its licence and
       provenance before you download it; Cover_Maker recommends the one that
-      fits your hardware and never bundles weights.
+      fits your hardware and never bundles separation weights.
     </td>
   </tr>
 </table>
@@ -96,7 +97,7 @@ stems straight into your DAW; dark and light themes.
 | Batch, watched folders, re-sync | Yes | Limited | No |
 | Model licences shown before download | Yes | Not applicable | Rarely |
 | DAW integration (REAPER, VST3) | Yes | Some | No |
-| Interface in English and Spanish | Yes | Varies | Varies |
+| Interface in English, Spanish, Portuguese, French, German and Italian | Yes | Varies | Varies |
 
 ## How fast is it?
 
@@ -155,8 +156,9 @@ listed in the [CHANGELOG](CHANGELOG.md).
 Bug reports, ideas and pull requests are welcome; read
 [CONTRIBUTING.md](CONTRIBUTING.md) first. **Translations are especially
 welcome:** the interface strings live in
-[`desktop/src/lib/i18n.svelte.ts`](desktop/src/lib/i18n.svelte.ts), one
-dictionary per language. Please keep the project legal by design: no
+[`desktop/src/lib/i18n/`](desktop/src/lib/i18n), one file per language, and
+[docs/TRANSLATING.md](docs/TRANSLATING.md) explains how to improve one or add
+a new language. Please keep the project legal by design: no
 commercial audio in issues, tests or screenshots.
 
 ## Credits
@@ -180,9 +182,10 @@ commercial audio in issues, tests or screenshots.
 
 Cover_Maker never searches for, scrapes or matches music on streaming
 services. Online audio is fetched only from links you paste yourself, after you
-confirm you have the right to use that content. AI model weights are never
-bundled or hosted by this project; each model's licence is shown before you
-download it. Screenshots, tests and examples use only synthetic or Creative
+confirm you have the right to use that content. Separation model weights are
+never bundled or hosted by this project; each model's licence is shown before
+you download it. The only bundled model is Basic Pitch's 230 KB
+note-transcription model (Apache-2.0), for audio to MIDI. Screenshots, tests and examples use only synthetic or Creative
 Commons audio. Read [DISCLAIMER.md](DISCLAIMER.md).
 
 ## Code signing policy

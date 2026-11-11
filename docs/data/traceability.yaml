@@ -56,7 +56,7 @@ FR-SRC-06:
 FR-SEP-01:
   - "engine:test_runner.py::test_extract_exports_selected_stem"
   - "engine:test_runner.py::test_new_stem_reuses_previous_separation"
-  - "ui:stems.test.ts > lists the six selectable stems"
+  - "ui:stems.test.ts > lists the six top-level stems"
 FR-SEP-02:
   - "engine:test_runner.py::test_without_vocals_keep_residual"
   - "engine:test_runner.py::test_without_drop_residual_needs_all_stems"
@@ -66,6 +66,15 @@ FR-SEP-03:
   - "engine:test_recipes_catalog.py::test_every_preset_covers_all_stems_with_catalogue_models"
   - "engine:test_runner.py::test_max_preset_runs_ensemble"
   - "engine:test_api.py::test_system_reports_tier_and_preset"
+FR-SEP-04:
+  - "engine:test_runner.py::test_lead_and_backing_split_the_vocals"
+  - "engine:test_runner.py::test_without_lead_keeps_the_backing"
+  - "engine:test_runner.py::test_lead_reuses_the_cached_vocals"
+  - "engine:test_recipes_catalog.py::test_lead_and_backing_run_on_the_vocals_stem"
+  - "engine:test_mixer.py::test_removing_the_lead_keeps_the_backing"
+  - "engine:test_mixer.py::test_sub_stems_at_one_gain_sound_like_their_parent"
+  - "ui:stems.test.ts > shows lead and backing lanes in place of the vocals"
+  - "manual: benchmark of the lead/backing model on the RTX 3050 Laptop 4 GB (2026-11-11)"
 FR-MOD-01:
   - "engine:test_recipes_catalog.py::test_catalogue_has_licence_and_notice_for_every_model"
   - "engine:test_installer.py::test_download_calls_the_cli_entry_point"
@@ -85,6 +94,17 @@ FR-LIB-02:
   - "engine:test_library.py::test_imported_playlist_matching_and_review"
   - "engine:test_api.py::test_match_correction"
   - "ui:library.test.ts > sends only matched, selected items to a job"
+FR-MIDI-01:
+  - "engine:test_midi.py::test_a_melody_gives_each_note_with_its_pitch_and_timing"
+  - "engine:test_midi.py::test_a_chord_gives_its_three_notes_as_the_strongest"
+  - "engine:test_midi.py::test_the_bass_profile_ignores_notes_above_its_range"
+  - "engine:test_midi.py::test_drums_become_kick_snare_and_hi_hat_on_their_beats"
+  - "engine:test_midi.py::test_tempo_map_puts_bar_lines_on_the_downbeats_after_a_pickup"
+  - "engine:test_midi.py::test_the_file_has_the_tempo_map_and_notes_on_the_beat_grid"
+  - "engine:test_midi_api.py::test_midi_files_are_named_like_the_stems_and_reused"
+  - "engine:test_midi_api.py::test_midi_without_a_beat_grid_uses_120_bpm"
+  - "ui:midi.test.ts > reads progress events for its own item only"
+  - "ui:midi.test.ts > adds finished stems to the current one"
 FR-MIX-01:
   - "engine:test_mixer.py::test_muting_in_the_mixer_matches_without"
   - "engine:test_preview.py::test_preview_lists_all_stems_and_serves_audio"
@@ -127,8 +147,9 @@ FR-PRA-06:
   - "engine:test_practice.py::test_cents_tune_a_detuned_song_back_to_a440"
   - "engine:test_practice_api.py::test_render_applies_tempo_pitch_click_and_stems"
 FR-UI-01:
-  - "ui:jobs.test.ts > has every key translated"
-  - "ui:about.test.ts > has every user-facing text in English and Spanish"
+  - "ui:i18n.test.ts > has every key of the English source, and no other"
+  - "ui:i18n.test.ts > detects the language from the system preferences"
+  - "ui:about.test.ts > has every user-facing text in every interface language"
   - "shell:locale::maps_windows_language_ids"
 FR-UI-02:
   - "engine:test_example.py::test_example_clip_is_short_small_and_cc0_or_cc_by"
@@ -144,6 +165,15 @@ FR-DAW-02:
   - "plugin:engine::tests::orders_stems_as_asked_and_describes_progress"
   - "plugin:preview::tests::resamples_and_stops_at_the_end"
   - "manual: the bundle loads and exposes its VST3 factory (2026-11-05)"
+FR-DAW-03:
+  - "engine:test_daw_session.py::test_reaper_project_matches_the_golden_file"
+  - "engine:test_daw_session.py::test_dawproject_xml_matches_the_golden_files"
+  - "engine:test_daw_session.py::test_dawproject_xml_is_valid_against_the_official_schema"
+  - "engine:test_daw_session.py::test_midi_tempo_map_matches_the_golden_file_and_the_grid"
+  - "engine:test_daw_session.py::test_every_downbeat_lands_on_a_bar_line"
+  - "engine:test_daw_session.py::test_export_writes_aligned_stems_and_every_project"
+  - "engine:test_daw_session_api.py::test_session_export_writes_every_format_with_mixer_settings"
+  - "ui:mixer.test.ts > turns mute and solo into DAW mute flags, keeping fader and pan"
 
 NFR-PERF-01:
   - "manual: M1 benchmarks on an RTX 3050 Laptop 4 GB (Architecture, Benchmarks)"

@@ -210,6 +210,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/items/{item_id}/midi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Item Midi
+         * @description Convert stems to MIDI files with the song's tempo map (FR-MIDI-01).
+         *
+         *     Stems run one after another on a CPU thread; ``midi.progress`` events report
+         *     the stem being converted. Stems converted before are reused from the cache.
+         */
+        post: operations["item_midi_items__item_id__midi_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/items/{item_id}/preview": {
         parameters: {
             query?: never;
@@ -238,6 +261,27 @@ export interface paths {
         put?: never;
         /** Render */
         post: operations["render_items__item_id__render_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/items/{item_id}/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Item Session
+         * @description Write a DAW session: every stem on its own track at 0, with the tempo map,
+         *     section markers and key (REAPER, DAWproject and a MIDI tempo map).
+         */
+        post: operations["item_session_items__item_id__session_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -835,6 +879,11 @@ export interface components {
             /** Id */
             id: number;
         };
+        /**
+         * DawFormat
+         * @enum {string}
+         */
+        DawFormat: "reaper" | "dawproject" | "midi";
         /** DiagnosticsOut */
         DiagnosticsOut: {
             /**
@@ -1075,6 +1124,51 @@ export interface components {
              */
             path?: string | null;
         };
+        /** MidiFileOut */
+        MidiFileOut: {
+            /**
+             * Cached
+             * @description True when the file was made before and reused.
+             */
+            cached: boolean;
+            /**
+             * Notes
+             * @description Notes found (0: nothing pitched or no hits).
+             */
+            notes: number;
+            /**
+             * Path
+             * @description The MIDI file, next to the stem exports.
+             */
+            path: string;
+            /** Stem */
+            stem: string;
+        };
+        /** MidiOut */
+        MidiOut: {
+            /**
+             * Bpm
+             * @description Tempo of the song from the analysis (120 without a beat grid).
+             */
+            bpm: number;
+            /** Files */
+            files: components["schemas"]["MidiFileOut"][];
+            /** Item Id */
+            item_id: number;
+            /**
+             * Tempo From Analysis
+             * @description False when the song has no beat grid: one default tempo (120 BPM).
+             */
+            tempo_from_analysis: boolean;
+        };
+        /** MidiRequest */
+        MidiRequest: {
+            /**
+             * Stems
+             * @description Stem ids to convert, e.g. vocals, bass, drums.
+             */
+            stems: string[];
+        };
         /**
          * Mode
          * @enum {string}
@@ -1231,11 +1325,72 @@ export interface components {
          * @enum {string}
          */
         ResidualMode: "keep" | "drop";
+        /** SessionOut */
+        SessionOut: {
+            /**
+             * Folder
+             * @description New folder with the audio files and the project files.
+             */
+            folder: string;
+            /**
+             * Projects
+             * @description Path of each project file written.
+             */
+            projects: {
+                [key: string]: string;
+            };
+            /**
+             * Tracks
+             * @description Track names, in project order.
+             */
+            tracks: string[];
+        };
+        /** SessionRequest */
+        SessionRequest: {
+            /**
+             * Formats
+             * @description Project files to write next to the stems (all by default).
+             */
+            formats?: components["schemas"]["DawFormat"][];
+            /**
+             * @description keep: the Residual track plays; drop: it is muted.
+             * @default keep
+             */
+            residual: components["schemas"]["ResidualMode"];
+            /**
+             * Tracks
+             * @description Mixer settings per stem. Missing stems are at 0 dB, centred and audible.
+             */
+            tracks?: {
+                [key: string]: components["schemas"]["SessionTrackIn"];
+            };
+        };
+        /** SessionTrackIn */
+        SessionTrackIn: {
+            /**
+             * Gain
+             * @description Linear fader gain (1 = 0 dB).
+             * @default 1
+             */
+            gain: number;
+            /**
+             * Muted
+             * @description Muted track (after mute and solo in the mixer).
+             * @default false
+             */
+            muted: boolean;
+            /**
+             * Pan
+             * @description Stereo balance from -1 (left) to 1 (right).
+             * @default 0
+             */
+            pan: number;
+        };
         /**
          * Stem
          * @enum {string}
          */
-        Stem: "vocals" | "guitar" | "drums" | "bass" | "piano" | "other";
+        Stem: "vocals" | "guitar" | "drums" | "bass" | "piano" | "other" | "vocals.lead" | "vocals.backing";
         /** StorageOut */
         StorageOut: {
             /** Library Bytes */
@@ -1703,6 +1858,41 @@ export interface operations {
             };
         };
     };
+    item_midi_items__item_id__midi_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MidiRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MidiOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     preview_items__item_id__preview_get: {
         parameters: {
             query?: never;
@@ -1756,6 +1946,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RenderOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    item_session_items__item_id__session_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionOut"];
                 };
             };
             /** @description Validation Error */

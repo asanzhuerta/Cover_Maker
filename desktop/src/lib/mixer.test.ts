@@ -11,6 +11,7 @@ import {
   nodeGains,
   panGains,
   peaksPath,
+  sessionTracks,
   stemsNeeded,
   wavSeconds,
   wrapPosition,
@@ -49,6 +50,25 @@ describe("mixer gains", () => {
       vocals: 0,
       guitar: 0,
       drums: 1,
+    });
+  });
+
+  it("turns mute and solo into DAW mute flags, keeping fader and pan", () => {
+    const controls = {
+      vocals: { ...flat(-6), pan: -0.5 },
+      guitar: { ...flat(), muted: true },
+      drums: flat(MIN_DB),
+    };
+    expect(sessionTracks(controls)).toEqual({
+      vocals: { gain: dbToGain(-6), pan: -0.5, muted: false },
+      guitar: { gain: 1, pan: 0, muted: true },
+      drums: { gain: 0, pan: 0, muted: false },
+    });
+    controls.guitar.soloed = true;
+    expect(sessionTracks(controls)).toMatchObject({
+      vocals: { muted: true },
+      guitar: { muted: false },
+      drums: { muted: true },
     });
   });
 

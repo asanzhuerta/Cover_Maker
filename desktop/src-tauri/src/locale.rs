@@ -3,10 +3,22 @@
 //! The NSIS hook stores the installer's language id (`$LANGUAGE`) in
 //! `HKCU\Software\Cover_Maker\Language`; the UI asks for it on first start.
 
-/// UI locale for a Windows language id: Spanish for any Spanish variant.
+/// UI locale for a Windows language id (LANGID), by its primary language:
+/// any regional variant maps to the one locale the app has for it, and a
+/// language the app is not translated into maps to English.
+///
+/// Keep in step with `LOCALES` in `desktop/src/lib/i18n.svelte.ts` and the
+/// NSIS `languages` in `tauri.conf.json` (see docs/TRANSLATING.md).
 pub fn locale_for_language_id(id: u32) -> &'static str {
-    // The low 10 bits are the primary language; 0x0a is Spanish.
-    if id & 0x3ff == 0x0a { "es" } else { "en" }
+    // The low 10 bits are the primary language id (LANG_* in winnt.h).
+    match id & 0x3ff {
+        0x0a => "es",
+        0x16 => "pt-BR",
+        0x0c => "fr",
+        0x07 => "de",
+        0x10 => "it",
+        _ => "en",
+    }
 }
 
 #[cfg(windows)]
@@ -58,7 +70,15 @@ mod tests {
         assert_eq!(locale_for_language_id(1034), "es"); // Spanish, traditional sort
         assert_eq!(locale_for_language_id(3082), "es"); // Spanish, modern sort
         assert_eq!(locale_for_language_id(2058), "es"); // Spanish (Mexico)
+        assert_eq!(locale_for_language_id(1046), "pt-BR"); // Portuguese (Brazil)
+        assert_eq!(locale_for_language_id(2070), "pt-BR"); // Portuguese (Portugal)
+        assert_eq!(locale_for_language_id(1036), "fr"); // French (France)
+        assert_eq!(locale_for_language_id(3084), "fr"); // French (Canada)
+        assert_eq!(locale_for_language_id(1031), "de"); // German (Germany)
+        assert_eq!(locale_for_language_id(3079), "de"); // German (Austria)
+        assert_eq!(locale_for_language_id(1040), "it"); // Italian (Italy)
         assert_eq!(locale_for_language_id(1033), "en");
-        assert_eq!(locale_for_language_id(1036), "en"); // French: not translated
+        assert_eq!(locale_for_language_id(2057), "en"); // English (UK)
+        assert_eq!(locale_for_language_id(1041), "en"); // Japanese: not translated
     }
 }

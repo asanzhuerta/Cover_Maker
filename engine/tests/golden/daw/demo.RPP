@@ -1,0 +1,117 @@
+<REAPER_PROJECT 0.1 "6.0" 0
+  TEMPO 98 4 4
+  SAMPLERATE 44100 0 0
+  <NOTES 0 2
+    |Demo
+    |Tempo: 98.00 BPM
+    |Key: G major
+    |Tuning: -20.0 cents from A440
+    |Synthetic test session.
+    |Exported by Cover_Maker.
+  >
+  <TEMPOENVEX
+    ACT 1 -1
+    VIS 1 0 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 1 -1 -1
+    PT 0.000000000000 100.0000000000 1 262145 0 1
+    PT 0.600000000000 100.0000000000 1 262148 0 1
+    PT 3.000000000000 88.8889000000 1
+    PT 5.700000000000 100.0000000000 1
+    PT 8.100000000000 88.8889000000 1
+  >
+  MARKER 1 0 "Intro" 0 0 1
+  MARKER 2 3 'Verse "A"' 0 0 1
+  MARKER 3 8.1 "Chorus & más" 0 0 1
+  <TRACK
+    NAME "Vocals"
+    VOLPAN 0.5 -0.25 -1 -1 1
+    MUTESOLO 0 0 0
+    NCHAN 2
+    <ITEM
+      POSITION 0
+      LENGTH 12.5
+      LOOP 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      NAME "Demo - Vocals.wav"
+      SOFFS 0
+      <SOURCE WAVE
+        FILE "Demo - Vocals.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "Drums"
+    VOLPAN 1.4125375446 0 -1 -1 1
+    MUTESOLO 0 0 0
+    NCHAN 2
+    <ITEM
+      POSITION 0
+      LENGTH 12.5
+      LOOP 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      NAME "Demo - Drums.wav"
+      SOFFS 0
+      <SOURCE WAVE
+        FILE "Demo - Drums.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "Bass"
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 1 0 0
+    NCHAN 2
+    <ITEM
+      POSITION 0
+      LENGTH 12.5
+      LOOP 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      NAME "Demo - Bass.wav"
+      SOFFS 0
+      <SOURCE WAVE
+        FILE "Demo - Bass.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "Residual"
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    NCHAN 2
+    <ITEM
+      POSITION 0
+      LENGTH 12.5
+      LOOP 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      NAME "Demo - Residual.wav"
+      SOFFS 0
+      <SOURCE WAVE
+        FILE "Demo - Residual.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "Original mix"
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 1 0 0
+    NCHAN 2
+    <ITEM
+      POSITION 0
+      LENGTH 12.5
+      LOOP 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      NAME "Demo - Original mix.wav"
+      SOFFS 0
+      <SOURCE WAVE
+        FILE "Demo - Original mix.wav"
+      >
+    >
+  >
+>

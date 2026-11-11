@@ -1,11 +1,15 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
+  import Icon from "$lib/components/Icon.svelte";
   import { connection, isTauri } from "$lib/connection.svelte";
-  import { LOCALES, t, type Locale } from "$lib/i18n.svelte";
+  import { openExternal } from "$lib/external";
+  import { LOCALES, MAINTAINED, t, type Locale } from "$lib/i18n.svelte";
   import { saveSettings, settings } from "$lib/settings.svelte";
 
   const locales = Object.entries(LOCALES) as [Locale, string][];
+  const TRANSLATING =
+    "https://github.com/asanzhuerta/Cover_Maker/blob/main/docs/TRANSLATING.md";
 
   let appVersion = $state("");
   let appUpdate = $state("");
@@ -115,10 +119,18 @@
       data-testid="locale"
     >
       {#each locales as [code, name] (code)}
-        <option value={code}>{name}</option>
+        <option value={code} lang={code}>{name}</option>
       {/each}
     </select>
   </label>
+  <p class="muted translate" data-testid="translate">
+    {#if !MAINTAINED.includes(settings.locale)}{t(
+        "settings.language.community",
+      )}{/if}
+    <button class="ghost small" onclick={() => void openExternal(TRANSLATING)}
+      ><Icon name="external" />{t("settings.language.help")}</button
+    >
+  </p>
 
   <label>
     <span>{t("settings.theme")}</span>
@@ -214,6 +226,15 @@
   .form label:not(.row) {
     display: grid;
     gap: 0.3rem;
+  }
+
+  .translate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.8rem;
+    margin: -0.6rem 0 0;
+    font-size: 0.8rem;
   }
 
   .updates {

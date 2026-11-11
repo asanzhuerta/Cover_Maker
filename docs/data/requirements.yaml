@@ -67,6 +67,11 @@ functional:
     text: The system shall offer Fast, Balanced and Max quality presets adapted to the detected hardware tier.
     priority: must
     milestone: M3
+  - id: FR-SEP-04
+    title: Lead and backing vocals
+    text: The user shall split the vocals into lead and backing vocals and extract or remove either one (for example a track without the lead vocals that keeps the backing vocals). The split shall run on the separated vocals, so vocals already separated are reused, and the mixer shall show lead and backing lanes in place of the vocals.
+    priority: should
+    milestone: Future work
   - id: FR-MOD-01
     title: Model catalogue
     text: The system shall list available models with licence class, provenance, size and estimated memory, and download only models the user explicitly accepts.
@@ -94,7 +99,7 @@ functional:
     milestone: M7
   - id: FR-UI-01
     title: Languages
-    text: The user interface shall be available in English and Spanish.
+    text: The user interface shall be available in English and Spanish, and in community translations (Portuguese (Brazil), French, German and Italian) that have every string.
     priority: must
     milestone: M6
   - id: FR-UI-02
@@ -112,6 +117,11 @@ functional:
     text: A VST3 plugin shall run a separation through the running engine and offer the stems for preview and drag-and-drop into tracks.
     priority: should
     milestone: M11
+  - id: FR-DAW-03
+    title: DAW session export
+    text: From a separated song the system shall write a new folder with every stem, the residual and the original mix as WAV files aligned at 0, a REAPER project (.RPP), a DAWproject file and a Standard MIDI File that put each file on its own track with the mixer's volume, pan and mute, plus the tempo map fitted to the beat grid, the section markers and the key.
+    priority: should
+    milestone: Future work
   - id: FR-PRA-01
     title: Tuning and key
     text: The system shall estimate each song's tuning offset from A440 in cents and its key (tonic and major or minor), store them with the song and show them in the LCD panel as played after the pitch settings.
@@ -142,6 +152,11 @@ functional:
     text: The custom mix, the track without X and, on request, every stem and the click shall be exported with the chosen pitch and tempo, rendered by the engine with the same algorithm as the preview.
     priority: must
     milestone: M14
+  - id: FR-MIDI-01
+    title: Audio to MIDI per stem
+    text: From a separated song the user shall convert chosen stems (vocal melody, bass, guitar, piano, other and drums) to Standard MIDI Files named like the stem exports, carrying the tempo map fitted to the song's beat grid (one 120 BPM tempo without a grid), on the CPU, with the progress shown in the mixer and each stem converted only once.
+    priority: should
+    milestone: Future work
 
 non_functional:
   - id: NFR-PERF-01

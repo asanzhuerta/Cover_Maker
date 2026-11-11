@@ -1,6 +1,8 @@
-# Fast: one Demucs pass for all six stems (good on CPU-only machines).
+# Fast: one Demucs pass for all six stems (good on CPU-only machines); the
+# karaoke model splits its vocals into lead and backing when a job asks for them.
 nodes:
   - {id: demucs, model: htdemucs-6s, input: mix}
+  - {id: lead, model: bs-roformer-karaoke-anvuew, input: "stem:demucs.vocals"}
 outputs:
   vocals: demucs.vocals
   guitar: demucs.guitar
@@ -8,3 +10,5 @@ outputs:
   bass: demucs.bass
   piano: demucs.piano
   other: demucs.other
+  vocals.lead: lead.vocals.lead
+  vocals.backing: lead.vocals.backing

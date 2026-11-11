@@ -1,9 +1,10 @@
 """Separation recipes: presets as small graphs of model runs.
 
 A recipe has nodes and outputs. A model node runs one model on an input, which
-is either the mix (``mix``) or the mix minus a stem produced by an earlier node
-(``mix-minus:<node>.<stem>``). An average node averages stems from earlier
-nodes. ``outputs`` says which node provides each final stem. Recipes are pruned
+is the mix (``mix``), the mix minus a stem produced by an earlier node
+(``mix-minus:<node>.<stem>``) or a stem produced by an earlier node
+(``stem:<node>.<stem>``, for example to split the vocals into lead and
+backing). An average node averages stems from earlier nodes. ``outputs`` says which node provides each final stem. Recipes are pruned
 to the nodes needed for the stems a job asks for.
 """
 
@@ -21,6 +22,7 @@ from ..domain import Preset, Stem
 
 MIX = "mix"
 MINUS = "mix-minus:"
+STEM = "stem:"
 
 
 class Ref(BaseModel):
@@ -58,8 +60,9 @@ class Node(BaseModel):
     def dependencies(self) -> list[Ref]:
         if self.average is not None:
             return [Ref.parse(item) for item in self.average]
-        if self.input.startswith(MINUS):
-            return [Ref.parse(self.input.removeprefix(MINUS))]
+        for prefix in (MINUS, STEM):
+            if self.input.startswith(prefix):
+                return [Ref.parse(self.input.removeprefix(prefix))]
         return []
 
 

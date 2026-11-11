@@ -113,9 +113,17 @@ Every stem has its own colour and icon (for example yellow for vocals and
 orange for guitar), used on the stem picker, in the queue, in the model list
 and in the mixer.
 
-The interface is available in English and Spanish. The installed app starts
-in the language chosen in the installer (in development builds it follows the
-system); it can be changed in \emph{Settings}, together with the theme. The dark
+\paragraph{Languages.} The interface is available in English, Spanish,
+Portuguese (Brazil), French, German and Italian. The maintainers keep English
+and Spanish up to date; the other languages are community translations, and
+\emph{Settings} says so under the language list, with a \emph{Help translate}
+link to the translation guide (\texttt{docs/TRANSLATING.md} in the
+repository). The installed app starts in the language chosen in the
+installer; otherwise it follows the language of Windows, using the same
+language from another region when there is no exact match (Portuguese
+(Portugal) shows Portuguese (Brazil), French (Canada) shows French) and
+English when the app is not translated into that language. The language can
+be changed at any time in \emph{Settings}, together with the theme. The dark
 theme is the default; \emph{Light} (a cream paper look) and \emph{System} are
 also available. If your system asks for reduced motion, the app does not
 animate.
@@ -174,8 +182,10 @@ Max quality & BS-RoFormer SW and BS-RoFormer Resurrection. \\
   \item On \emph{New job}, drop audio files or folders on the dashed area, use
         \emph{Add files} or \emph{Add folder}, or paste a video or playlist link
         and press \emph{Add link}.
-  \item Select the stems by clicking their cards: Vocals, Guitar, Drums, Bass,
-        Piano, Other. A selected card is lit in the stem's colour.
+  \item Select the stems by clicking their cards: Vocals, Lead vocals,
+        Backing vocals, Guitar, Drums, Bass, Piano, Other. A selected card is
+        lit in the stem's colour. Lead and backing vocals are explained in
+        \autoref{sec:lead-backing}.
   \item Choose what to export:
         \begin{itemize}
           \item \emph{The selected stems}: one file per stem;
@@ -222,8 +232,30 @@ fallback when the graphics card runs out of memory, installing a missing
 model, or checking for a yt-dlp update when a video link stops working.
 Fix the cause and press \emph{Retry}.
 
+\section{Lead and backing vocals}\label{sec:lead-backing}
+The \emph{Lead vocals} and \emph{Backing vocals} cards split the vocals in
+two: the main singer, and the choir or harmonies behind them. Use them to:
+\begin{itemize}
+  \item sing the lead over the original backing vocals: choose \emph{Lead
+        vocals} and \emph{The song without them};
+  \item sing the harmonies over the lead: do the same with \emph{Backing
+        vocals};
+  \item study a harmony part on its own: choose \emph{Backing vocals} and
+        \emph{The selected stems}.
+\end{itemize}
+The split needs one more model, \emph{BS-RoFormer karaoke (lead/backing
+vocals, anvuew)}, which you install from \emph{Models} like the others (about
+200~MB; its licence is GPL-3.0). It runs on the vocals that the preset has
+already separated, so a song whose vocals are done only needs this extra
+step: about 15 seconds per minute of song on a 4~GB graphics card. In the
+mixer, a song with the split shows \emph{Lead vocals} and \emph{Backing
+vocals} lanes in place of \emph{Vocals}. A duet, or a choir singing the
+melody, may be treated as lead: listen in the mixer before you rely on the
+result.
+
 \section{File names}
-Stems are saved as \texttt{<song> - <Stem>.<format>} and backing tracks as
+Stems are saved as \texttt{<song> - <Stem>.<format>} (for example
+\texttt{<song> - Lead vocals.wav}) and backing tracks as
 \texttt{<song> - without <stems>.<format>}; the \emph{Both} mode writes both
 kinds.
 
@@ -308,6 +340,33 @@ format. An existing file is never overwritten: later exports are numbered
 \texttt{(2)}, \texttt{(3)}, and so on. If the mix would clip, its level is
 lowered just enough and the mixer tells you by how much.
 
+\section{Exporting a DAW session}\label{sec:daw-session}
+\emph{Export DAW session} writes a new folder \texttt{<song> - DAW session} in
+the job's output folder, ready to open in your \gls{daw} and record over:
+\begin{description}
+  \item[Audio] one WAV file per stem, named like the stem export
+  (\texttt{<song> - Vocals.wav}), plus \emph{Residual} (what no stem captured)
+  and the \emph{Original mix}. Every file starts at 0, so they stay in sync.
+  \item[\texttt{<song>.RPP}] a REAPER project.
+  \item[\texttt{<song>.dawproject}] a DAWproject file for Bitwig Studio,
+  Studio One, Cubase and other DAWs that import the format.
+  \item[\texttt{<song> - tempo map.mid}] a MIDI file with the tempo map,
+  sections and key. In any other DAW, import it and drag the WAV files to the
+  start of the project.
+\end{description}
+Each file is on its own track with the volume, pan and mute of the mixer (a
+stem silenced by another stem's solo is muted). The Residual track is muted
+when \emph{Keep what the models missed} is off; the Original mix is always
+muted, for comparison. The projects also carry the song's tempo map, so bars
+and the metronome follow the song, the sections you marked in the Practice
+panel and, in the project notes, the key and tuning. If the song starts before
+its first full bar, the project begins with a short bar (for example 1/4) so
+that every bar line after it falls on the beat.
+
+The session keeps the original pitch and tempo; use \emph{Export this mix} for
+practice versions. The projects find the audio next to them, so move or copy
+the whole folder, not only the project file.
+
 \section{Long songs and memory}
 The preview decodes the song first and each stem only when your settings need
 it. Decoded audio takes memory (about 85~MB per stem for four minutes); for
@@ -371,6 +430,25 @@ Mute an instrument first to get the track without it. Tick \emph{Also export
 every stem and the click} to get a folder with each stem and the click at the
 same pitch and tempo. The engine uses the same algorithm as the mixer, so the
 file sounds like what you heard.
+
+\section{MIDI from the stems}
+The \emph{MIDI} card under the mixer turns stems into notes that you can edit
+in a DAW or a notation program. Tick the stems you want and choose
+\emph{Export MIDI}; a bar shows which stem is being converted (a 4-minute stem
+takes a few seconds). The files are saved next to the stems and named like
+them, for example \texttt{My Song - Bass.mid}.
+\begin{itemize}
+  \item Vocals and bass give one note at a time, the melody or bass line;
+  guitar, piano and other can give chords.
+  \item Drums give kick, snare and closed hi-hat on the General MIDI drum
+  channel (10).
+  \item The files carry the song's tempo map from the beat grid, so in a DAW
+  that follows the file's tempo the notes line up with the stems placed at the
+  start. Without a beat grid the files use 120~BPM, and the card says so.
+\end{itemize}
+Transcription is automatic, so check the result: expect some extra notes an
+octave above loud notes, missed fast or quiet notes, and no toms or cymbals
+other than the hi-hat. Converting a stem again reuses the saved file.
 
 \chapter{Library, folders and playlist import}
 The \emph{Library} page keeps the music you work with in \emph{collections}:
@@ -489,6 +567,8 @@ model, especially for commercial use. The same list is in
 \chapter{Using \CM{} from your DAW}\label{ch:daw}
 \CM{} can work from inside your \gls{daw}. The app must be open: the DAW tools
 talk to the engine it runs, on this computer only.
+To take a separated song to your DAW as a ready-made project instead, use
+\emph{Export DAW session} in the mixer (section~\ref{sec:daw-session}).
 
 \section{REAPER}
 The REAPER script separates a song and inserts each stem as a new track.
@@ -560,8 +640,9 @@ The \emph{About} page, near the bottom of the icon rail, shows:
 The texts follow the language chosen in \emph{Settings}. Everything on the page
 comes from one file in the source code, \texttt{desktop/src/lib/about.json}; the
 photo is \texttt{desktop/static/about/avatar.svg}. To personalise a build, edit
-those two files: each text that users read has an \texttt{en} and an
-\texttt{es} version.
+those two files: each text that users read has a version for every interface
+language (\texttt{en}, \texttt{es}, \texttt{pt-BR}, \texttt{fr}, \texttt{de},
+\texttt{it}).
 
 \chapter{Command-line reference}
 The engine can be used without the desktop application.
@@ -578,7 +659,7 @@ cover-maker separate song.flac --stems vocals --mode without -o backing
 \toprule
 \textbf{Option of \texttt{separate}} & \textbf{Meaning} \\
 \midrule
-\texttt{--stems} & Comma-separated: vocals, guitar, drums, bass, piano, other. \\
+\texttt{--stems} & Comma-separated: vocals, guitar, drums, bass, piano, other, vocals.lead (lead vocals), vocals.backing (backing vocals). \\
 \texttt{--mode} & \texttt{extract} (default) writes the stems; \texttt{without} writes the song without them; \texttt{both} writes both. \\
 \texttt{--residual} & For \texttt{without} and \texttt{both}: \texttt{keep} (default) or \texttt{drop}. \\
 \texttt{--preset} & \texttt{auto} (default), \texttt{fast}, \texttt{balanced} or \texttt{max}. \\

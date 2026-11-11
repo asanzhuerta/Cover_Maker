@@ -9,12 +9,33 @@ project follows [Semantic Versioning](https://semver.org/).
 ## [0.4.0] - 2026-11-11
 
 Practice tools (key, tuning and tempo analysis, real-time pitch and tempo,
-bar loops, count-in, click and speed trainer), the *Tape & Console* visual
-identity, a first-run quick start with a Creative Commons example song, a
-stable download link, DAW integration (REAPER script and VST3 plugin),
-presets tuned from measured runs, model licences page, the code signing
-policy and privacy notice, security hardening, and all documents at version
-1.0 (M8, M10, M11, M13, M14).
+bar loops, count-in, click and speed trainer), DAW session export, audio to
+MIDI per stem, lead and backing vocal separation, four more interface
+languages, the *Tape & Console* visual identity, a first-run quick start with
+a Creative Commons example song, a stable download link, DAW integration
+(REAPER script and VST3 plugin), security hardening, and all documents at
+version 1.0 (M8, M10, M11, M13, M14).
+
+### Added (DAW export, MIDI and vocals)
+- Audio to MIDI per stem (FR-MIDI-01, ADR-012). The mixer's *MIDI* card
+  converts chosen stems to Standard MIDI Files named like the stem exports
+  (`My Song - Bass.mid`), with the song's tempo map from the beat grid
+  (120 BPM without one). Pitched stems use Spotify's Basic Pitch model
+  (Apache-2.0, 230 KB, bundled) on ONNX Runtime, now a base engine
+  dependency, on the CPU: about 3.5 s for a 4-minute stem on an i5-11400H.
+  Vocals and bass are kept to one note at a time; drums become kick, snare
+  and hi-hat with signal processing only. `POST /items/{id}/midi` reports
+  `midi.progress` events and caches each stem's file.
+- Lead and backing vocals: new stems `vocals.lead` and `vocals.backing` that
+  split the vocals with the BS-RoFormer karaoke model by anvuew (GPL-3.0,
+  about 200 MB, downloaded on request like every model). Each preset runs it
+  on its separated vocals, so the split is cached and reuses vocals already
+  separated. Extract either part or remove it ("track without lead vocals"
+  keeps the backing vocals); the mixer shows lead and backing lanes in place
+  of the vocals, and the mixer maths treat sub-stems as parts of their parent
+  with both residual modes. New stem cards and colours in New job (English
+  and Spanish), requirement FR-SEP-04, a User Manual section and a benchmark
+  row for the RTX 3050 Laptop.
 
 ### Added (M14: practice tools)
 - Practice tools (M14). The engine analyses each song once, after decoding:
@@ -37,6 +58,15 @@ policy and privacy notice, security hardening, and all documents at version
   `python-stretch`, MIT), and can also write every stem and the click.
 - Practice chapter in the User Manual, ADR-010, requirements FR-PRA-01 to
   FR-PRA-06 and NFR-PERF-05.
+- DAW session export: *Export DAW session* in the mixer
+  (`POST /items/{id}/session`) writes a folder with every stem, the residual
+  and the original mix as WAV files aligned at 0, a REAPER project (`.RPP`), a
+  DAWproject file (Bitwig Studio, Studio One, Cubase) and a MIDI tempo map for
+  any other DAW. Tracks keep the mixer's volume, pan and mute; the projects
+  carry the tempo map fitted to the beat grid (with a pickup bar when the song
+  starts mid-bar), the section markers and the key. Pure-Python writers; the
+  DAWproject XML is validated against the official schema in the tests
+  (`xmlschema`, development only). ADR-011, requirement FR-DAW-03.
 
 ### Security
 - Release workflow: the tag name reaches run scripts through an environment
@@ -91,6 +121,25 @@ policy and privacy notice, security hardening, and all documents at version
 - Library page: *Temporary files* lists what stopped or failed jobs left
   behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
   `POST /storage/temporary/clear`), and opens the folder in Explorer.
+
+### Added (Interface languages)
+- The interface is now also in Portuguese (Brazil), French, German and
+  Italian, community-maintained translations next to English and Spanish.
+  The About page texts are translated too.
+- The installer offers the same six languages and the app starts in the one
+  you pick; without an installer choice it follows the Windows language,
+  falling back to the same language from another region (`pt-PT` → `pt-BR`,
+  `fr-CA` → `fr`) and then to English.
+- *Settings* marks community translations and links to the new translation
+  guide, [docs/TRANSLATING.md](docs/TRANSLATING.md), with a style guide and a
+  glossary of music terms.
+- The page language (`<html lang>`) follows the interface language.
+
+### Changed (Interface languages)
+- The strings moved from `i18n.svelte.ts` to one file per language in
+  `desktop/src/lib/i18n/`, each typed against the English source, so a
+  missing or unknown key fails `pnpm check`. A new CI step,
+  `pnpm check:i18n`, also reports empty strings and changed `{placeholders}`.
 
 ### Added (Launch: download and repository)
 - First-run quick start (#95): the last welcome step shows the model, or

@@ -58,6 +58,8 @@ docs/latex/**/build/
 *.ckpt
 *.pth
 *.onnx
+# Basic Pitch note-transcription model (Apache-2.0, 230 KB), bundled on purpose (ADR-012).
+!engine/src/cover_maker/data/basic_pitch/nmp.onnx
 *.safetensors
 # ...except the short Creative Commons example song offered on first run
 # (CC0 or CC BY, under 30 s and 2 MB; credited in THIRD_PARTY_NOTICES.md).
