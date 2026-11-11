@@ -27,6 +27,10 @@ describe("shortcuts", () => {
     });
     expect(press("ArrowDown")).toEqual({ action: "laneBy", step: 1 });
     expect(press("?")).toEqual({ action: "help" });
+    expect(press("[")).toEqual({ action: "tempoBy", step: -0.05 });
+    expect(press("]")).toEqual({ action: "tempoBy", step: 0.05 });
+    expect(press("-")).toEqual({ action: "pitchBy", step: -1 });
+    expect(press("+")).toEqual({ action: "pitchBy", step: 1 });
   });
 
   it("leaves keys with modifiers to the system", () => {
