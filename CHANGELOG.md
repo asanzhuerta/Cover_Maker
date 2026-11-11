@@ -6,9 +6,9 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-11-05
+## [0.4.0] - 2026-11-11
 
-First stable release: the *Tape & Console* visual identity, a first-run quick
+The *Tape & Console* visual identity, a first-run quick
 start with a Creative Commons example song, a stable download link, DAW
 integration (REAPER script and VST3 plugin), presets tuned from measured runs,
 model licences page, the code signing policy and privacy notice, security
@@ -120,7 +120,7 @@ hardening, and all documents at version 1.0 (M8, M10, M11, M13).
   licence, source and verification date (generated from the catalogue).
 - All six documents at version 1.0; the SRS includes the traceability
   matrix, the Installation Guide explains what the installer downloads and how
-  it is verified, and the Test Report covers v1.0.0.
+  it is verified, and the Test Report covers v0.4.0.
 
 ### Added (M11: DAW integration)
 - REAPER script (`daw/reaper`): separates the selected item's song (or a
