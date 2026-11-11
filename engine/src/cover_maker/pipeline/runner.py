@@ -20,7 +20,7 @@ from typing import Any
 
 import numpy as np
 
-from ..audio import analysis, io, mixer
+from ..audio import analysis, io, mixer, practice
 from ..domain import ALL_STEMS, JobSpec, Mode, Preset, ResidualMode, Stem
 from ..library.matching import read_track
 from ..paths import Paths
@@ -75,26 +75,62 @@ class MixSources:
     spec: JobSpec
 
 
+@dataclass(frozen=True)
+class BeatGrid:
+    beats: list[float]
+    downbeats: list[float]
+
+
+def _free_path(folder: Path, base: str, suffix: str) -> Path:
+    target = folder / f"{base}{suffix}"
+    counter = 2
+    while target.exists():
+        target = folder / f"{base} ({counter}){suffix}"
+        counter += 1
+    return target
+
+
 def render_custom_mix(
     sources: MixSources,
     gains: dict[Stem, float],
     residual: ResidualMode,
     fmt: str | None = None,
     pans: dict[Stem, float] | None = None,
+    *,
+    practice_settings: practice.Practice | None = None,
+    click_gain: float = 0.0,
+    grid: BeatGrid | None = None,
+    with_stems: bool = False,
 ) -> tuple[Path, mixer.RenderResult]:
-    """Render mixer settings to a new file in the job's output folder (never overwrites)."""
+    """Render mixer settings to a new file in the job's output folder (never overwrites).
+
+    With practice settings, the mix (and each stem when ``with_stems``) is rendered at
+    the chosen tempo and pitch with the same chain as the preview (ADR-012). A click
+    stem from the beat grid is mixed in at ``click_gain`` and exported with the stems.
+    """
     fmt = fmt or sources.spec.output_format.value
+    settings = practice_settings or practice.Practice()
     mix = io.read(sources.mix)
     stems = {stem: io.read(path) for stem, path in sources.stems.items()}
-    result = mixer.protect_peaks(mixer.mix_gains(mix, stems, gains, residual, pans))
+    mixed = mixer.mix_gains(mix, stems, gains, residual, pans)
+    click = practice.click_stereo(grid.beats, grid.downbeats, len(mixed)) if grid else None
+    if click is not None and click_gain > 0:
+        mixed = (mixed + click * np.float32(click_gain)).astype(np.float32)
+    result = mixer.protect_peaks(practice.apply(mixed, settings))
+    tag = settings.suffix()
+    label = f" ({tag})" if tag else ""
     folder = sources.spec.output_dir
-    base = f"{sources.title} - custom mix"
-    target = folder / f"{base}.{fmt}"
-    counter = 2
-    while target.exists():
-        target = folder / f"{base} ({counter}).{fmt}"
-        counter += 1
+    target = _free_path(folder, f"{sources.title} - custom mix{label}", f".{fmt}")
     io.write(result.audio, target, fmt)
+    if with_stems:
+        stem_dir = _free_path(folder, f"{sources.title} - stems{label}", "")
+        stem_dir.mkdir(parents=True)
+        tracks: dict[str, io.Audio] = {stem.value: audio for stem, audio in stems.items()}
+        if click is not None:
+            tracks["click"] = click
+        for name, audio in tracks.items():
+            shaped = mixer.protect_peaks(practice.apply(audio, settings)).audio
+            io.write(shaped, stem_dir / f"{sources.title} - {name}.{fmt}", fmt)
     return target, result
 
 

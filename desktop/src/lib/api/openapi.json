@@ -1,6 +1,82 @@
 {
   "components": {
     "schemas": {
+      "AnalysisOut": {
+        "properties": {
+          "beats": {
+            "description": "Beat times in seconds.",
+            "items": {
+              "type": "number"
+            },
+            "title": "Beats",
+            "type": "array"
+          },
+          "bpm": {
+            "description": "Tempo in beats per minute (0 when no beat was found).",
+            "title": "Bpm",
+            "type": "number"
+          },
+          "downbeats": {
+            "description": "Bar starts in seconds (4/4 assumed).",
+            "items": {
+              "type": "number"
+            },
+            "title": "Downbeats",
+            "type": "array"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "key": {
+            "description": "Tonic pitch class, e.g. C, F#, Eb.",
+            "title": "Key",
+            "type": "string"
+          },
+          "key_confidence": {
+            "description": "Best key score minus the runner-up (0 = ambiguous).",
+            "title": "Key Confidence",
+            "type": "number"
+          },
+          "markers": {
+            "description": "Named section markers, sorted by time.",
+            "items": {
+              "$ref": "#/components/schemas/MarkerIn"
+            },
+            "title": "Markers",
+            "type": "array"
+          },
+          "mix": {
+            "description": "Asset id (SHA-256) of the analysed mix.",
+            "title": "Mix",
+            "type": "string"
+          },
+          "mode": {
+            "description": "major or minor.",
+            "title": "Mode",
+            "type": "string"
+          },
+          "tuning_cents": {
+            "description": "Offset of the recording from A440, in cents.",
+            "title": "Tuning Cents",
+            "type": "number"
+          }
+        },
+        "required": [
+          "item_id",
+          "mix",
+          "tuning_cents",
+          "key",
+          "mode",
+          "key_confidence",
+          "bpm",
+          "beats",
+          "downbeats",
+          "markers"
+        ],
+        "title": "AnalysisOut",
+        "type": "object"
+      },
       "ApiError": {
         "properties": {
           "code": {
@@ -867,6 +943,46 @@
         "title": "JobRequest",
         "type": "object"
       },
+      "MarkerIn": {
+        "properties": {
+          "name": {
+            "description": "Section name, e.g. Verse 1.",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "time": {
+            "description": "Seconds from the start of the song.",
+            "minimum": 0.0,
+            "title": "Time",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "time"
+        ],
+        "title": "MarkerIn",
+        "type": "object"
+      },
+      "MarkersIn": {
+        "properties": {
+          "markers": {
+            "items": {
+              "$ref": "#/components/schemas/MarkerIn"
+            },
+            "maxItems": 200,
+            "title": "Markers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "markers"
+        ],
+        "title": "MarkersIn",
+        "type": "object"
+      },
       "MatchRequest": {
         "properties": {
           "path": {
@@ -1088,6 +1204,22 @@
       },
       "RenderRequest": {
         "properties": {
+          "cents": {
+            "default": 0.0,
+            "description": "Fine pitch shift in cents.",
+            "maximum": 50.0,
+            "minimum": -50.0,
+            "title": "Cents",
+            "type": "number"
+          },
+          "click_gain": {
+            "default": 0.0,
+            "description": "Linear gain of the click stem in the mix (0 = no click).",
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Click Gain",
+            "type": "number"
+          },
           "gains": {
             "additionalProperties": {
               "type": "number"
@@ -1125,6 +1257,28 @@
             "$ref": "#/components/schemas/ResidualMode",
             "default": "keep",
             "description": "keep: add back what no stem captured; drop: stems only."
+          },
+          "semitones": {
+            "default": 0.0,
+            "description": "Pitch shift in semitones.",
+            "maximum": 12.0,
+            "minimum": -12.0,
+            "title": "Semitones",
+            "type": "number"
+          },
+          "tempo": {
+            "default": 1.0,
+            "description": "Tempo factor (1 = original speed).",
+            "maximum": 1.5,
+            "minimum": 0.5,
+            "title": "Tempo",
+            "type": "number"
+          },
+          "with_stems": {
+            "default": false,
+            "description": "Also write every stem (and the click) with the same tempo and pitch.",
+            "title": "With Stems",
+            "type": "boolean"
           }
         },
         "title": "RenderRequest",
@@ -1742,6 +1896,99 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/items/{item_id}/analysis": {
+      "get": {
+        "description": "Tuning, key, tempo and beat grid; computed now for items separated before M14.",
+        "operationId": "item_analysis_items__item_id__analysis_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Item Analysis"
+      }
+    },
+    "/items/{item_id}/markers": {
+      "put": {
+        "operationId": "item_markers_items__item_id__markers_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkersIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarkerIn"
+                  },
+                  "title": "Response Item Markers Items  Item Id  Markers Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Item Markers"
       }
     },
     "/items/{item_id}/preview": {

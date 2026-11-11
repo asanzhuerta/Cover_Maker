@@ -149,6 +149,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/items/{item_id}/analysis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Item Analysis
+         * @description Tuning, key, tempo and beat grid; computed now for items separated before M14.
+         */
+        get: operations["item_analysis_items__item_id__analysis_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/items/{item_id}/markers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Item Markers */
+        put: operations["item_markers_items__item_id__markers_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/items/{item_id}/preview": {
         parameters: {
             query?: never;
@@ -572,6 +609,56 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AnalysisOut */
+        AnalysisOut: {
+            /**
+             * Beats
+             * @description Beat times in seconds.
+             */
+            beats: number[];
+            /**
+             * Bpm
+             * @description Tempo in beats per minute (0 when no beat was found).
+             */
+            bpm: number;
+            /**
+             * Downbeats
+             * @description Bar starts in seconds (4/4 assumed).
+             */
+            downbeats: number[];
+            /** Item Id */
+            item_id: number;
+            /**
+             * Key
+             * @description Tonic pitch class, e.g. C, F#, Eb.
+             */
+            key: string;
+            /**
+             * Key Confidence
+             * @description Best key score minus the runner-up (0 = ambiguous).
+             */
+            key_confidence: number;
+            /**
+             * Markers
+             * @description Named section markers, sorted by time.
+             */
+            markers: components["schemas"]["MarkerIn"][];
+            /**
+             * Mix
+             * @description Asset id (SHA-256) of the analysed mix.
+             */
+            mix: string;
+            /**
+             * Mode
+             * @description major or minor.
+             */
+            mode: string;
+            /**
+             * Tuning Cents
+             * @description Offset of the recording from A440, in cents.
+             */
+            tuning_cents: number;
+        };
         /** ApiError */
         ApiError: {
             /** Code */
@@ -906,6 +993,24 @@ export interface components {
             /** Stems */
             stems: components["schemas"]["Stem"][];
         };
+        /** MarkerIn */
+        MarkerIn: {
+            /**
+             * Name
+             * @description Section name, e.g. Verse 1.
+             */
+            name: string;
+            /**
+             * Time
+             * @description Seconds from the start of the song.
+             */
+            time: number;
+        };
+        /** MarkersIn */
+        MarkersIn: {
+            /** Markers */
+            markers: components["schemas"]["MarkerIn"][];
+        };
         /** MatchRequest */
         MatchRequest: {
             /**
@@ -1014,6 +1119,18 @@ export interface components {
         /** RenderRequest */
         RenderRequest: {
             /**
+             * Cents
+             * @description Fine pitch shift in cents.
+             * @default 0
+             */
+            cents: number;
+            /**
+             * Click Gain
+             * @description Linear gain of the click stem in the mix (0 = no click).
+             * @default 0
+             */
+            click_gain: number;
+            /**
              * Gains
              * @description Linear gain per stem (0 = muted, 1 = unchanged, max 4). Missing stems stay at 1.
              */
@@ -1034,6 +1151,24 @@ export interface components {
              * @default keep
              */
             residual: components["schemas"]["ResidualMode"];
+            /**
+             * Semitones
+             * @description Pitch shift in semitones.
+             * @default 0
+             */
+            semitones: number;
+            /**
+             * Tempo
+             * @description Tempo factor (1 = original speed).
+             * @default 1
+             */
+            tempo: number;
+            /**
+             * With Stems
+             * @description Also write every stem (and the click) with the same tempo and pitch.
+             * @default false
+             */
+            with_stems: boolean;
         };
         /**
          * ResidualMode
@@ -1397,6 +1532,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    item_analysis_items__item_id__analysis_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    item_markers_items__item_id__markers_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkersIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarkerIn"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

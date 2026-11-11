@@ -23,8 +23,10 @@ from ..audio.analysis import Analysis
 from ..audio.analysis import analyse as analyse_audio
 from ..audio.io import ffmpeg_path
 from ..audio.peaks import compute_peaks
+from ..audio.practice import Practice
 from ..domain import JobSpec
 from ..pipeline.runner import (
+    BeatGrid,
     RightsNotConfirmed,
     preset_models,
     render_custom_mix,
@@ -513,10 +515,27 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         if sources is None:
             raise ApiProblem(404, "no_preview", f"item {item_id} has no stems to mix yet")
         fmt = body.output_format.value if body.output_format else None
+        grid: BeatGrid | None = None
+        if body.click_gain > 0 or body.with_stems:
+            mix = await _db(lambda: _item_mix(item_id))
+            stored = await _db(lambda: analyses.load(engine().conn, mix))
+            if stored is not None and stored.beats:
+                grid = BeatGrid(beats=stored.beats, downbeats=stored.downbeats)
+        settings = Practice(tempo=body.tempo, semitones=body.semitones, cents=body.cents)
         try:
             # Rendering only reads library files, so it runs outside the store lock.
             target, result = await asyncio.to_thread(
-                render_custom_mix, sources, body.gains, body.residual, fmt, body.pans
+                lambda: render_custom_mix(
+                    sources,
+                    body.gains,
+                    body.residual,
+                    fmt,
+                    body.pans,
+                    practice_settings=settings,
+                    click_gain=body.click_gain,
+                    grid=grid,
+                    with_stems=body.with_stems,
+                )
             )
         except (RuntimeError, OSError) as exc:
             raise ApiProblem(500, "render_failed", str(exc)) from exc

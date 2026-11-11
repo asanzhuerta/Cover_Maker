@@ -303,6 +303,15 @@ class RenderRequest(BaseModel):
         ResidualMode.KEEP, description="keep: add back what no stem captured; drop: stems only."
     )
     output_format: OutputFormat | None = Field(None, description="Defaults to the job's format.")
+    tempo: float = Field(1.0, ge=0.5, le=1.5, description="Tempo factor (1 = original speed).")
+    semitones: float = Field(0.0, ge=-12, le=12, description="Pitch shift in semitones.")
+    cents: float = Field(0.0, ge=-50, le=50, description="Fine pitch shift in cents.")
+    click_gain: float = Field(
+        0.0, ge=0, le=4, description="Linear gain of the click stem in the mix (0 = no click)."
+    )
+    with_stems: bool = Field(
+        False, description="Also write every stem (and the click) with the same tempo and pitch."
+    )
 
     @field_validator("gains")
     @classmethod
