@@ -4,14 +4,14 @@ name: Release
 # and attaches them, a copy of the installer under a stable name, the SHA-256
 # checksums, the ffmpeg mirror, the DAW plugin and script and the six PDF
 # documents to a draft GitHub release. Publishing the draft stays a manual
-# step; publishing it submits the new version to winget when a WINGET_TOKEN
-# secret exists.
+# step; publishing it as a full release submits the new version to winget
+# when a WINGET_TOKEN secret exists.
 
 on:
   push:
     tags: ["v*"]
   release:
-    types: [published]
+    types: [released]
 
 permissions:
   contents: write
@@ -174,8 +174,9 @@ jobs:
 
   winget:
     name: winget submission
-    # Runs when the draft release is published by hand (not for pre-releases).
-    if: github.event_name == 'release' && !github.event.release.prerelease
+    # Runs when the draft is published as a full release (or a pre-release is
+    # promoted to one), like notify-website.yml.
+    if: github.event_name == 'release'
     runs-on: windows-latest
     env:
       # Optional: a classic personal access token with the public_repo scope,

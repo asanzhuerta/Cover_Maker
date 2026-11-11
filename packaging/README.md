@@ -19,9 +19,10 @@ non-pre-release) installer:
 ## winget
 
 The `winget` job of `release.yml` runs when a draft release is published by
-hand. It runs `wingetcreate update` (pinned version, checked by SHA-256), which
-opens a pull request on [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
-with the new version. Without a `WINGET_TOKEN` secret it only logs a notice.
+hand as a full release (not a pre-release). It runs `wingetcreate update`
+(pinned version, checked by SHA-256), which opens a pull request on
+[microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) with the new
+version. Without a `WINGET_TOKEN` secret it only logs a notice.
 
 One-time setup:
 
