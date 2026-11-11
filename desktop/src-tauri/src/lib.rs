@@ -141,7 +141,7 @@ fn open_data_folder(name: String) -> Result<(), String> {
     tauri_plugin_opener::open_path(folder, None::<&str>).map_err(|e| e.to_string())
 }
 
-/// Language picked in the installer (`en` or `es`), used as the first default.
+/// Language picked in the installer (a UI locale code), used as the first default.
 #[tauri::command]
 fn installer_locale() -> Option<&'static str> {
     locale::installer_locale()

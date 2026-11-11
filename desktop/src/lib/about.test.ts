@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { about, contactLinks, localized } from "./about";
+import { LOCALES, type Locale } from "./i18n.svelte";
 
 describe("about", () => {
-  it("has every user-facing text in English and Spanish", () => {
+  it("has every user-facing text in every interface language", () => {
     const texts = [
       about.author.bio,
       about.app.description,
       ...about.credits.map((credit) => credit.role),
     ];
     for (const text of texts) {
-      expect(text.en.length).toBeGreaterThan(0);
-      expect(text.es.length).toBeGreaterThan(0);
+      for (const locale of Object.keys(LOCALES) as Locale[]) {
+        expect(text[locale], `${locale}: ${text.en}`).toBeTruthy();
+      }
     }
   });
 

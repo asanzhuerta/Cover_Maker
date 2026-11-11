@@ -29,7 +29,8 @@
   de agua.
 - **100 % local.** La separación se hace en tu ordenador. Sin cuenta, sin
   telemetría, sin subir nada.
-- **En tu idioma.** Toda la aplicación está en español y en inglés.
+- **En tu idioma.** Toda la aplicación está en español y en inglés, y además en
+  portugués (Brasil), francés, alemán e italiano, traducidos con la comunidad.
 
 ## Descarga
 
@@ -102,7 +103,7 @@ oscuro y claro.
 | Lotes, carpetas vigiladas, resincronización | Sí | Limitado | No |
 | Licencias de los modelos antes de descargar | Sí | No aplica | Rara vez |
 | Integración con DAW (REAPER, VST3) | Sí | Algunas | No |
-| Interfaz en español e inglés | Sí | Depende | Depende |
+| Interfaz en español, inglés, portugués, francés, alemán e italiano | Sí | Depende | Depende |
 
 ## ¿Qué velocidad tiene?
 
@@ -163,8 +164,9 @@ PDF a cada versión. Los cambios se recogen en el [CHANGELOG](CHANGELOG.md).
 Los informes de errores, las ideas y los pull requests son bienvenidos; lee
 antes [CONTRIBUTING.md](CONTRIBUTING.md). **Las traducciones son
 especialmente bienvenidas:** los textos de la interfaz están en
-[`desktop/src/lib/i18n.svelte.ts`](desktop/src/lib/i18n.svelte.ts), un
-diccionario por idioma. Ayúdanos a mantener el proyecto legal desde el
+[`desktop/src/lib/i18n/`](desktop/src/lib/i18n), un archivo por idioma, y
+[docs/TRANSLATING.md](docs/TRANSLATING.md) explica (en inglés) cómo mejorar
+una traducción o añadir un idioma. Ayúdanos a mantener el proyecto legal desde el
 diseño: nada de audio comercial en issues, tests ni capturas.
 
 ## Créditos

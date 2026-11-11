@@ -7,14 +7,22 @@
     "github": "https://github.com/asanzhuerta",
     "bio": {
       "en": "Musician and developer.",
-      "es": "Músico y desarrollador."
+      "es": "Músico y desarrollador.",
+      "pt-BR": "Músico e desenvolvedor.",
+      "fr": "Musicien et développeur.",
+      "de": "Musiker und Entwickler.",
+      "it": "Musicista e sviluppatore."
     }
   },
   "app": {
     "repository": "https://github.com/asanzhuerta/Cover_Maker",
     "description": {
       "en": "Cover_Maker separates your own songs into stems on your PC, with local AI models, so you can practise or record covers without the parts you play. Nothing is uploaded and no model is bundled: you choose each model after reading its licence.",
-      "es": "Cover_Maker separa tus propias canciones en stems en tu PC, con modelos de IA locales, para que practiques o grabes versiones sin las partes que tocas. No se sube nada y no se incluye ningún modelo: eliges cada uno tras leer su licencia."
+      "es": "Cover_Maker separa tus propias canciones en stems en tu PC, con modelos de IA locales, para que practiques o grabes versiones sin las partes que tocas. No se sube nada y no se incluye ningún modelo: eliges cada uno tras leer su licencia.",
+      "pt-BR": "O Cover_Maker separa as suas próprias músicas em stems no seu PC, com modelos de IA locais, para você praticar ou gravar covers sem as partes que toca. Nada é enviado e nenhum modelo vem incluído: você escolhe cada um depois de ler a licença.",
+      "fr": "Cover_Maker sépare vos propres morceaux en stems sur votre PC, avec des modèles d'IA locaux, pour vous entraîner ou enregistrer des reprises sans les parties que vous jouez. Rien n'est envoyé en ligne et aucun modèle n'est fourni : vous choisissez chaque modèle après avoir lu sa licence.",
+      "de": "Cover_Maker zerlegt deine eigenen Songs auf deinem PC mit lokalen KI-Modellen in Stems, damit du Cover ohne die Parts üben oder aufnehmen kannst, die du selbst spielst. Nichts wird hochgeladen und kein Modell ist enthalten: Du wählst jedes Modell selbst, nachdem du seine Lizenz gelesen hast.",
+      "it": "Cover_Maker separa i tuoi brani in stem sul tuo PC, con modelli di IA locali, così puoi esercitarti o registrare cover senza le parti che suoni. Non viene caricato nulla e nessun modello è incluso: scegli ogni modello dopo averne letto la licenza."
     }
   },
   "credits": [
@@ -22,25 +30,53 @@
       "name": "Tauri",
       "url": "https://tauri.app",
       "licence": "MIT / Apache-2.0",
-      "role": { "en": "Desktop shell", "es": "Aplicación de escritorio" }
+      "role": {
+        "en": "Desktop shell",
+        "es": "Aplicación de escritorio",
+        "pt-BR": "Aplicativo de desktop",
+        "fr": "Application de bureau",
+        "de": "Desktop-App",
+        "it": "Applicazione desktop"
+      }
     },
     {
       "name": "Svelte",
       "url": "https://svelte.dev",
       "licence": "MIT",
-      "role": { "en": "User interface", "es": "Interfaz" }
+      "role": {
+        "en": "User interface",
+        "es": "Interfaz",
+        "pt-BR": "Interface",
+        "fr": "Interface",
+        "de": "Benutzeroberfläche",
+        "it": "Interfaccia"
+      }
     },
     {
       "name": "FastAPI",
       "url": "https://fastapi.tiangolo.com",
       "licence": "MIT",
-      "role": { "en": "Local engine API", "es": "API local del motor" }
+      "role": {
+        "en": "Local engine API",
+        "es": "API local del motor",
+        "pt-BR": "API local do motor",
+        "fr": "API locale du moteur",
+        "de": "Lokale Engine-API",
+        "it": "API locale del motore"
+      }
     },
     {
       "name": "PyTorch",
       "url": "https://pytorch.org",
       "licence": "BSD-3-Clause",
-      "role": { "en": "Model inference", "es": "Inferencia de los modelos" }
+      "role": {
+        "en": "Model inference",
+        "es": "Inferencia de los modelos",
+        "pt-BR": "Inferência dos modelos",
+        "fr": "Inférence des modèles",
+        "de": "Modell-Inferenz",
+        "it": "Inferenza dei modelli"
+      }
     },
     {
       "name": "audio-separator",
@@ -48,7 +84,11 @@
       "licence": "MIT",
       "role": {
         "en": "Separation models runner",
-        "es": "Ejecución de los modelos de separación"
+        "es": "Ejecución de los modelos de separación",
+        "pt-BR": "Execução dos modelos de separação",
+        "fr": "Exécution des modèles de séparation",
+        "de": "Ausführung der Trennmodelle",
+        "it": "Esecuzione dei modelli di separazione"
       }
     },
     {
@@ -57,7 +97,11 @@
       "licence": "Unlicense",
       "role": {
         "en": "Audio from pasted video links",
-        "es": "Audio de los enlaces de vídeo"
+        "es": "Audio de los enlaces de vídeo",
+        "pt-BR": "Áudio dos links de vídeo",
+        "fr": "Audio des liens vidéo collés",
+        "de": "Audio aus eingefügten Videolinks",
+        "it": "Audio dai link video incollati"
       }
     },
     {
@@ -66,20 +110,38 @@
       "licence": "LGPL-3.0-or-later",
       "role": {
         "en": "Audio decoding and MP3",
-        "es": "Decodificación de audio y MP3"
+        "es": "Decodificación de audio y MP3",
+        "pt-BR": "Decodificação de áudio e MP3",
+        "fr": "Décodage audio et MP3",
+        "de": "Audio-Dekodierung und MP3",
+        "it": "Decodifica audio e MP3"
       }
     },
     {
       "name": "uv",
       "url": "https://github.com/astral-sh/uv",
       "licence": "MIT / Apache-2.0",
-      "role": { "en": "Runtime installer", "es": "Instalación del runtime" }
+      "role": {
+        "en": "Runtime installer",
+        "es": "Instalación del runtime",
+        "pt-BR": "Instalação do runtime",
+        "fr": "Installation du runtime",
+        "de": "Installation der Runtime",
+        "it": "Installazione del runtime"
+      }
     },
     {
       "name": "Archivo",
       "url": "https://github.com/Omnibus-Type/Archivo",
       "licence": "OFL-1.1",
-      "role": { "en": "Display typeface", "es": "Tipografía de títulos" }
+      "role": {
+        "en": "Display typeface",
+        "es": "Tipografía de títulos",
+        "pt-BR": "Fonte dos títulos",
+        "fr": "Police des titres",
+        "de": "Schrift für Überschriften",
+        "it": "Carattere dei titoli"
+      }
     },
     {
       "name": "IBM Plex Sans and Mono",
@@ -87,7 +149,11 @@
       "licence": "OFL-1.1",
       "role": {
         "en": "Text and display readout typefaces",
-        "es": "Tipografías del texto y de la pantalla"
+        "es": "Tipografías del texto y de la pantalla",
+        "pt-BR": "Fontes do texto e do visor",
+        "fr": "Polices du texte et de l'écran",
+        "de": "Schriften für Text und Anzeige",
+        "it": "Caratteri del testo e del display"
       }
     }
   ],

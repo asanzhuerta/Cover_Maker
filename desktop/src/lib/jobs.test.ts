@@ -8,7 +8,6 @@ import {
   stepName,
   type ItemView,
 } from "./jobs";
-import { detectLocale, translate } from "./i18n.svelte";
 
 const item: ItemView = {
   id: 7,
@@ -86,18 +85,6 @@ describe("job progress", () => {
   it("shows file names and keeps links", () => {
     expect(displayName("C:\\Music\\Song.flac")).toBe("Song.flac");
     expect(displayName("https://youtu.be/abc")).toBe("https://youtu.be/abc");
-  });
-});
-
-describe("i18n", () => {
-  it("picks Spanish for es-* browsers and English otherwise", () => {
-    expect(detectLocale("es-ES")).toBe("es");
-    expect(detectLocale("de-DE")).toBe("en");
-  });
-
-  it("has every key translated", () => {
-    expect(translate("es", "stem.guitar")).toBe("Guitarra");
-    expect(translate("en", "stem.guitar")).toBe("Guitar");
   });
 });
 

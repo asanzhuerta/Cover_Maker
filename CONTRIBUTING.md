@@ -58,3 +58,14 @@ REAPER script look for a running engine in `Cover_Maker` first and then in
    `svelte-check`, `vitest`, `cargo fmt`, `cargo clippy` and the docs build.
 4. Update the affected LaTeX documents and `CHANGELOG.md` in the same pull
    request.
+5. New interface strings go into `desktop/src/lib/i18n/en.ts` and `es.ts`, and
+   into every other language file so that `pnpm check:i18n` passes; see
+   [Translations](#translations).
+
+## Translations
+
+Translating the interface needs no programming. Every language is one file in
+`desktop/src/lib/i18n/`, typed against the English source, and CI checks that
+each has every string. [docs/TRANSLATING.md](docs/TRANSLATING.md) explains how
+to improve a translation or add a language, with a style guide and a glossary
+of music terms. Label translation issues and pull requests `translation`.
