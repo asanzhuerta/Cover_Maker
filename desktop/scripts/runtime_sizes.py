@@ -56,9 +56,12 @@ def lock_bytes(lock: Path) -> int:
 
 def remote_size(urls: list[str], version: str, fallback: int) -> int:
     for url in urls:
+        # URLs come from the repository's lock files; only HTTPS is accepted.
+        if not url.startswith("https://"):
+            continue
         request = urllib.request.Request(url.replace("{version}", version), method="HEAD")
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:
+            with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                 length = response.headers.get("Content-Length")
                 if length:
                     return int(length)
