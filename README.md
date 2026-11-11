@@ -27,7 +27,8 @@
 - **Free and open source.** MIT licence, no paid tier, no watermark.
 - **100 % local.** Separation runs on your computer. No account, no
   telemetry, no uploads.
-- **In your language.** The whole app speaks English and Spanish.
+- **In your language.** The whole app speaks English and Spanish, plus
+  Portuguese (Brazil), French, German and Italian translated with the community.
 
 ## Download
 
@@ -96,7 +97,7 @@ stems straight into your DAW; dark and light themes.
 | Batch, watched folders, re-sync | Yes | Limited | No |
 | Model licences shown before download | Yes | Not applicable | Rarely |
 | DAW integration (REAPER, VST3) | Yes | Some | No |
-| Interface in English and Spanish | Yes | Varies | Varies |
+| Interface in English, Spanish, Portuguese, French, German and Italian | Yes | Varies | Varies |
 
 ## How fast is it?
 
@@ -155,8 +156,9 @@ listed in the [CHANGELOG](CHANGELOG.md).
 Bug reports, ideas and pull requests are welcome; read
 [CONTRIBUTING.md](CONTRIBUTING.md) first. **Translations are especially
 welcome:** the interface strings live in
-[`desktop/src/lib/i18n.svelte.ts`](desktop/src/lib/i18n.svelte.ts), one
-dictionary per language. Please keep the project legal by design: no
+[`desktop/src/lib/i18n/`](desktop/src/lib/i18n), one file per language, and
+[docs/TRANSLATING.md](docs/TRANSLATING.md) explains how to improve one or add
+a new language. Please keep the project legal by design: no
 commercial audio in issues, tests or screenshots.
 
 ## Credits

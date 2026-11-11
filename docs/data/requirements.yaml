@@ -94,7 +94,7 @@ functional:
     milestone: M7
   - id: FR-UI-01
     title: Languages
-    text: The user interface shall be available in English and Spanish.
+    text: The user interface shall be available in English and Spanish, and in community translations (Portuguese (Brazil), French, German and Italian) that have every string.
     priority: must
     milestone: M6
   - id: FR-UI-02

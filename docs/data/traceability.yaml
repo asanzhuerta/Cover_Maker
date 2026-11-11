@@ -127,8 +127,9 @@ FR-PRA-06:
   - "engine:test_practice.py::test_cents_tune_a_detuned_song_back_to_a440"
   - "engine:test_practice_api.py::test_render_applies_tempo_pitch_click_and_stems"
 FR-UI-01:
-  - "ui:jobs.test.ts > has every key translated"
-  - "ui:about.test.ts > has every user-facing text in English and Spanish"
+  - "ui:i18n.test.ts > has every key of the English source, and no other"
+  - "ui:i18n.test.ts > detects the language from the system preferences"
+  - "ui:about.test.ts > has every user-facing text in every interface language"
   - "shell:locale::maps_windows_language_ids"
 FR-UI-02:
   - "engine:test_example.py::test_example_clip_is_short_small_and_cc0_or_cc_by"

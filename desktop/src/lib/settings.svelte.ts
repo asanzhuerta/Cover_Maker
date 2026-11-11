@@ -1,5 +1,5 @@
 /** User preferences persisted in localStorage (per machine, not shared). */
-import { i18n, type Locale } from "./i18n.svelte";
+import { applyLocale, i18n, isLocale, type Locale } from "./i18n.svelte";
 
 export type Theme = "system" | "light" | "dark";
 export type Format = "wav" | "flac" | "mp3";
@@ -34,7 +34,12 @@ function stored(): string | null {
 
 function load(raw: string | null): Settings {
   try {
-    return raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
+    const loaded: Settings = raw
+      ? { ...defaults, ...JSON.parse(raw) }
+      : { ...defaults };
+    // A language removed or renamed since it was saved falls back to the default.
+    if (!isLocale(loaded.locale)) loaded.locale = defaults.locale;
+    return loaded;
   } catch {
     return { ...defaults };
   }
@@ -55,8 +60,8 @@ export async function applyInstallerLocale(): Promise<void> {
   if (!firstStart) return;
   try {
     const { invoke } = await import("@tauri-apps/api/core");
-    const locale = await invoke<Locale | null>("installer_locale");
-    if (locale === "en" || locale === "es") {
+    const locale = await invoke<string | null>("installer_locale");
+    if (isLocale(locale)) {
       settings.locale = locale;
       saveSettings();
     }
@@ -67,6 +72,7 @@ export async function applyInstallerLocale(): Promise<void> {
 
 export function saveSettings(): void {
   i18n.locale = settings.locale;
+  applyLocale(settings.locale);
   applyTheme(settings.theme);
   try {
     localStorage.setItem(KEY, JSON.stringify(settings));

@@ -51,6 +51,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm check
+      - name: Check that every language has every string
+        run: pnpm check:i18n
       - run: pnpm test
       - run: pnpm build
 

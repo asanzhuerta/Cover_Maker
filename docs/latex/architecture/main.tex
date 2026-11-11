@@ -138,7 +138,7 @@ and end-to-end tests without a GPU.
 \texttt{lib/shortcuts} & Maps key presses to player and mixer actions and ignores them while the user types in a field (unit-tested). \\
 \texttt{lib/jobs} & Pure functions deriving item progress, step names and the file to reveal from events (unit-tested). \\
 \texttt{lib/stems}, \texttt{lib/icons}, \texttt{lib/wave} & Stem colours, hand-drawn SVG icons (no icon package) and deterministic decorative waveform shapes (unit-tested). \\
-\texttt{lib/i18n} & English and Spanish dictionaries with a reactive locale. \\
+\texttt{lib/i18n} & Reactive locale, system-language detection and one dictionary per language in \texttt{lib/i18n/} (\texttt{en}, \texttt{es}, \texttt{pt-BR}, \texttt{fr}, \texttt{de}, \texttt{it}), each typed against the English source so that a missing key fails the type check (unit-tested). \\
 \texttt{lib/settings} & Preferences in local storage: language, theme, output folder, format, CPU fallback. \\
 \texttt{lib/components} & Logo, Icon, Waveform, stem picker, model list with the licence dialog, and the console parts: transport dock, LCD panel, LED meter, knob, shortcut help. \\
 \bottomrule

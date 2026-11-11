@@ -80,6 +80,25 @@ project follows [Semantic Versioning](https://semver.org/).
   behind, deletes it after showing exactly what goes (`GET /storage/temporary`,
   `POST /storage/temporary/clear`), and opens the folder in Explorer.
 
+### Added (Interface languages)
+- The interface is now also in Portuguese (Brazil), French, German and
+  Italian, community-maintained translations next to English and Spanish.
+  The About page texts are translated too.
+- The installer offers the same six languages and the app starts in the one
+  you pick; without an installer choice it follows the Windows language,
+  falling back to the same language from another region (`pt-PT` → `pt-BR`,
+  `fr-CA` → `fr`) and then to English.
+- *Settings* marks community translations and links to the new translation
+  guide, [docs/TRANSLATING.md](docs/TRANSLATING.md), with a style guide and a
+  glossary of music terms.
+- The page language (`<html lang>`) follows the interface language.
+
+### Changed (Interface languages)
+- The strings moved from `i18n.svelte.ts` to one file per language in
+  `desktop/src/lib/i18n/`, each typed against the English source, so a
+  missing or unknown key fails `pnpm check`. A new CI step,
+  `pnpm check:i18n`, also reports empty strings and changed `{placeholders}`.
+
 ### Added (Launch: download and repository)
 - First-run quick start (#95): the last welcome step shows the model, or
   models, that the recommended preset uses on this PC with their licence

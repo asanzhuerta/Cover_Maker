@@ -113,9 +113,17 @@ Every stem has its own colour and icon (for example yellow for vocals and
 orange for guitar), used on the stem picker, in the queue, in the model list
 and in the mixer.
 
-The interface is available in English and Spanish. The installed app starts
-in the language chosen in the installer (in development builds it follows the
-system); it can be changed in \emph{Settings}, together with the theme. The dark
+\paragraph{Languages.} The interface is available in English, Spanish,
+Portuguese (Brazil), French, German and Italian. The maintainers keep English
+and Spanish up to date; the other languages are community translations, and
+\emph{Settings} says so under the language list, with a \emph{Help translate}
+link to the translation guide (\texttt{docs/TRANSLATING.md} in the
+repository). The installed app starts in the language chosen in the
+installer; otherwise it follows the language of Windows, using the same
+language from another region when there is no exact match (Portuguese
+(Portugal) shows Portuguese (Brazil), French (Canada) shows French) and
+English when the app is not translated into that language. The language can
+be changed at any time in \emph{Settings}, together with the theme. The dark
 theme is the default; \emph{Light} (a cream paper look) and \emph{System} are
 also available. If your system asks for reduced motion, the app does not
 animate.
@@ -560,8 +568,9 @@ The \emph{About} page, near the bottom of the icon rail, shows:
 The texts follow the language chosen in \emph{Settings}. Everything on the page
 comes from one file in the source code, \texttt{desktop/src/lib/about.json}; the
 photo is \texttt{desktop/static/about/avatar.svg}. To personalise a build, edit
-those two files: each text that users read has an \texttt{en} and an
-\texttt{es} version.
+those two files: each text that users read has a version for every interface
+language (\texttt{en}, \texttt{es}, \texttt{pt-BR}, \texttt{fr}, \texttt{de},
+\texttt{it}).
 
 \chapter{Command-line reference}
 The engine can be used without the desktop application.

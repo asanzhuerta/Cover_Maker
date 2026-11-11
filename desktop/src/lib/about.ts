@@ -1,12 +1,13 @@
 /**
  * Content of the About page. Edit `about.json` (next to this file) to change
  * the author profile, the app description or the credits; texts that the
- * user reads come in English and Spanish.
+ * user reads come in every interface language (English is the fallback).
  */
 import data from "./about.json";
 import type { Locale } from "./i18n.svelte";
 
-export type Localized = Record<Locale, string>;
+/** A text in English plus its translations, keyed by locale. */
+export type Localized = { en: string } & Partial<Record<Locale, string>>;
 
 export interface Credit {
   name: string;
