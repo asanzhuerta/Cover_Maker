@@ -18,6 +18,9 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 
 from .. import __version__, diagnostics
+from ..audio import io as audio_io
+from ..audio.analysis import Analysis
+from ..audio.analysis import analyse as analyse_audio
 from ..audio.io import ffmpeg_path
 from ..audio.peaks import compute_peaks
 from ..domain import JobSpec
@@ -36,7 +39,7 @@ from ..sources import catalogs
 from ..sources.expand import expand_inputs
 from ..sources.links import InputKind, UnsupportedInput, parse_input
 from ..sources.youtube import DownloadError
-from ..store import storage
+from ..store import analyses, storage
 from . import schemas
 from .engine import EngineService
 from .security import AccessMiddleware, AccessPolicy
@@ -520,6 +523,60 @@ def create_app(policy: AccessPolicy, service: EngineService | None = None) -> Fa
         return schemas.RenderOut(
             path=str(target), peak_dbfs=max(result.peak_dbfs, -200.0), gain_db=result.gain_db
         )
+
+    # ------------------------------------------------------------ practice (M14)
+
+    def _analysis_out(item_id: int, mix: str, result: Analysis) -> schemas.AnalysisOut:
+        markers = analyses.load_markers(engine().conn, mix)
+        return schemas.AnalysisOut(
+            item_id=item_id,
+            mix=mix,
+            tuning_cents=result.tuning_cents,
+            key=result.key,
+            mode=result.mode,
+            key_confidence=result.key_confidence,
+            bpm=result.bpm,
+            beats=result.beats,
+            downbeats=result.downbeats,
+            markers=[schemas.MarkerIn(name=m.name, time=m.time) for m in markers],
+        )
+
+    def _item_mix(item_id: int) -> str:
+        mix = engine().jobs.item_mix(item_id)
+        if mix is None:
+            raise ApiProblem(404, "no_preview", f"item {item_id} has no analysed mix yet")
+        return mix
+
+    @app.get("/items/{item_id}/analysis", response_model=schemas.AnalysisOut)
+    async def item_analysis(item_id: int) -> schemas.AnalysisOut:  # pyright: ignore[reportUnusedFunction]
+        """Tuning, key, tempo and beat grid; computed now for items separated before M14."""
+        mix = await _db(lambda: _item_mix(item_id))
+        stored = await _db(lambda: analyses.load(engine().conn, mix))
+        if stored is None:
+            path = await _db(lambda: engine().jobs.assets.require(mix))
+            try:
+                stored = await asyncio.to_thread(
+                    lambda: analyse_audio(audio_io.read(path), audio_io.SAMPLE_RATE)
+                )
+            except (RuntimeError, OSError, ValueError) as exc:
+                raise ApiProblem(500, "analysis_failed", str(exc)) from exc
+            result = stored
+            await _db(lambda: analyses.save(engine().conn, mix, result))
+        final = stored
+        return await _db(lambda: _analysis_out(item_id, mix, final))
+
+    @app.put("/items/{item_id}/markers", response_model=list[schemas.MarkerIn])
+    async def item_markers(item_id: int, body: schemas.MarkersIn) -> list[schemas.MarkerIn]:  # pyright: ignore[reportUnusedFunction]
+        def run() -> list[schemas.MarkerIn]:
+            mix = _item_mix(item_id)
+            saved = analyses.save_markers(
+                engine().conn,
+                mix,
+                [analyses.Marker(name=m.name.strip(), time=m.time) for m in body.markers],
+            )
+            return [schemas.MarkerIn(name=m.name, time=m.time) for m in saved]
+
+        return await _db(run)
 
     def _asset_path(sha: str) -> Path:
         # Only files registered in the library can be served (no arbitrary paths).

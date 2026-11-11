@@ -1,6 +1,6 @@
 """Job runner: turns a :class:`JobSpec` into exported stems, step by step.
 
-Steps per input: hash → decode → separation nodes → render/export. Every step
+Steps per input: hash → decode → analyse → separation nodes → render/export. Every step
 has a cache key stored in ``step_cache``; finished work is reused, so running
 the same job again does no separation at all. Job and item states live in
 SQLite, so an interrupted job resumes on the next start.
@@ -20,7 +20,7 @@ from typing import Any
 
 import numpy as np
 
-from ..audio import io, mixer
+from ..audio import analysis, io, mixer
 from ..domain import ALL_STEMS, JobSpec, Mode, Preset, ResidualMode, Stem
 from ..library.matching import read_track
 from ..paths import Paths
@@ -32,6 +32,7 @@ from ..separation.tuning import Tuning
 from ..separation.types import Cancelled, SeparationRequest
 from ..sources import catalogs, youtube
 from ..sources.links import InputKind, parse_input
+from ..store import analyses
 from ..store.assets import AssetStore, sha256_file
 from .events import EventBus
 
@@ -340,6 +341,11 @@ class JobRunner:
                 raise FileNotFoundError(f"input file not found: {source}")
         self._step(job_id, item_id, "decode")
         mix_sha = self._decode(source)
+        self._step(job_id, item_id, "analyse")
+        try:
+            self.analyse(mix_sha)
+        except Exception as exc:  # the analysis is an extra: never lose the stems over it
+            self.events.emit("item.analysis_failed", job=job_id, item=item_id, error=str(exc))
 
         produced: dict[str, dict[Stem, str]] = {}
         for node in recipe.prune(wanted):
@@ -441,6 +447,19 @@ class JobRunner:
             sha = self.assets.put(target, "mix", move=True)
         self._store("decode", key, sha)
         return sha
+
+    def analyse(self, mix_sha: str) -> analysis.Analysis:
+        """Tuning, key, tempo and beat grid of a mix, computed once per mix and algorithm."""
+        stored = analyses.load(self.conn, mix_sha)
+        if stored is not None:
+            return stored
+        result = analysis.analyse(io.read(self.assets.require(mix_sha)), io.SAMPLE_RATE)
+        analyses.save(self.conn, mix_sha, result)
+        return result
+
+    def item_mix(self, item_id: int) -> str | None:
+        preview = self.preview(item_id)
+        return str(preview["mix"]) if preview else None
 
     def _resolve(self, ref: Ref, produced: dict[str, dict[Stem, str]]) -> str:
         return produced[ref.node][ref.stem]
