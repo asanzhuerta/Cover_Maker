@@ -31,6 +31,8 @@ dependencies = [
     "requests",
     "urllib3",
     "websockets",
+    "librosa>=1.0",
+    "python-stretch==0.3.1",
 ]
 
 [project.optional-dependencies]

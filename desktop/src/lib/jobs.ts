@@ -18,6 +18,7 @@ export interface ItemView {
 export const STEP_WEIGHTS: Record<string, number> = {
   download: 0.15,
   decode: 0.25,
+  analyse: 0.3,
   separate: 0.85,
   export: 0.95,
 };
@@ -34,10 +35,11 @@ export function itemProgress(item: ItemView): number {
 /** Coarse step name of an item step id, e.g. "separate:sw" -> "separate". */
 export function stepName(
   step: string,
-): "download" | "decode" | "separate" | "export" | null {
+): "download" | "decode" | "analyse" | "separate" | "export" | null {
   const base = step.split(":")[0];
   return base === "download" ||
     base === "decode" ||
+    base === "analyse" ||
     base === "separate" ||
     base === "export"
     ? base

@@ -6,6 +6,28 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Practice tools (M14). The engine analyses each song once, after decoding:
+  tuning offset from A440 in cents, key (major or minor), tempo, beats and bar
+  starts, with librosa (no model weights). Results are stored in SQLite
+  (migration 6) and served by `GET /items/{id}/analysis`, computed on demand
+  for songs separated earlier. The LCD now shows BPM, key and tuning as played.
+- Real-time pitch (-12 to +12 semitones plus fine cents) and tempo (50-150 %
+  without pitch change) in the mixer, with one Signalsmith Stretch (MIT)
+  worklet on the master bus; *Tune to A440* cancels a recording's detuning.
+  Knobs work with the keyboard; `[` `]` change the tempo and `-` `+` the pitch.
+- Loops that snap to bar lines, named section markers saved with the song
+  (`PUT /items/{id}/markers`), a section loop button, one bar of count-in and
+  a click stem from the beat grid.
+- Speed trainer: raises the tempo by a step every N loop passes up to a
+  target, with the tempo and pass count in the LCD.
+- Exports with the chosen pitch and tempo: `POST /items/{id}/render` takes
+  `tempo`, `semitones`, `cents`, `click_gain` and `with_stems`; the engine
+  uses the same chain as the preview (resample, then Signalsmith Stretch via
+  `python-stretch`, MIT), and can also write every stem and the click.
+- Practice chapter in the User Manual, ADR-010, requirements FR-PRA-01 to
+  FR-PRA-06 and NFR-PERF-05.
+
 ### Security
 - Release workflow: the tag name reaches run scripts through an environment
   variable instead of `${{ }}` interpolation (script injection).
@@ -17,6 +39,9 @@ project follows [Semantic Versioning](https://semver.org/).
   and may only reach the catalogue hosts; Internet Archive identifiers are
   URL-quoted.
 - Job item updates accept only known column names.
+- The content security policy allows `'wasm-unsafe-eval'` scripts for the
+  stretch worklet's WebAssembly; the worklet is served from the app itself, so
+  no `blob:` scripts are allowed.
 
 ### Changed
 - New visual identity, *Tape & Console* (warm analogue hardware), with the

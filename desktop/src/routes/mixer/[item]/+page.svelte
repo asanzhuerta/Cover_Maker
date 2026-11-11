@@ -5,6 +5,7 @@
   import Icon from "$lib/components/Icon.svelte";
   import Knob from "$lib/components/Knob.svelte";
   import Meter from "$lib/components/Meter.svelte";
+  import PracticePanel from "$lib/components/PracticePanel.svelte";
   import { connection, isTauri } from "$lib/connection.svelte";
   import { t } from "$lib/i18n.svelte";
   import {
@@ -15,8 +16,10 @@
     formatPan,
     formatTime,
     pans,
+    dbToGain,
     peaksPath,
   } from "$lib/mixer";
+  import { formatShift, formatTempo } from "$lib/practice";
   import { stemColor, type Stem } from "$lib/stems";
   import {
     MIX,
@@ -38,6 +41,7 @@
   let rendering = $state(false);
   let rendered = $state<Schemas["RenderOut"] | null>(null);
   let renderError = $state("");
+  let withStems = $state(false);
 
   $effect(() => {
     if (connection.status === "ready") void openItem(itemId);
@@ -91,6 +95,13 @@
           gains: gains as Record<Stem, number>,
           pans: pans(transport.controls) as Record<Stem, number>,
           residual: transport.residual,
+          tempo: transport.practice.tempo,
+          semitones: transport.practice.semitones,
+          cents: transport.practice.cents,
+          click_gain: transport.practice.click
+            ? dbToGain(transport.practice.clickDb)
+            : 0,
+          with_stems: withStems,
         },
       },
     );
@@ -266,7 +277,26 @@
     {/each}
   </section>
 
+  <PracticePanel />
+
   <section class="card export">
+    <label class="check">
+      <input
+        type="checkbox"
+        bind:checked={withStems}
+        data-testid="with-stems"
+      />{t("practice.withStems")}
+    </label>
+    {#if transport.practice.tempo !== 1 || transport.practice.semitones || transport.practice.cents}
+      <p class="muted export-hint" data-testid="export-hint">
+        {t("practice.exportHint")
+          .replace(
+            "{shift}",
+            formatShift(transport.practice.semitones, transport.practice.cents),
+          )
+          .replace("{tempo}", formatTempo(transport.practice.tempo))}
+      </p>
+    {/if}
     <button
       class="primary"
       onclick={render}
@@ -590,6 +620,18 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.7rem;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+  }
+
+  .export-hint {
+    margin: 0;
+    font-size: 0.85rem;
   }
 
   .rendered {

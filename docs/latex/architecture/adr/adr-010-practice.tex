@@ -1,0 +1,51 @@
+\section{ADR-010: Practice analysis and time-stretch}
+\textbf{Status:} accepted and implemented (M14).
+
+\textbf{Analysis.} A pipeline step \texttt{analyse} runs after decoding, before
+separation. Its cache key is the decoded mix's SHA-256 plus the algorithm
+version (\texttt{analysis-v1}), and the result is a row of the
+\texttt{analyses} table (migration 6), so the same mix is never analysed twice;
+\texttt{GET /items/\{id\}/analysis} computes it on demand for songs separated
+before M14. Everything uses librosa (ISC) and classic signal processing, so no
+model weights are needed:
+\begin{itemize}
+  \item \emph{tuning}: \texttt{librosa.estimate\_tuning}, in cents from A440;
+  \item \emph{key}: mean constant-Q chroma of the harmonic part (HPSS keeps drum
+  noise out), corrected for the tuning, correlated with the 24 rotations of the
+  Krumhansl--Kessler and Temperley key profiles, averaged; the confidence is
+  the margin over the runner-up;
+  \item \emph{tempo and beats}: \texttt{librosa.beat.beat\_track}; the BPM is
+  the median inter-beat interval;
+  \item \emph{downbeats}: librosa has none, so 4/4 is assumed and the bar phase
+  is the beat offset (0--3) with the most low-frequency onset energy.
+\end{itemize}
+Beat This! (MIT code and weights) tracks beats and downbeats better, but needs
+PyTorch and a weight download; it stays a possible upgrade behind the same
+API. Named section markers are stored per mix in the \texttt{markers} table.
+
+\textbf{Real-time pitch and tempo.} The preview keeps one
+\texttt{AudioBufferSourceNode} per track (ADR-007). A worklet cannot pull those
+faster, so the tempo is the sources' \texttt{playbackRate} (a resample, which
+also raises the pitch by $12\log_2 r$), and one Signalsmith Stretch node (MIT,
+official WebAssembly build) on the summed bus transposes by
+$s + c/100 - 12\log_2 r$ semitones. One instance serves every stem, so the cost
+does not grow with the number of stems: an offline render of six stems through
+the chain took 2.8\,\% of real time on one core of the i5-11400H in Chromium
+(0.4\,\% without the stretch). The node is only in the chain when the shift is
+not zero. Its module is served from the app's origin and the CSP gains only
+\texttt{'wasm-unsafe-eval'} (no \texttt{blob:} scripts). Rubber Band (GPL) and
+SoundTouch (LGPL) were rejected for their licences.
+
+\textbf{Exports.} \texttt{POST /items/\{id\}/render} takes \texttt{tempo},
+\texttt{semitones}, \texttt{cents}, \texttt{click\_gain} and
+\texttt{with\_stems}. The engine applies the same two steps in the same order:
+resample by the tempo (soxr through librosa), then Signalsmith Stretch through
+\texttt{python-stretch} (MIT) with the same tonality limit (8~kHz), so the
+export matches the preview. The click stem is synthesised from the stored beat
+grid with the same recipe in the UI and the engine (short 1~kHz blips, 1.5~kHz
+and louder on downbeats).
+
+\textbf{Consequences.} The stretch adds about 60~ms of latency to the preview
+when active, and the position display does not compensate for it. The
+resamplers differ (the browser's against soxr), which is inaudible next to the
+stretch. Songs in other metres get 4/4 bars until a downbeat tracker is added.

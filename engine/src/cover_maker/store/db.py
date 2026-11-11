@@ -102,6 +102,28 @@ MIGRATIONS: tuple[str, ...] = (
     );
     CREATE INDEX separation_runs_model ON separation_runs(model_id, device)
     """,
+    # 6: musical analysis (tuning, key, tempo, beat grid) and named section markers (M14).
+    """
+    CREATE TABLE analyses (
+        cache_key TEXT PRIMARY KEY,
+        mix_sha TEXT NOT NULL,
+        version INTEGER NOT NULL,
+        tuning_cents REAL NOT NULL,
+        key TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        key_confidence REAL NOT NULL,
+        bpm REAL NOT NULL,
+        beats_json TEXT NOT NULL,
+        downbeats_json TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX analyses_mix ON analyses(mix_sha);
+    CREATE TABLE markers (
+        mix_sha TEXT PRIMARY KEY,
+        markers_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+    """,
 )
 
 

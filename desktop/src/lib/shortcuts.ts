@@ -13,6 +13,8 @@ export type Shortcut =
   | { action: "loop" }
   | { action: "ab" }
   | { action: "seek"; seconds: number }
+  | { action: "tempoBy"; step: number }
+  | { action: "pitchBy"; step: number }
   | { action: "help" };
 
 export interface KeyPress {
@@ -67,6 +69,7 @@ export function typingIn(target: EventTarget | null, key: string): boolean {
 }
 
 export const SEEK_SECONDS = 5;
+export const TEMPO_STEP = 0.05;
 
 export function shortcutFor(press: KeyPress): Shortcut | null {
   if (press.ctrlKey || press.metaKey || press.altKey) return null;
@@ -79,6 +82,10 @@ export function shortcutFor(press: KeyPress): Shortcut | null {
   if (key === "ArrowUp") return { action: "laneBy", step: -1 };
   if (key === "ArrowDown") return { action: "laneBy", step: 1 };
   if (/^[1-6]$/.test(key)) return { action: "lane", index: Number(key) - 1 };
+  if (key === "[") return { action: "tempoBy", step: -TEMPO_STEP };
+  if (key === "]") return { action: "tempoBy", step: TEMPO_STEP };
+  if (key === "-") return { action: "pitchBy", step: -1 };
+  if (key === "=" || key === "+") return { action: "pitchBy", step: 1 };
   switch (key.toLowerCase()) {
     case "m":
       return { action: "mute" };
@@ -102,5 +109,7 @@ export const SHORTCUT_HELP = [
   { keys: ["L"], label: "shortcuts.loop" },
   { keys: ["A"], label: "shortcuts.ab" },
   { keys: ["←", "→"], label: "shortcuts.seek" },
+  { keys: ["[", "]"], label: "shortcuts.tempo" },
+  { keys: ["−", "+"], label: "shortcuts.pitch" },
   { keys: ["?"], label: "shortcuts.help" },
 ] as const;

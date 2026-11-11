@@ -112,6 +112,36 @@ functional:
     text: A VST3 plugin shall run a separation through the running engine and offer the stems for preview and drag-and-drop into tracks.
     priority: should
     milestone: M11
+  - id: FR-PRA-01
+    title: Tuning and key
+    text: The system shall estimate each song's tuning offset from A440 in cents and its key (tonic and major or minor), store them with the song and show them in the LCD panel as played after the pitch settings.
+    priority: must
+    milestone: M14
+  - id: FR-PRA-02
+    title: Tempo and beat grid
+    text: The system shall estimate each song's tempo in BPM, beat times and bar starts (4/4) once per decoded mix, store them and show the tempo in the LCD panel.
+    priority: must
+    milestone: M14
+  - id: FR-PRA-03
+    title: Real-time pitch and tempo
+    text: In the mixer the user shall shift the pitch by -12 to +12 semitones plus -50 to +50 cents and set the tempo from 50 % to 150 % without changing the pitch, with knob controls that work with the keyboard and in English and Spanish.
+    priority: must
+    milestone: M14
+  - id: FR-PRA-04
+    title: Loops, sections, count-in and click
+    text: Loops shall snap to bar lines of the beat grid; the user shall name section markers and loop a section; playback may start after one bar of count-in; a click stem generated from the beat grid can be heard and exported.
+    priority: should
+    milestone: M14
+  - id: FR-PRA-05
+    title: Speed trainer
+    text: The speed trainer shall raise (or lower) the tempo by a set step every N loop passes until it reaches a target, and show the tempo and the pass count in the LCD panel.
+    priority: should
+    milestone: M14
+  - id: FR-PRA-06
+    title: Exports with pitch and tempo
+    text: The custom mix, the track without X and, on request, every stem and the click shall be exported with the chosen pitch and tempo, rendered by the engine with the same algorithm as the preview.
+    priority: must
+    milestone: M14
 
 non_functional:
   - id: NFR-PERF-01
@@ -134,6 +164,11 @@ non_functional:
     text: Separation shall run at reduced priority with a thread cap, and offer a low-impact mode when a DAW is running.
     priority: should
     milestone: M3
+  - id: NFR-PERF-05
+    title: Real-time stretch cost
+    text: Pitch and tempo processing in the mixer shall cost under 10 % of one CPU core of a 6-core laptop CPU from 2021 with six stems loaded, since it runs once on the summed master bus.
+    priority: should
+    milestone: M14
   - id: NFR-SEC-01
     title: Local API protection
     text: The local engine shall listen on 127.0.0.1 only and require a per-session token, an exact Host header and an allowed Origin.

@@ -28,6 +28,7 @@
     lanes,
     seekBy,
     selectLane,
+    setTempo,
     toggle,
     toggleLoop,
     toggleMute,
@@ -93,6 +94,18 @@
       case "seek":
         if (!loaded) return;
         seekBy(shortcut.seconds);
+        break;
+      case "tempoBy":
+        if (!loaded) return;
+        transport.trainer.on = false;
+        setTempo(transport.practice.tempo + shortcut.step);
+        break;
+      case "pitchBy":
+        if (!loaded) return;
+        transport.practice.semitones = Math.max(
+          -12,
+          Math.min(12, transport.practice.semitones + shortcut.step),
+        );
         break;
       case "loop":
         if (!loaded) return;

@@ -90,6 +90,42 @@ FR-MIX-01:
   - "engine:test_preview.py::test_preview_lists_all_stems_and_serves_audio"
   - "engine:test_preview.py::test_render_writes_the_custom_mix_without_overwriting"
   - "ui:mixer.test.ts > matches the engine formula for the player's gain nodes"
+FR-PRA-01:
+  - "engine:test_analysis.py::test_tuning_offset_of_detuned_tones"
+  - "engine:test_analysis.py::test_key_of_sine_chord_progressions"
+  - "engine:test_analysis.py::test_key_follows_a_detuned_recording"
+  - "engine:test_analysis.py::test_key_ignores_drum_noise"
+  - "ui:practice.test.ts > names the shifted key"
+  - "ui:practice.test.ts > folds and formats cents"
+FR-PRA-02:
+  - "engine:test_analysis.py::test_tempo_of_click_tracks"
+  - "engine:test_analysis.py::test_downbeats_land_on_the_accented_clicks"
+  - "engine:test_analysis.py::test_analyse_stereo_44k_and_round_trip"
+  - "engine:test_practice_api.py::test_job_stores_the_analysis_once_and_serves_it"
+  - "engine:test_practice_api.py::test_analysis_is_computed_on_demand_for_older_items"
+FR-PRA-03:
+  - "ui:practice.test.ts > cancels the resample pitch and adds the user's shift"
+  - "ui:practice.test.ts > keeps the tempo between 50 and 150 %"
+  - "ui:shortcuts.test.ts > maps the player and mixer keys"
+  - "engine:test_practice.py::test_correction_undoes_the_resample_pitch"
+  - "manual: mixer in the demo engine, pitch -1 st and tempo 80 % by keyboard; LCD shows 80 BPM and F# (2026-11-11)"
+FR-PRA-04:
+  - "ui:practice.test.ts > snaps to the nearest bar line"
+  - "ui:practice.test.ts > keeps a snapped loop at least one bar long"
+  - "ui:practice.test.ts > loops a section up to the next marker or the end"
+  - "ui:practice.test.ts > lasts one bar at the played tempo"
+  - "ui:practice.test.ts > places a blip on every beat, louder on downbeats"
+  - "engine:test_practice.py::test_click_lands_on_the_grid_with_accented_downbeats"
+  - "engine:test_practice_api.py::test_markers_are_saved_sorted_and_validated"
+FR-PRA-05:
+  - "ui:practice.test.ts > raises the tempo every N passes up to the target"
+  - "ui:practice.test.ts > can also slow down towards a lower target"
+  - "ui:practice.test.ts > detects a loop pass"
+FR-PRA-06:
+  - "engine:test_practice.py::test_pitch_shift_keeps_length_and_moves_the_pitch"
+  - "engine:test_practice.py::test_tempo_changes_length_but_not_pitch"
+  - "engine:test_practice.py::test_cents_tune_a_detuned_song_back_to_a440"
+  - "engine:test_practice_api.py::test_render_applies_tempo_pitch_click_and_stems"
 FR-UI-01:
   - "ui:jobs.test.ts > has every key translated"
   - "ui:about.test.ts > has every user-facing text in English and Spanish"
@@ -124,6 +160,8 @@ NFR-PERF-03:
   - "manual: low-impact mode with a DAW running (M3 spike)"
 NFR-PERF-04:
   - "manual: M1 CPU benchmarks; installer CPU path separated the demo clip (2026-11-03)"
+NFR-PERF-05:
+  - "manual: offline render of six stems through the stretch worklet in Chromium on the i5-11400H, 2.8 % of real time on one core (2026-11-11)"
 NFR-SEC-01:
   - "engine:test_api_security.py::test_missing_token_is_rejected"
   - "engine:test_api_security.py::test_wrong_token_is_rejected"

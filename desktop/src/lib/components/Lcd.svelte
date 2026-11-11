@@ -1,10 +1,18 @@
 <script lang="ts">
-  // Amber-on-black display: engine and runtime lights, the clock and the
-  // slots for tempo, key and tuning (filled by the practice tools later).
+  // Amber-on-black display: engine and runtime lights, the clock, and the
+  // song's tempo, key and tuning as played (after the practice settings).
+  // While the speed trainer runs, a TRAIN cell shows the tempo and passes.
   import { bootstrap, separationReady } from "$lib/bootstrap.svelte";
   import { connection } from "$lib/connection.svelte";
   import { t } from "$lib/i18n.svelte";
   import { formatClock } from "$lib/mixer";
+  import {
+    foldCents,
+    formatCents,
+    formatShift,
+    formatTempo,
+    shiftedKey,
+  } from "$lib/practice";
   import { transport } from "$lib/transport.svelte";
 
   const engineLed = $derived(
@@ -46,6 +54,37 @@
   );
 
   const loaded = $derived(transport.duration > 0);
+  const analysis = $derived(loaded ? transport.analysis : null);
+  const practice = $derived(transport.practice);
+  const bpm = $derived(
+    analysis && analysis.bpm > 0
+      ? (analysis.bpm * practice.tempo).toFixed(0)
+      : "",
+  );
+  const key = $derived(
+    analysis && analysis.key_confidence > 0
+      ? shiftedKey(analysis.key, analysis.mode, practice.semitones)
+      : "",
+  );
+  const tune = $derived(
+    analysis
+      ? formatCents(foldCents(analysis.tuning_cents + practice.cents))
+      : "",
+  );
+  const bpmHint = $derived(
+    analysis
+      ? t("lcd.bpmHint")
+          .replace("{bpm}", analysis.bpm.toFixed(1))
+          .replace("{tempo}", formatTempo(practice.tempo))
+      : t("lcd.soon"),
+  );
+  const keyHint = $derived(
+    analysis
+      ? t("lcd.keyHint")
+          .replace("{key}", shiftedKey(analysis.key, analysis.mode, 0))
+          .replace("{shift}", formatShift(practice.semitones, practice.cents))
+      : t("lcd.soon"),
+  );
 </script>
 
 <div class="lcd" role="group" aria-label={t("lcd.label")}>
@@ -83,18 +122,33 @@
     {#if loaded}<span class="total">/ {formatClock(transport.duration)}</span
       >{/if}
   </div>
-  <div class="cell slot" title={t("lcd.soon")}>
-    <span class="tag">{t("lcd.bpm")}</span>
-    <span class="digits">---</span>
+  <div class="cell" class:slot={!bpm} title={bpmHint} data-testid="lcd-bpm">
+    <span class="tag"
+      >{t("lcd.bpm")}{practice.tempo !== 1
+        ? ` ${formatTempo(practice.tempo)}`
+        : ""}</span
+    >
+    <span class="digits">{bpm || "---"}</span>
   </div>
-  <div class="cell slot" title={t("lcd.soon")}>
+  <div class="cell" class:slot={!key} title={keyHint} data-testid="lcd-key">
     <span class="tag">{t("lcd.key")}</span>
-    <span class="digits">--</span>
+    <span class="digits">{key || "--"}</span>
   </div>
-  <div class="cell slot" title={t("lcd.soon")}>
+  <div
+    class="cell"
+    class:slot={!tune}
+    title={analysis ? t("lcd.tuneHint") : t("lcd.soon")}
+    data-testid="lcd-tune"
+  >
     <span class="tag">{t("lcd.tuning")}</span>
-    <span class="digits">---</span>
+    <span class="digits">{tune || "---"}</span>
   </div>
+  {#if loaded && transport.trainer.on}
+    <div class="cell" data-testid="lcd-train" role="status">
+      <span class="tag">{t("lcd.train")} ×{transport.passes}</span>
+      <span class="digits">{formatTempo(practice.tempo)}</span>
+    </div>
+  {/if}
 </div>
 
 <style>
