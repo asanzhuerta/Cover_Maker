@@ -5,6 +5,7 @@
   import Icon from "$lib/components/Icon.svelte";
   import Knob from "$lib/components/Knob.svelte";
   import Meter from "$lib/components/Meter.svelte";
+  import MidiExport from "$lib/components/MidiExport.svelte";
   import PracticePanel from "$lib/components/PracticePanel.svelte";
   import { connection, isTauri } from "$lib/connection.svelte";
   import { t } from "$lib/i18n.svelte";
@@ -325,6 +326,8 @@
     {/if}
     {#if renderError}<p class="error">{renderError}</p>{/if}
   </section>
+
+  <MidiExport {itemId} {stems} />
 {/if}
 
 <style>

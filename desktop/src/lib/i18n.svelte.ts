@@ -348,6 +348,16 @@ const en = {
   "mixer.rendering": "Exporting…",
   "mixer.rendered": "Saved:",
   "mixer.clipped": "Gain was lowered by {db} dB to avoid clipping.",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Turn stems into MIDI notes on the song's tempo, for a DAW or notation.",
+  "midi.stems": "Stems to convert to MIDI",
+  "midi.export": "Export MIDI",
+  "midi.converting": "Converting to MIDI…",
+  "midi.step": "{stem} ({n} of {total})",
+  "midi.saved": "MIDI saved:",
+  "midi.noNotes": "No notes found",
+  "midi.noTempo": "No beat grid was found, so the files use 120 BPM.",
   "mixer.memory":
     "This song is long: the preview uses a lower sample rate to save memory (about {mb} MB). The exported file keeps full quality.",
   "models.title": "Models",
@@ -791,6 +801,17 @@ const es: Dictionary = {
   "mixer.rendering": "Exportando…",
   "mixer.rendered": "Guardado:",
   "mixer.clipped": "Se bajó la ganancia {db} dB para evitar saturación.",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Convierte pistas en notas MIDI con el tempo de la canción, para un DAW o partitura.",
+  "midi.stems": "Pistas que convertir a MIDI",
+  "midi.export": "Exportar MIDI",
+  "midi.converting": "Convirtiendo a MIDI…",
+  "midi.step": "{stem} ({n} de {total})",
+  "midi.saved": "MIDI guardado:",
+  "midi.noNotes": "No se encontraron notas",
+  "midi.noTempo":
+    "No se encontró rejilla de pulsos; los archivos usan 120 BPM.",
   "mixer.memory":
     "Esta canción es larga: la previsualización usa una frecuencia de muestreo menor para ahorrar memoria (unos {mb} MB). El archivo exportado mantiene la calidad completa.",
   "models.title": "Modelos",
