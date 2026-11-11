@@ -144,6 +144,15 @@ FR-DAW-02:
   - "plugin:engine::tests::orders_stems_as_asked_and_describes_progress"
   - "plugin:preview::tests::resamples_and_stops_at_the_end"
   - "manual: the bundle loads and exposes its VST3 factory (2026-11-05)"
+FR-DAW-03:
+  - "engine:test_daw_session.py::test_reaper_project_matches_the_golden_file"
+  - "engine:test_daw_session.py::test_dawproject_xml_matches_the_golden_files"
+  - "engine:test_daw_session.py::test_dawproject_xml_is_valid_against_the_official_schema"
+  - "engine:test_daw_session.py::test_midi_tempo_map_matches_the_golden_file_and_the_grid"
+  - "engine:test_daw_session.py::test_every_downbeat_lands_on_a_bar_line"
+  - "engine:test_daw_session.py::test_export_writes_aligned_stems_and_every_project"
+  - "engine:test_daw_session_api.py::test_session_export_writes_every_format_with_mixer_settings"
+  - "ui:mixer.test.ts > turns mute and solo into DAW mute flags, keeping fader and pan"
 
 NFR-PERF-01:
   - "manual: M1 benchmarks on an RTX 3050 Laptop 4 GB (Architecture, Benchmarks)"
