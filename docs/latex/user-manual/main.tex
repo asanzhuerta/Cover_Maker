@@ -431,6 +431,25 @@ every stem and the click} to get a folder with each stem and the click at the
 same pitch and tempo. The engine uses the same algorithm as the mixer, so the
 file sounds like what you heard.
 
+\section{MIDI from the stems}
+The \emph{MIDI} card under the mixer turns stems into notes that you can edit
+in a DAW or a notation program. Tick the stems you want and choose
+\emph{Export MIDI}; a bar shows which stem is being converted (a 4-minute stem
+takes a few seconds). The files are saved next to the stems and named like
+them, for example \texttt{My Song - Bass.mid}.
+\begin{itemize}
+  \item Vocals and bass give one note at a time, the melody or bass line;
+  guitar, piano and other can give chords.
+  \item Drums give kick, snare and closed hi-hat on the General MIDI drum
+  channel (10).
+  \item The files carry the song's tempo map from the beat grid, so in a DAW
+  that follows the file's tempo the notes line up with the stems placed at the
+  start. Without a beat grid the files use 120~BPM, and the card says so.
+\end{itemize}
+Transcription is automatic, so check the result: expect some extra notes an
+octave above loud notes, missed fast or quiet notes, and no toms or cymbals
+other than the hi-hat. Converting a stem again reuses the saved file.
+
 \chapter{Library, folders and playlist import}
 The \emph{Library} page keeps the music you work with in \emph{collections}:
 \begin{description}

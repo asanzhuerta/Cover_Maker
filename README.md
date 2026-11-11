@@ -74,7 +74,7 @@ publisher; see the [code signing policy](#code-signing-policy).
       <img src="docs/screenshots/readme/en/quick-start.png" alt="First run: recommended model and the example song">
       <strong>Honest models.</strong> Each AI model shows its licence and
       provenance before you download it; Cover_Maker recommends the one that
-      fits your hardware and never bundles weights.
+      fits your hardware and never bundles separation weights.
     </td>
   </tr>
 </table>
@@ -182,9 +182,10 @@ commercial audio in issues, tests or screenshots.
 
 Cover_Maker never searches for, scrapes or matches music on streaming
 services. Online audio is fetched only from links you paste yourself, after you
-confirm you have the right to use that content. AI model weights are never
-bundled or hosted by this project; each model's licence is shown before you
-download it. Screenshots, tests and examples use only synthetic or Creative
+confirm you have the right to use that content. Separation model weights are
+never bundled or hosted by this project; each model's licence is shown before
+you download it. The only bundled model is Basic Pitch's 230 KB
+note-transcription model (Apache-2.0), for audio to MIDI. Screenshots, tests and examples use only synthetic or Creative
 Commons audio. Read [DISCLAIMER.md](DISCLAIMER.md).
 
 ## Code signing policy

@@ -458,4 +458,15 @@ export const de: Dictionary = {
     "Leadgesang und Backgrounds trennen den Gesang mit einem weiteren Modell: So kannst du die Backgrounds behalten und selbst die Lead-Stimme singen oder umgekehrt.",
   "stem.vocals.lead": "Leadgesang",
   "stem.vocals.backing": "Backgrounds",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Wandle Stems in MIDI-Noten im Tempo des Songs um, für eine DAW oder Notation.",
+  "midi.stems": "Stems, die in MIDI umgewandelt werden",
+  "midi.export": "MIDI exportieren",
+  "midi.converting": "Wird in MIDI umgewandelt…",
+  "midi.step": "{stem} ({n} von {total})",
+  "midi.saved": "MIDI gespeichert:",
+  "midi.noNotes": "Keine Noten gefunden",
+  "midi.noTempo":
+    "Kein Beat-Raster gefunden, daher nutzen die Dateien 120 BPM.",
 };

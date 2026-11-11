@@ -1079,6 +1079,89 @@
         "title": "MatchRequest",
         "type": "object"
       },
+      "MidiFileOut": {
+        "properties": {
+          "cached": {
+            "description": "True when the file was made before and reused.",
+            "title": "Cached",
+            "type": "boolean"
+          },
+          "notes": {
+            "description": "Notes found (0: nothing pitched or no hits).",
+            "title": "Notes",
+            "type": "integer"
+          },
+          "path": {
+            "description": "The MIDI file, next to the stem exports.",
+            "title": "Path",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stem",
+          "path",
+          "notes",
+          "cached"
+        ],
+        "title": "MidiFileOut",
+        "type": "object"
+      },
+      "MidiOut": {
+        "properties": {
+          "bpm": {
+            "description": "Tempo of the song from the analysis (120 without a beat grid).",
+            "title": "Bpm",
+            "type": "number"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/MidiFileOut"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "tempo_from_analysis": {
+            "description": "False when the song has no beat grid: one default tempo (120 BPM).",
+            "title": "Tempo From Analysis",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "item_id",
+          "bpm",
+          "tempo_from_analysis",
+          "files"
+        ],
+        "title": "MidiOut",
+        "type": "object"
+      },
+      "MidiRequest": {
+        "properties": {
+          "stems": {
+            "description": "Stem ids to convert, e.g. vocals, bass, drums.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "title": "Stems",
+            "type": "array"
+          }
+        },
+        "required": [
+          "stems"
+        ],
+        "title": "MidiRequest",
+        "type": "object"
+      },
       "Mode": {
         "enum": [
           "extract",
@@ -2206,6 +2289,56 @@
           }
         },
         "summary": "Item Markers"
+      }
+    },
+    "/items/{item_id}/midi": {
+      "post": {
+        "description": "Convert stems to MIDI files with the song's tempo map (FR-MIDI-01).\n\nStems run one after another on a CPU thread; ``midi.progress`` events report\nthe stem being converted. Stems converted before are reused from the cache.",
+        "operationId": "item_midi_items__item_id__midi_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MidiRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MidiOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Item Midi"
       }
     },
     "/items/{item_id}/preview": {

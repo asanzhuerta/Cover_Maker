@@ -451,6 +451,16 @@ export const en = {
     "Lead and backing vocals split the vocals with one more model, so you can keep the choir and sing the lead, or the other way round.",
   "stem.vocals.lead": "Lead vocals",
   "stem.vocals.backing": "Backing vocals",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Turn stems into MIDI notes on the song's tempo, for a DAW or notation.",
+  "midi.stems": "Stems to convert to MIDI",
+  "midi.export": "Export MIDI",
+  "midi.converting": "Converting to MIDI…",
+  "midi.step": "{stem} ({n} of {total})",
+  "midi.saved": "MIDI saved:",
+  "midi.noNotes": "No notes found",
+  "midi.noTempo": "No beat grid was found, so the files use 120 BPM.",
 } as const;
 
 /** A key of the English source: the only keys `t()` accepts. */

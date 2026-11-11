@@ -94,6 +94,17 @@ FR-LIB-02:
   - "engine:test_library.py::test_imported_playlist_matching_and_review"
   - "engine:test_api.py::test_match_correction"
   - "ui:library.test.ts > sends only matched, selected items to a job"
+FR-MIDI-01:
+  - "engine:test_midi.py::test_a_melody_gives_each_note_with_its_pitch_and_timing"
+  - "engine:test_midi.py::test_a_chord_gives_its_three_notes_as_the_strongest"
+  - "engine:test_midi.py::test_the_bass_profile_ignores_notes_above_its_range"
+  - "engine:test_midi.py::test_drums_become_kick_snare_and_hi_hat_on_their_beats"
+  - "engine:test_midi.py::test_tempo_map_puts_bar_lines_on_the_downbeats_after_a_pickup"
+  - "engine:test_midi.py::test_the_file_has_the_tempo_map_and_notes_on_the_beat_grid"
+  - "engine:test_midi_api.py::test_midi_files_are_named_like_the_stems_and_reused"
+  - "engine:test_midi_api.py::test_midi_without_a_beat_grid_uses_120_bpm"
+  - "ui:midi.test.ts > reads progress events for its own item only"
+  - "ui:midi.test.ts > adds finished stems to the current one"
 FR-MIX-01:
   - "engine:test_mixer.py::test_muting_in_the_mixer_matches_without"
   - "engine:test_preview.py::test_preview_lists_all_stems_and_serves_audio"

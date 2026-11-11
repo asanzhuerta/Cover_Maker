@@ -465,4 +465,15 @@ export const fr: Dictionary = {
     "Voix lead et chœurs séparent la voix avec un modèle de plus : vous pouvez garder les chœurs et chanter la voix lead, ou l'inverse.",
   "stem.vocals.lead": "Voix lead",
   "stem.vocals.backing": "Chœurs",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Convertissez des stems en notes MIDI calées sur le tempo du morceau, pour un DAW ou une partition.",
+  "midi.stems": "Stems à convertir en MIDI",
+  "midi.export": "Exporter en MIDI",
+  "midi.converting": "Conversion en MIDI…",
+  "midi.step": "{stem} ({n} sur {total})",
+  "midi.saved": "MIDI enregistré :",
+  "midi.noNotes": "Aucune note trouvée",
+  "midi.noTempo":
+    "Aucune grille rythmique trouvée : les fichiers utilisent 120 BPM.",
 };

@@ -33,6 +33,8 @@ dependencies = [
     "websockets",
     "librosa>=1.0",
     "python-stretch==0.3.1",
+    # Runs the bundled Basic Pitch model for audio-to-MIDI (ADR-011).
+    "onnxruntime>=1.31",
 ]
 
 [project.optional-dependencies]
@@ -63,9 +65,10 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cover_maker"]
-# The example song is an MP3, which the repository's .gitignore excludes
-# everywhere else; hatchling would otherwise leave it out of the wheel.
-artifacts = ["src/cover_maker/data/example/*.mp3"]
+# The example song (MP3) and the Basic Pitch model (ONNX) are file types the
+# repository's .gitignore excludes everywhere else; hatchling would otherwise
+# leave them out of the wheel.
+artifacts = ["src/cover_maker/data/example/*.mp3", "src/cover_maker/data/basic_pitch/nmp.onnx"]
 
 [tool.ruff]
 line-length = 100

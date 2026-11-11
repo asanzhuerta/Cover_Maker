@@ -79,7 +79,7 @@ editor desconocido; consulta la [política de firma de código](README.md#code-s
       <img src="docs/screenshots/readme/es/quick-start.png" alt="Primera ejecución: modelo recomendado y canción de ejemplo">
       <strong>Modelos con transparencia.</strong> Cada modelo de IA muestra su
       licencia y su procedencia antes de descargarlo; Cover_Maker recomienda
-      el que encaja con tu equipo y nunca incluye los pesos.
+      el que encaja con tu equipo y nunca incluye los pesos de separación.
     </td>
   </tr>
 </table>
@@ -191,8 +191,9 @@ diseño: nada de audio comercial en issues, tests ni capturas.
 Cover_Maker nunca busca, rastrea ni empareja música en servicios de streaming.
 El audio en línea solo se obtiene de enlaces que pegas tú, después de
 confirmar que tienes derecho a usar ese contenido. Este proyecto nunca incluye
-ni aloja pesos de modelos de IA; la licencia de cada modelo se muestra antes de
-descargarlo. Las capturas, los tests y los ejemplos usan solo audio sintético o
+ni aloja pesos de modelos de separación; la licencia de cada modelo se muestra
+antes de descargarlo. El único modelo incluido es el de transcripción de notas
+de Basic Pitch (230 KB, Apache-2.0), para pasar audio a MIDI. Las capturas, los tests y los ejemplos usan solo audio sintético o
 Creative Commons.
 
 ## Privacidad

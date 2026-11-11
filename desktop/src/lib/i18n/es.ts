@@ -450,4 +450,15 @@ export const es: Dictionary = {
     "La voz principal y los coros separan la voz con un modelo más: puedes quedarte con los coros y cantar la principal, o al revés.",
   "stem.vocals.lead": "Voz principal",
   "stem.vocals.backing": "Coros",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Convierte pistas en notas MIDI con el tempo de la canción, para un DAW o partitura.",
+  "midi.stems": "Pistas que convertir a MIDI",
+  "midi.export": "Exportar MIDI",
+  "midi.converting": "Convirtiendo a MIDI…",
+  "midi.step": "{stem} ({n} de {total})",
+  "midi.saved": "MIDI guardado:",
+  "midi.noNotes": "No se encontraron notas",
+  "midi.noTempo":
+    "No se encontró rejilla de pulsos; los archivos usan 120 BPM.",
 };

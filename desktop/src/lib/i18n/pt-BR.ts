@@ -455,4 +455,15 @@ export const ptBR: Dictionary = {
     "Voz principal e backing vocal separam a voz com mais um modelo: você pode manter o backing vocal e cantar a voz principal, ou o contrário.",
   "stem.vocals.lead": "Voz principal",
   "stem.vocals.backing": "Backing vocal",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Converta stems em notas MIDI no andamento da música, para uma DAW ou partitura.",
+  "midi.stems": "Stems para converter em MIDI",
+  "midi.export": "Exportar MIDI",
+  "midi.converting": "Convertendo para MIDI…",
+  "midi.step": "{stem} ({n} de {total})",
+  "midi.saved": "MIDI salvo:",
+  "midi.noNotes": "Nenhuma nota encontrada",
+  "midi.noTempo":
+    "Nenhuma grade de tempo foi encontrada, então os arquivos usam 120 BPM.",
 };

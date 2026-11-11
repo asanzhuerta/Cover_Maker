@@ -455,4 +455,14 @@ export const it: Dictionary = {
     "Voce solista e cori separano la voce con un modello in più: puoi tenere i cori e cantare la voce solista, o il contrario.",
   "stem.vocals.lead": "Voce solista",
   "stem.vocals.backing": "Cori",
+  "midi.title": "MIDI",
+  "midi.hint":
+    "Converti gli stem in note MIDI sul tempo del brano, per una DAW o la notazione.",
+  "midi.stems": "Stem da convertire in MIDI",
+  "midi.export": "Esporta MIDI",
+  "midi.converting": "Conversione in MIDI…",
+  "midi.step": "{stem} ({n} di {total})",
+  "midi.saved": "MIDI salvato:",
+  "midi.noNotes": "Nessuna nota trovata",
+  "midi.noTempo": "Nessuna griglia ritmica trovata: i file usano 120 BPM.",
 };
