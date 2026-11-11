@@ -8,6 +8,7 @@
     label,
     valueText,
     size = 34,
+    snap,
     testid,
   }: {
     value?: number;
@@ -20,6 +21,8 @@
     label: string;
     valueText: string;
     size?: number;
+    /** Values snap to multiples of this (default: a fifth of `step`). */
+    snap?: number;
     testid?: string;
   } = $props();
 
@@ -43,7 +46,8 @@
   }
 
   function set(next: number) {
-    value = Math.round(clamp(next) / (step / 5)) * (step / 5);
+    const grain = snap ?? step / 5;
+    value = Math.round(clamp(next) / grain) * grain;
   }
 
   let dragFrom: { y: number; value: number } | null = null;

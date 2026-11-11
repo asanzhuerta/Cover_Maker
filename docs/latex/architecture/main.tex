@@ -162,8 +162,9 @@ respects \texttt{prefers-reduced-motion}.
 page except the welcome: play and pause, loop, A/B, the song's title (a link
 back to the mixer), a scrub waveform, the output meter and the LCD panel. The
 LCD shows the engine and runtime state as LEDs (green ready, blinking amber
-starting or installing, red failed), the clock, and empty slots for tempo, key
-and tuning that M14 will fill. The player is created when a mixer page opens a
+starting or installing, red failed), the clock, and the song's tempo, key and
+tuning as played after the practice settings (M14, ADR-010); while the speed
+trainer runs, a TRAIN cell shows the tempo and the pass count. The player is created when a mixer page opens a
 song and stays alive until another song is opened, so navigation never stops
 playback.
 
@@ -364,6 +365,7 @@ Decisions are recorded as \glspl{adr}, one per file under
 \input{adr/adr-007-audio-preview}
 \input{adr/adr-008-daw-integration}
 \input{adr/adr-009-visual-identity}
+\input{adr/adr-010-practice}
 
 \chapter{Compliance}\label{ch:compliance}
 \cmnote{This chapter summarises a risk analysis carried out on 2026-11-02. It is

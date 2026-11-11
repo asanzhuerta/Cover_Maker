@@ -11,6 +11,7 @@
 \begin{revisionhistory}
   0.1 & 2026-11-03 & Document skeleton (M0). \\
   0.2 & 2026-11-03 & About and credits chapter (M12). \\
+  0.3 & 2026-11-11 & Practice chapter (M14). \\
   0.3 & 2026-11-04 & Library, match review, disk space and Creative Commons sources (M8). \\
   0.4 & 2026-11-05 & Using Cover\_Maker from your DAW (M11). \\
   1.0 & 2026-11-05 & Version 1.0: model licences appendix and Auto preset tuning. \\
@@ -293,6 +294,8 @@ Up, Down & Previous or next row \\
 \texttt{L} & Loop on or off \\
 \texttt{A} & Switch between your mix and the original \\
 Left, Right & Jump back or forward 5 seconds \\
+\texttt{[}, \texttt{]} & Tempo down or up 5\,\% (chapter~\ref{ch:practice}) \\
+\texttt{-}, \texttt{+} & Pitch down or up one semitone \\
 \texttt{?} & Show the shortcuts \\
 \bottomrule
 \end{tabularx}
@@ -313,6 +316,61 @@ what you hear in the mixer: exported files always keep full quality.
 
 Songs processed before the mixer existed have no preview data; process them
 again (this reuses the previous separation and takes seconds).
+
+\chapter{Practice}\label{ch:practice}
+When \CM{} separates a song it also listens for its tempo, its key and how far
+its tuning is from A440. The display at the bottom right shows them as you
+play: BPM, KEY and TUNE. The Practice panel under the mixer uses them.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/practice-dark}
+  \caption{The Practice panel and the display: a synthetic demo song one
+  semitone down, tuned to A440, slowed by the speed trainer and looping the
+  Chorus section.}
+\end{figure}
+
+\section{Pitch and tempo}
+\begin{description}
+  \item[Pitch] moves the song by whole semitones, from 12 down to 12 up. Use
+  $-1$ to play along in E flat tuning without retuning, or $+1$ to bring a
+  song recorded in E flat to standard tuning.
+  \item[Fine tune] moves it by cents. \emph{Tune to A440} sets it so that a
+  recording that is slightly sharp or flat matches your tuner.
+  \item[Tempo] plays from 50\,\% to 150\,\% of the original speed without
+  changing the pitch.
+\end{description}
+Turn a knob with the mouse (drag up or down, Shift for fine steps), or focus it
+with Tab and use the arrow keys, Page Up and Page Down; Delete or a
+double-click resets it. Anywhere in the app, \texttt{[} and \texttt{]} change the
+tempo by 5\,\% and \texttt{-} and \texttt{+} the pitch by a semitone. The display
+shows the key and the tempo as you hear them.
+
+\section{Loops, sections and click}
+Drag on a waveform to loop a region. With \emph{Snap loops to bars} on, both
+ends move to the nearest bar line. Under \emph{Sections}, stop where a part
+begins and add a marker with its name (Verse, Chorus\dots); the loop button
+next to a marker repeats that section up to the next marker. Markers are saved
+with the song.
+
+\emph{Click} adds a metronome that follows the song's beats, with an accent
+on the first beat of each bar, at the level of its knob. \emph{Count-in} plays
+one bar of clicks before the song starts. Tempo detection assumes 4/4; songs
+in other metres keep the click but their bars may be off.
+
+\section{Speed trainer}
+The speed trainer loops the current region and raises the tempo by a step
+every few passes until it reaches your target, for example from 70\,\% by
+5\,\% every 2 passes up to 100\,\%. The display shows the current tempo and the
+number of passes. Set the target below the start to slow down instead.
+
+\section{Exporting at another pitch or tempo}
+\emph{Export this mix} uses the pitch and tempo of the Practice panel, and the
+file name says so, for example \texttt{My Song - custom mix (-1 st, 80 \%).wav}.
+Mute an instrument first to get the track without it. Tick \emph{Also export
+every stem and the click} to get a folder with each stem and the click at the
+same pitch and tempo. The engine uses the same algorithm as the mixer, so the
+file sounds like what you heard.
 
 \chapter{Library, folders and playlist import}
 The \emph{Library} page keeps the music you work with in \emph{collections}:

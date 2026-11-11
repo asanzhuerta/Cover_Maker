@@ -71,6 +71,7 @@ describe("job progress", () => {
   it("names coarse steps", () => {
     expect(stepName("separate:sw")).toBe("separate");
     expect(stepName("export")).toBe("export");
+    expect(stepName("analyse")).toBe("analyse");
     expect(stepName("mystery")).toBeNull();
   });
 

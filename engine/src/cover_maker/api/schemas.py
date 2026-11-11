@@ -284,6 +284,28 @@ class PreviewOut(BaseModel):
     stems: dict[str, str] = Field(description="Stem id -> asset id of every produced stem.")
 
 
+class MarkerIn(BaseModel):
+    name: str = Field(min_length=1, max_length=40, description="Section name, e.g. Verse 1.")
+    time: float = Field(ge=0, description="Seconds from the start of the song.")
+
+
+class MarkersIn(BaseModel):
+    markers: list[MarkerIn] = Field(max_length=200)
+
+
+class AnalysisOut(BaseModel):
+    item_id: int
+    mix: str = Field(description="Asset id (SHA-256) of the analysed mix.")
+    tuning_cents: float = Field(description="Offset of the recording from A440, in cents.")
+    key: str = Field(description="Tonic pitch class, e.g. C, F#, Eb.")
+    mode: str = Field(description="major or minor.")
+    key_confidence: float = Field(description="Best key score minus the runner-up (0 = ambiguous).")
+    bpm: float = Field(description="Tempo in beats per minute (0 when no beat was found).")
+    beats: list[float] = Field(description="Beat times in seconds.")
+    downbeats: list[float] = Field(description="Bar starts in seconds (4/4 assumed).")
+    markers: list[MarkerIn] = Field(description="Named section markers, sorted by time.")
+
+
 class PeaksOut(BaseModel):
     asset: str
     points: int
@@ -303,6 +325,15 @@ class RenderRequest(BaseModel):
         ResidualMode.KEEP, description="keep: add back what no stem captured; drop: stems only."
     )
     output_format: OutputFormat | None = Field(None, description="Defaults to the job's format.")
+    tempo: float = Field(1.0, ge=0.5, le=1.5, description="Tempo factor (1 = original speed).")
+    semitones: float = Field(0.0, ge=-12, le=12, description="Pitch shift in semitones.")
+    cents: float = Field(0.0, ge=-50, le=50, description="Fine pitch shift in cents.")
+    click_gain: float = Field(
+        0.0, ge=0, le=4, description="Linear gain of the click stem in the mix (0 = no click)."
+    )
+    with_stems: bool = Field(
+        False, description="Also write every stem (and the click) with the same tempo and pitch."
+    )
 
     @field_validator("gains")
     @classmethod

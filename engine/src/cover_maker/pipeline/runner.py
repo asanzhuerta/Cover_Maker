@@ -1,6 +1,6 @@
 """Job runner: turns a :class:`JobSpec` into exported stems, step by step.
 
-Steps per input: hash → decode → separation nodes → render/export. Every step
+Steps per input: hash → decode → analyse → separation nodes → render/export. Every step
 has a cache key stored in ``step_cache``; finished work is reused, so running
 the same job again does no separation at all. Job and item states live in
 SQLite, so an interrupted job resumes on the next start.
@@ -20,7 +20,7 @@ from typing import Any
 
 import numpy as np
 
-from ..audio import io, mixer
+from ..audio import analysis, io, mixer, practice
 from ..domain import ALL_STEMS, JobSpec, Mode, Preset, ResidualMode, Stem
 from ..library.matching import read_track
 from ..paths import Paths
@@ -32,6 +32,7 @@ from ..separation.tuning import Tuning
 from ..separation.types import Cancelled, SeparationRequest
 from ..sources import catalogs, youtube
 from ..sources.links import InputKind, parse_input
+from ..store import analyses
 from ..store.assets import AssetStore, sha256_file
 from .events import EventBus
 
@@ -74,26 +75,62 @@ class MixSources:
     spec: JobSpec
 
 
+@dataclass(frozen=True)
+class BeatGrid:
+    beats: list[float]
+    downbeats: list[float]
+
+
+def _free_path(folder: Path, base: str, suffix: str) -> Path:
+    target = folder / f"{base}{suffix}"
+    counter = 2
+    while target.exists():
+        target = folder / f"{base} ({counter}){suffix}"
+        counter += 1
+    return target
+
+
 def render_custom_mix(
     sources: MixSources,
     gains: dict[Stem, float],
     residual: ResidualMode,
     fmt: str | None = None,
     pans: dict[Stem, float] | None = None,
+    *,
+    practice_settings: practice.Practice | None = None,
+    click_gain: float = 0.0,
+    grid: BeatGrid | None = None,
+    with_stems: bool = False,
 ) -> tuple[Path, mixer.RenderResult]:
-    """Render mixer settings to a new file in the job's output folder (never overwrites)."""
+    """Render mixer settings to a new file in the job's output folder (never overwrites).
+
+    With practice settings, the mix (and each stem when ``with_stems``) is rendered at
+    the chosen tempo and pitch with the same chain as the preview (ADR-010). A click
+    stem from the beat grid is mixed in at ``click_gain`` and exported with the stems.
+    """
     fmt = fmt or sources.spec.output_format.value
+    settings = practice_settings or practice.Practice()
     mix = io.read(sources.mix)
     stems = {stem: io.read(path) for stem, path in sources.stems.items()}
-    result = mixer.protect_peaks(mixer.mix_gains(mix, stems, gains, residual, pans))
+    mixed = mixer.mix_gains(mix, stems, gains, residual, pans)
+    click = practice.click_stereo(grid.beats, grid.downbeats, len(mixed)) if grid else None
+    if click is not None and click_gain > 0:
+        mixed = (mixed + click * np.float32(click_gain)).astype(np.float32)
+    result = mixer.protect_peaks(practice.apply(mixed, settings))
+    tag = settings.suffix()
+    label = f" ({tag})" if tag else ""
     folder = sources.spec.output_dir
-    base = f"{sources.title} - custom mix"
-    target = folder / f"{base}.{fmt}"
-    counter = 2
-    while target.exists():
-        target = folder / f"{base} ({counter}).{fmt}"
-        counter += 1
+    target = _free_path(folder, f"{sources.title} - custom mix{label}", f".{fmt}")
     io.write(result.audio, target, fmt)
+    if with_stems:
+        stem_dir = _free_path(folder, f"{sources.title} - stems{label}", "")
+        stem_dir.mkdir(parents=True)
+        tracks: dict[str, io.Audio] = {stem.value: audio for stem, audio in stems.items()}
+        if click is not None:
+            tracks["click"] = click
+        for name, audio in tracks.items():
+            shaped = mixer.protect_peaks(practice.apply(audio, settings)).audio
+            io.write(shaped, stem_dir / f"{sources.title} - {name}.{fmt}", fmt)
     return target, result
 
 
@@ -340,6 +377,11 @@ class JobRunner:
                 raise FileNotFoundError(f"input file not found: {source}")
         self._step(job_id, item_id, "decode")
         mix_sha = self._decode(source)
+        self._step(job_id, item_id, "analyse")
+        try:
+            self.analyse(mix_sha)
+        except Exception as exc:  # the analysis is an extra: never lose the stems over it
+            self.events.emit("item.analysis_failed", job=job_id, item=item_id, error=str(exc))
 
         produced: dict[str, dict[Stem, str]] = {}
         for node in recipe.prune(wanted):
@@ -441,6 +483,19 @@ class JobRunner:
             sha = self.assets.put(target, "mix", move=True)
         self._store("decode", key, sha)
         return sha
+
+    def analyse(self, mix_sha: str) -> analysis.Analysis:
+        """Tuning, key, tempo and beat grid of a mix, computed once per mix and algorithm."""
+        stored = analyses.load(self.conn, mix_sha)
+        if stored is not None:
+            return stored
+        result = analysis.analyse(io.read(self.assets.require(mix_sha)), io.SAMPLE_RATE)
+        analyses.save(self.conn, mix_sha, result)
+        return result
+
+    def item_mix(self, item_id: int) -> str | None:
+        preview = self.preview(item_id)
+        return str(preview["mix"]) if preview else None
 
     def _resolve(self, ref: Ref, produced: dict[str, dict[Stem, str]]) -> str:
         return produced[ref.node][ref.stem]

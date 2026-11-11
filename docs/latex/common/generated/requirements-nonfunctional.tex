@@ -8,6 +8,7 @@
 \texttt{NFR-PERF-04} & \textbf{CPU-only operation}. Without a usable GPU, the Fast preset shall separate a 4-minute song in under 5 minutes on a 6-core CPU from 2021 or newer (measured in M1 at about 2.5 minutes). & must & M1 \\
 \texttt{NFR-PERF-02} & \textbf{Low-memory fallback}. On out-of-memory errors the system shall retry with smaller chunks and half precision before asking the user to fall back to CPU. & must & M3 \\
 \texttt{NFR-PERF-03} & \textbf{DAW coexistence}. Separation shall run at reduced priority with a thread cap, and offer a low-impact mode when a DAW is running. & should & M3 \\
+\texttt{NFR-PERF-05} & \textbf{Real-time stretch cost}. Pitch and tempo processing in the mixer shall cost under 10 \% of one CPU core of a 6-core laptop CPU from 2021 with six stems loaded, since it runs once on the summed master bus. & should & M14 \\
 \texttt{NFR-SEC-01} & \textbf{Local API protection}. The local engine shall listen on 127.0.0.1 only and require a per-session token, an exact Host header and an allowed Origin. & must & M5 \\
 \texttt{NFR-SEC-02} & \textbf{Engine discovery}. Local clients such as DAW tools shall find the engine through a per-user file readable only by the user, with a client token separate from the shell's session token, and shall be subject to the Host and Origin checks. & must & M11 \\
 \texttt{NFR-REL-01} & \textbf{Crash safety}. Jobs shall survive application restarts and worker crashes without corrupting the library. & must & M3 \\

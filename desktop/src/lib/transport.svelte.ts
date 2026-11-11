@@ -10,6 +10,7 @@ import { t } from "./i18n.svelte";
 import {
   MEMORY_BUDGET_MB,
   REDUCED_RATE,
+  dbToGain,
   decodedMb,
   effectiveGains,
   nodeGains,
@@ -30,9 +31,24 @@ import {
   type MeterState,
 } from "./meter";
 import { Player } from "./player";
+import {
+  clampTempo,
+  countInSeconds,
+  freshTrainer,
+  loopWrapped,
+  nextMarkerName,
+  pitchCorrection,
+  renderClick,
+  sectionRegion,
+  snapRegion,
+  sortMarkers,
+  trainerTempo,
+  type Marker,
+} from "./practice";
 import { STEMS, type Stem } from "./stems";
 
 export const MIX = "mix";
+export const CLICK = "click";
 const WAVE_POINTS = 900;
 
 export interface Region {
@@ -45,6 +61,19 @@ export const freshControl = (): StemControl => ({
   muted: false,
   soloed: false,
   pan: 0,
+});
+
+export const freshPractice = () => ({
+  /** Whole semitones, -12..+12. */
+  semitones: 0,
+  /** Fine tuning, -50..+50 cents. */
+  cents: 0,
+  /** Tempo factor, 0.5..1.5. */
+  tempo: 1,
+  click: false,
+  clickDb: -6,
+  countIn: false,
+  snap: true,
 });
 
 export const transport = $state({
@@ -69,6 +98,15 @@ export const transport = $state({
   selected: 0,
   /** Meter per stem, plus `L` and `R` for the output. */
   meters: {} as Record<string, MeterState>,
+  /** Tuning, key and beat grid from the engine (null until it answers). */
+  analysis: null as Schemas["AnalysisOut"] | null,
+  markers: [] as Marker[],
+  practice: freshPractice(),
+  trainer: freshTrainer(),
+  /** Loop passes since the trainer (or the loop) started. */
+  passes: 0,
+  /** True while the count-in bar plays. */
+  counting: false,
 });
 
 // Plain values, not UI state.
@@ -120,6 +158,7 @@ export async function openItem(itemId: number): Promise<void> {
     return;
   }
   transport.preview = data;
+  void loadAnalysis(itemId);
   transport.controls = Object.fromEntries(
     Object.keys(data.stems).map((stem) => [stem, freshControl()]),
   );
@@ -146,6 +185,7 @@ export async function openItem(itemId: number): Promise<void> {
     player = next;
     transport.duration = player.duration;
     applyGains();
+    applyPractice();
     startTimer();
   } catch (failure) {
     transport.failure = String(failure);
@@ -176,8 +216,25 @@ export async function closeSong(): Promise<void> {
     loop: null,
     selected: 0,
     meters: {},
+    analysis: null,
+    markers: [],
+    practice: freshPractice(),
+    trainer: freshTrainer(),
+    passes: 0,
+    counting: false,
   });
   await old?.close();
+}
+
+/** Ask the engine for the song's analysis (computed now for older songs). */
+async function loadAnalysis(itemId: number): Promise<void> {
+  if (!connection.api) return;
+  const { data } = await connection.api.GET("/items/{item_id}/analysis", {
+    params: { path: { item_id: itemId } },
+  });
+  if (transport.itemId !== itemId || !data) return;
+  transport.analysis = data;
+  transport.markers = sortMarkers(data.markers);
 }
 
 function applyGains() {
@@ -191,6 +248,36 @@ function applyGains() {
   player.setGain(MIX, values.mix);
   for (const [stem, value] of Object.entries(values.stems))
     player.setGain(stem, value);
+  player.setGain(
+    CLICK,
+    transport.practice.click ? dbToGain(transport.practice.clickDb) : 0,
+  );
+}
+
+/** Generate the click track from the beat grid the first time it is wanted. */
+function ensureClick() {
+  const beats = transport.analysis?.beats ?? [];
+  if (!player || !transport.practice.click || player.has(CLICK)) return;
+  if (beats.length === 0) return;
+  const rate = player.context.sampleRate;
+  player.addSamples(
+    CLICK,
+    renderClick(
+      rate,
+      Math.round(player.duration * rate),
+      beats,
+      transport.analysis?.downbeats ?? [],
+    ),
+  );
+}
+
+function applyPractice() {
+  if (!player) return;
+  const { tempo, semitones, cents } = transport.practice;
+  player.setRate(tempo);
+  void player
+    .setShift(pitchCorrection(tempo, semitones, cents))
+    .catch((failure: unknown) => (transport.failure = String(failure)));
 }
 
 // Decode a stem only once the current settings need it (ADR-007).
@@ -227,8 +314,19 @@ if (typeof window !== "undefined") {
       // Track every control, the residual and A/B.
       void JSON.stringify(transport.controls);
       void [transport.residual, transport.original];
+      void [transport.practice.click, transport.practice.clickDb];
+      void transport.analysis;
+      ensureClick();
       applyGains();
       decodeNeeded();
+    });
+    $effect(() => {
+      void [
+        transport.practice.tempo,
+        transport.practice.semitones,
+        transport.practice.cents,
+      ];
+      applyPractice();
     });
   });
 }
@@ -282,6 +380,11 @@ function tick() {
   if (player.ended()) transport.playing = false;
   lastPosition = transport.position;
   transport.position = player.position;
+  if (
+    transport.looping &&
+    loopWrapped(lastPosition, transport.position, transport.loop)
+  )
+    passDone();
   stepMeters(dt);
 }
 
@@ -295,8 +398,99 @@ function startTimer() {
 export async function toggle(): Promise<void> {
   if (!player) return;
   if (player.playing) player.pause();
-  else await player.play();
+  else {
+    const bpm = transport.analysis?.bpm ?? 0;
+    const countIn = transport.practice.countIn
+      ? countInSeconds(bpm, transport.practice.tempo)
+      : 0;
+    transport.counting = countIn > 0;
+    const playing = player.play(countIn);
+    if (countIn > 0)
+      setTimeout(() => (transport.counting = false), countIn * 1000 + 50);
+    await playing;
+  }
   transport.playing = player.playing;
+}
+
+/** One more pass of the loop: the speed trainer may raise the tempo. */
+function passDone() {
+  transport.passes += 1;
+  const trainer = transport.trainer;
+  if (trainer.on)
+    transport.practice.tempo = trainerTempo(trainer, transport.passes);
+}
+
+export function setTempo(tempo: number): void {
+  transport.practice.tempo = clampTempo(Math.round(tempo * 100) / 100);
+}
+
+/** Start or stop the speed trainer; it loops the current region. */
+export function setTrainer(on: boolean): void {
+  transport.trainer.on = on;
+  transport.passes = 0;
+  if (!on) return;
+  transport.practice.tempo = trainerTempo(transport.trainer, 0);
+  if (!transport.looping) setLooping(true);
+}
+
+/** Fine-tune so the song sits on A440 (e.g. a recording 30 cents flat). */
+export function tuneToA440(): void {
+  const offset = transport.analysis?.tuning_cents ?? 0;
+  transport.practice.cents = Math.max(-50, Math.min(50, -Math.round(offset)));
+}
+
+export function resetPractice(): void {
+  const keep = {
+    click: transport.practice.click,
+    snap: transport.practice.snap,
+  };
+  Object.assign(transport.practice, freshPractice(), keep);
+  transport.trainer.on = false;
+  transport.passes = 0;
+}
+
+// ------------------------------------------------------------ markers
+
+async function saveMarkers() {
+  const itemId = transport.itemId;
+  if (!connection.api || itemId === null) return;
+  const { data } = await connection.api.PUT("/items/{item_id}/markers", {
+    params: { path: { item_id: itemId } },
+    body: { markers: transport.markers },
+  });
+  if (data && transport.itemId === itemId) transport.markers = data;
+}
+
+export function addMarker(base: string, name?: string): void {
+  const marker = {
+    name: (name ?? "").trim() || nextMarkerName(transport.markers, base),
+    time: Math.round(transport.position * 1000) / 1000,
+  };
+  transport.markers = sortMarkers([...transport.markers, marker]);
+  void saveMarkers();
+}
+
+export function renameMarker(index: number, name: string): void {
+  const marker = transport.markers[index];
+  if (!marker || !name.trim()) return;
+  marker.name = name.trim().slice(0, 40);
+  void saveMarkers();
+}
+
+export function removeMarker(index: number): void {
+  transport.markers = transport.markers.filter((_, i) => i !== index);
+  void saveMarkers();
+}
+
+/** Loop from a marker to the next one. */
+export function loopSection(index: number): void {
+  const region = sectionRegion(transport.markers, index, transport.duration);
+  if (!region) return;
+  transport.looping = true;
+  transport.loop = region;
+  transport.passes = 0;
+  player?.setLoop(region);
+  seek(region.start);
 }
 
 export function seek(seconds: number): void {
@@ -311,6 +505,14 @@ export function seekBy(seconds: number): void {
 }
 
 export function setLoop(region: Region | null): void {
+  const bars = transport.analysis?.downbeats ?? [];
+  if (region && transport.practice.snap && bars.length > 0)
+    region = snapRegion(region, bars, transport.duration);
+  if (
+    region?.start !== transport.loop?.start ||
+    region?.end !== transport.loop?.end
+  )
+    transport.passes = 0;
   transport.loop = region;
   player?.setLoop(transport.looping ? region : null);
 }

@@ -80,7 +80,7 @@ milestones:
     name: Practice tools
     effort: L
     goal: Tuning, key and tempo analysis; real-time pitch shift and time-stretch; bar-snapped loops, count-in, click stem and speed trainer; exports with key and tempo applied.
-    status: Planned
+    status: In progress
   - id: M15
     name: Cover studio (record audio and video)
     effort: L
