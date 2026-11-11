@@ -4,7 +4,8 @@
  * its WebAssembly and no `blob:` scripts (ADR-012).
  */
 import type { StretchNode } from "signalsmith-stretch";
-import workletUrl from "signalsmith-stretch-worklet?url";
+// The package only exports its entry point, so the file is imported by path.
+import workletUrl from "../../node_modules/signalsmith-stretch/SignalsmithStretch.mjs?url";
 
 /** Same tonality limit as the engine export (engine/.../audio/practice.py). */
 export const TONALITY_HZ = 8000;

@@ -117,3 +117,17 @@ def test_analyse_silence_is_neutral() -> None:
 
     assert result.bpm == 0.0
     assert result.beats == []
+
+
+def test_key_ignores_drum_noise() -> None:
+    chords = [[55, 59, 62], [50, 54, 57], [52, 55, 59], [48, 52, 55]]  # G D Em C
+    y = progression(chords, seconds=1.2)
+    rng = np.random.default_rng(7)
+    for start in np.arange(0, len(y) / SR - 0.2, 0.3):  # noisy snare hits
+        at = int(start * SR)
+        burst = rng.standard_normal(int(0.1 * SR)) * np.exp(-np.arange(int(0.1 * SR)) / SR * 40)
+        y[at : at + len(burst)] += (0.5 * burst).astype(np.float32)
+
+    key = estimate_key(y)
+
+    assert (key.tonic, key.mode) == ("G", "major")

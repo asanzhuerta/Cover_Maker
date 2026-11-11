@@ -5,7 +5,8 @@ weights are needed:
 
 - **Tuning**: ``librosa.estimate_tuning`` gives the offset of the pitch content
   from the A440 equal-tempered grid, in fractions of a semitone.
-- **Key**: the mean constant-Q chroma (corrected for that tuning) is correlated
+- **Key**: the mean constant-Q chroma of the harmonic part (HPSS removes drums,
+  whose noise smears every pitch class), corrected for that tuning, is correlated
   with the 24 rotations of the Krumhansl-Kessler and Temperley key profiles; the
   scores of both profile sets are averaged.
 - **Tempo and beats**: ``librosa.beat.beat_track`` (dynamic programming over the
@@ -96,7 +97,8 @@ def _profile_scores(chroma: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def estimate_key(y: Signal, sr: int = ANALYSIS_RATE, tuning_cents: float = 0.0) -> KeyEstimate:
-    chroma = librosa.feature.chroma_cqt(y=y, sr=sr, tuning=tuning_cents / 100.0)
+    harmonic = librosa.effects.harmonic(y, margin=2.0)
+    chroma = librosa.feature.chroma_cqt(y=harmonic, sr=sr, tuning=tuning_cents / 100.0)
     profile = np.asarray(chroma, dtype=np.float64).mean(axis=1)
     if not np.any(profile > 0) or np.allclose(profile, profile[0]):
         return KeyEstimate(tonic="C", mode="major", confidence=0.0)

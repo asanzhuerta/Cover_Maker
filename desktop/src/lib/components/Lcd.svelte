@@ -124,8 +124,9 @@
   </div>
   <div class="cell" class:slot={!bpm} title={bpmHint} data-testid="lcd-bpm">
     <span class="tag"
-      >{t("lcd.bpm")}{#if practice.tempo !== 1}
-        {formatTempo(practice.tempo)}{/if}</span
+      >{t("lcd.bpm")}{practice.tempo !== 1
+        ? ` ${formatTempo(practice.tempo)}`
+        : ""}</span
     >
     <span class="digits">{bpm || "---"}</span>
   </div>
