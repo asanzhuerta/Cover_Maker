@@ -85,7 +85,7 @@ def install(
         raise InstallError(
             "Separation support is not installed yet. The app installs it in the "
             "background after the first start; in a development checkout run: "
-            "uv sync --extra separation --extra cu128 (or --extra cpu)",
+            "uv sync --extra separation --extra cu128 (or --extra cpu; --extra mps on macOS)",
             code="separation_missing",
         )
     models_dir.mkdir(parents=True, exist_ok=True)

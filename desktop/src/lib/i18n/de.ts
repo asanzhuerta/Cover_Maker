@@ -173,6 +173,7 @@ export const de: Dictionary = {
   "bootstrap.space.free": "Frei auf diesem Laufwerk",
   "bootstrap.space.build": "PyTorch-Variante",
   "bootstrap.space.torch.cu128": "CUDA (NVIDIA-Grafikkarte)",
+  "bootstrap.space.torch.mps": "Metal (Apple-Silicon-Grafik)",
   "bootstrap.space.torch.cpu":
     "Prozessor (keine kompatible Grafikkarte gefunden)",
   "bootstrap.space.folder": "Ordner",

@@ -1,29 +1,51 @@
 {
-  "uv": {
-    "version": "0.13.6",
-    "file": "uv-x86_64-pc-windows-msvc.zip",
-    "urls": [
-      "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-x86_64-pc-windows-msvc.zip"
-    ],
-    "sha256": "a2a8820d5eea32f08ef467ef3b7f66883a9b076d5737a2fc2fbb5f458d1bb50f"
+  "windows-x64": {
+    "uv": {
+      "version": "0.13.6",
+      "file": "uv-x86_64-pc-windows-msvc.zip",
+      "urls": [
+        "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-x86_64-pc-windows-msvc.zip"
+      ],
+      "sha256": "a2a8820d5eea32f08ef467ef3b7f66883a9b076d5737a2fc2fbb5f458d1bb50f"
+    },
+    "ffmpeg": {
+      "version": "9.0.2",
+      "license": "LGPL-3.0-or-later",
+      "file": "ffmpeg-n9.0.2-45-g1e65c6cd5d-win64-lgpl-shared-9.0.zip",
+      "urls": [
+        "https://github.com/asanzhuerta/Cover_Maker/releases/download/v{version}/ffmpeg-n9.0.2-45-g1e65c6cd5d-win64-lgpl-shared-9.0.zip",
+        "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-11-03-12-50/ffmpeg-n9.0.2-45-g1e65c6cd5d-win64-lgpl-shared-9.0.zip"
+      ],
+      "sha256": "be035a7f1763fdab8430949bed65eab94dc91cbdea1d03607e4ac5403e73ce76"
+    },
+    "deno": {
+      "version": "2.9.8",
+      "license": "MIT",
+      "file": "deno-x86_64-pc-windows-msvc.zip",
+      "urls": [
+        "https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-pc-windows-msvc.zip"
+      ],
+      "sha256": "cba84b26e0df5ae7f74fc66b86a95b866872a86292ebd84fa1e959927edd93bf"
+    }
   },
-  "ffmpeg": {
-    "version": "9.0.2",
-    "license": "LGPL-3.0-or-later",
-    "file": "ffmpeg-n9.0.2-45-g1e65c6cd5d-win64-lgpl-shared-9.0.zip",
-    "urls": [
-      "https://github.com/asanzhuerta/Cover_Maker/releases/download/v{version}/ffmpeg-n9.0.2-45-g1e65c6cd5d-win64-lgpl-shared-9.0.zip",
-      "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-11-03-12-50/ffmpeg-n9.0.2-45-g1e65c6cd5d-win64-lgpl-shared-9.0.zip"
-    ],
-    "sha256": "be035a7f1763fdab8430949bed65eab94dc91cbdea1d03607e4ac5403e73ce76"
-  },
-  "deno": {
-    "version": "2.9.8",
-    "license": "MIT",
-    "file": "deno-x86_64-pc-windows-msvc.zip",
-    "urls": [
-      "https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-pc-windows-msvc.zip"
-    ],
-    "sha256": "cba84b26e0df5ae7f74fc66b86a95b866872a86292ebd84fa1e959927edd93bf"
+  "macos-arm64": {
+    "uv": {
+      "version": "0.13.6",
+      "file": "uv-aarch64-apple-darwin.tar.gz",
+      "urls": [
+        "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-aarch64-apple-darwin.tar.gz"
+      ],
+      "sha256": "60fbd5c8a1ed681845eea28d9d622fcde03c51e91a43465b64a1e17db1ed3472"
+    },
+    "ffmpeg": null,
+    "deno": {
+      "version": "2.9.8",
+      "license": "MIT",
+      "file": "deno-aarch64-apple-darwin.zip",
+      "urls": [
+        "https://github.com/denoland/deno/releases/download/v2.9.8/deno-aarch64-apple-darwin.zip"
+      ],
+      "sha256": "9f0bf660393da2eaff044cdc7444cb08c73f235849b61d224d825a194ce7c98e"
+    }
   }
 }

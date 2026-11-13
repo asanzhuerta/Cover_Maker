@@ -1,6 +1,7 @@
 //! Client of the local Cover_Maker engine (ADR-008).
 //!
-//! The engine writes `%LOCALAPPDATA%\Cover_Maker\run\engine.json` with its
+//! The engine writes `%LOCALAPPDATA%\Cover_Maker\run\engine.json` (on macOS
+//! `~/Library/Application Support/Cover_Maker/run/engine.json`) with its
 //! port and a client token while it runs. Every request carries the token in
 //! the `Authorization` header and addresses `127.0.0.1:<port>`, which is the
 //! exact `Host` the engine checks.
@@ -31,16 +32,31 @@ fn default_host() -> String {
 }
 
 /// Engine data folders to look in: `COVER_MAKER_HOME` when set, else the
-/// installed app's `%LOCALAPPDATA%\Cover_Maker`, then a development build's
-/// `%LOCALAPPDATA%\Cover_Maker.dev`.
+/// installed app's `Cover_Maker`, then a development build's
+/// `Cover_Maker.dev`, in the per-user data folder (`data_root`).
 pub fn homes() -> Vec<PathBuf> {
     if let Some(dir) = std::env::var_os("COVER_MAKER_HOME").filter(|v| !v.is_empty()) {
         return vec![PathBuf::from(dir)];
     }
-    let base = std::env::var_os("LOCALAPPDATA")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("."));
+    let base = data_root();
     vec![base.join("Cover_Maker"), base.join("Cover_Maker.dev")]
+}
+
+/// The engine's per-user data folder (its `paths.py`): `%LOCALAPPDATA%` on
+/// Windows, `~/Library/Application Support` on macOS (ADR-013).
+fn data_root() -> PathBuf {
+    if cfg!(target_os = "macos") {
+        return std::env::var_os("HOME")
+            .map(|home| {
+                PathBuf::from(home)
+                    .join("Library")
+                    .join("Application Support")
+            })
+            .unwrap_or_else(|| PathBuf::from("."));
+    }
+    std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."))
 }
 
 pub fn read_discovery(home: &Path) -> Option<Discovery> {

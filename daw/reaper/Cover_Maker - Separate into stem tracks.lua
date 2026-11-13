@@ -9,7 +9,9 @@
 --
 --   Cover_Maker must be open. The script finds the engine through the
 --   per-user discovery file %LOCALAPPDATA%\Cover_Maker\run\engine.json
---   (ADR-008) and talks to it with the curl.exe that ships with Windows.
+--   (ADR-008) and talks to it with the curl.exe that ships with Windows. On
+--   macOS (experimental, ADR-013) the file is in ~/Library/Application
+--   Support/Cover_Maker/run and the script uses /usr/bin/curl.
 --   Only separate audio you have the right to use.
 
 local SCRIPT = "Cover_Maker"
@@ -127,6 +129,7 @@ end
 ---------------------------------------------------------------------------
 
 local function sep() return package.config:sub(1, 1) end
+local function windows() return sep() == "\\" end
 
 -- Engine data folders: COVER_MAKER_HOME, else the installed app's folder,
 -- then a development build's (Cover_Maker.dev).
@@ -134,6 +137,9 @@ local function homes()
   local override = os.getenv("COVER_MAKER_HOME")
   if override and override ~= "" then return { override } end
   local base = (os.getenv("LOCALAPPDATA") or "") .. sep()
+  if not windows() then
+    base = (os.getenv("HOME") or "") .. "/Library/Application Support/"
+  end
   return { base .. "Cover_Maker", base .. "Cover_Maker.dev" }
 end
 
@@ -162,6 +168,7 @@ local function read_discovery(home)
 end
 
 local function curl_path()
+  if not windows() then return "/usr/bin/curl" end
   local root = os.getenv("SYSTEMROOT") or "C:\\Windows"
   return root .. "\\System32\\curl.exe"
 end

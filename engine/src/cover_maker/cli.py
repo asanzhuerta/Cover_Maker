@@ -216,7 +216,7 @@ def separate(
 
     if not separation_available():
         console.print(
-            "[red]Error:[/red] separation support is missing (uv sync --extra separation --extra cu128, or --extra cpu)."
+            "[red]Error:[/red] separation support is missing (uv sync --extra separation --extra cu128, or --extra cpu; --extra mps on macOS)."
         )
         raise typer.Exit(1)
     paths = Paths.default().ensure()

@@ -49,7 +49,9 @@
         <dd>
           {space.torch === "cu128"
             ? t("bootstrap.space.torch.cu128")
-            : t("bootstrap.space.torch.cpu")}
+            : space.torch === "mps"
+              ? t("bootstrap.space.torch.mps")
+              : t("bootstrap.space.torch.cpu")}
         </dd>
         <dt>{t("bootstrap.space.folder")}</dt>
         <dd class="folder" title={space.folder}>{space.folder}</dd>

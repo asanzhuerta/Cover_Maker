@@ -1,30 +1,42 @@
 """Hardware detection without importing torch (the engine process stays light).
 
-The GPU is queried through ``nvidia-smi``; everything else comes from psutil.
+An NVIDIA GPU is queried through ``nvidia-smi``; on a Mac with Apple Silicon
+the GPU (Metal, used by PyTorch as ``mps``) is always there and shares the
+system memory (ADR-013). Everything else comes from psutil.
 """
 
 from __future__ import annotations
 
+import platform
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 
 import psutil
 
-# Executable names of common DAWs, for the low-impact mode.
+# Process names of common DAWs (Windows and macOS), for the low-impact mode.
+# Ableton Live is "Live" on macOS, too generic to match safely.
 DAW_PROCESSES = {
     "ableton live": "Ableton Live",
     "fl64.exe": "FL Studio",
     "fl.exe": "FL Studio",
-    "reaper.exe": "REAPER",
+    "fl studio": "FL Studio",
+    "reaper": "REAPER",
     "cubase": "Cubase",
     "nuendo": "Nuendo",
-    "studio one.exe": "Studio One",
-    "bitwig studio.exe": "Bitwig Studio",
+    "studio one": "Studio One",
+    "bitwig studio": "Bitwig Studio",
     "protools.exe": "Pro Tools",
+    "pro tools": "Pro Tools",
+    "logic pro": "Logic Pro",
+    "garageband": "GarageBand",
 }
+# Share of the unified memory that Metal lets the GPU use (its recommended
+# working set is about two thirds of the RAM on Apple Silicon).
+APPLE_GPU_SHARE = 2 / 3
 
 
 class Tier(StrEnum):
@@ -42,9 +54,13 @@ class Gpu:
     free_mb: int
     compute_capability: float
     driver: str
+    # PyTorch backend: "cuda" (NVIDIA) or "mps" (Apple Silicon, Metal).
+    api: str = "cuda"
 
     @property
     def usable(self) -> bool:
+        if self.api == "mps":
+            return True
         # Current CUDA builds of PyTorch need Turing (7.5) or newer.
         return self.compute_capability >= 7.5
 
@@ -89,7 +105,35 @@ def parse_nvidia_smi(output: str) -> Gpu | None:
     return None
 
 
+def apple_gpu(chip: str, ram_bytes: int, available_bytes: int) -> Gpu:
+    """The GPU of an Apple Silicon Mac: its share of the unified memory."""
+    total = int(ram_bytes / 2**20 * APPLE_GPU_SHARE)
+    free = min(total, int(available_bytes / 2**20 * APPLE_GPU_SHARE))
+    return Gpu(f"{chip or 'Apple Silicon'} GPU", total, free, 0.0, "Metal", api="mps")
+
+
+def _sysctl(name: str) -> str:
+    try:
+        completed = subprocess.run(
+            ["/usr/sbin/sysctl", "-n", name],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return completed.stdout.strip() if completed.returncode == 0 else ""
+
+
+def apple_silicon() -> bool:
+    return sys.platform == "darwin" and platform.machine() == "arm64"
+
+
 def detect_gpu() -> Gpu | None:
+    if apple_silicon():
+        memory = psutil.virtual_memory()
+        return apple_gpu(_sysctl("machdep.cpu.brand_string"), memory.total, memory.available)
     smi = shutil.which("nvidia-smi")
     if smi is None:
         return None
@@ -115,6 +159,10 @@ def running_daws() -> list[str]:
 
 
 def _cpu_name() -> str:
+    if sys.platform == "darwin":
+        name = _sysctl("machdep.cpu.brand_string")
+        if name:
+            return name
     try:
         import winreg
 

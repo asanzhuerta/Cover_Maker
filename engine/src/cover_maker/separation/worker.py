@@ -11,6 +11,7 @@ Protocol over a multiprocessing pipe: the engine sends
 from __future__ import annotations
 
 import os
+import sys
 from multiprocessing.connection import Connection
 from typing import Any
 
@@ -28,9 +29,26 @@ def _lower_priority() -> None:
         pass
 
 
-def main(conn: Connection, threads: int | None, low_priority: bool) -> None:
+def _prepare_metal(device: str) -> None:
+    """Apple Silicon (ADR-013): run the operations Metal lacks on the CPU, and
+    keep a CPU worker off the GPU.
+
+    ``CUDA_VISIBLE_DEVICES`` hides an NVIDIA GPU from CPU workers (see
+    ``service.py``); Metal has no such switch, so a CPU worker reports MPS as
+    unavailable, which makes audio-separator choose the CPU.
+    """
+    os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+    if device == "cpu":
+        import torch  # pyright: ignore[reportMissingImports]
+
+        torch.backends.mps.is_available = lambda: False
+
+
+def main(conn: Connection, threads: int | None, low_priority: bool, device: str = "gpu") -> None:
     if low_priority:
         _lower_priority()
+    if sys.platform == "darwin":
+        _prepare_metal(device)
     from .backends.audio_separator import AudioSeparatorBackend
     from .types import SeparationError, SeparationRequest
 

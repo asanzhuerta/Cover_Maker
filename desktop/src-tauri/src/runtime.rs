@@ -1,14 +1,16 @@
 //! First-run bootstrap of the engine runtime (ADR-006).
 //!
 //! Release builds run the engine from a virtual environment in
-//! `%LOCALAPPDATA%\Cover_Maker\runtime`, created with the bundled `uv.exe`
-//! from the bundled engine wheel and `pylock.*.toml` lock files:
+//! `%LOCALAPPDATA%\Cover_Maker\runtime` (`~/Library/Application
+//! Support/Cover_Maker/runtime` on macOS, ADR-013), created with the bundled
+//! `uv` from the bundled engine wheel and `pylock.*.toml` lock files:
 //!
 //! - Phase A (core) blocks the engine start: Python 3.12, the venv with the
 //!   engine and its core dependencies, ffmpeg and deno.
 //! - Phase B (separation) runs in the background once the engine is up:
-//!   PyTorch (CUDA cu128 when the GPU supports it, CPU otherwise) and the
-//!   separation extra. Downloads stay in the uv cache, so a retry resumes.
+//!   PyTorch (CUDA cu128 when the GPU supports it, CPU otherwise; on macOS the
+//!   build with Metal) and the separation extra. Downloads stay in the uv
+//!   cache, so a retry resumes.
 //!
 //! A phase is redone when the app version changes, which re-syncs the venv
 //! with the lock files of the update. Development builds skip all of this and
@@ -23,18 +25,19 @@ use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-#[cfg(windows)]
-const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+use crate::platform;
+
 /// Lowest compute capability supported by the cu128 PyTorch wheels.
 const MIN_CUDA_CAPABILITY: f32 = 7.5;
 
 /// Where the bundled files are and where the runtime goes.
 #[derive(Clone, Debug)]
 pub struct Layout {
-    /// Bundled files (`bundle\` in the install folder): `uv.exe`, the
-    /// wheel, `pylock.*.toml` and `deps.json`.
+    /// Bundled files (`bundle\` in the install folder, `Contents/Resources/
+    /// bundle` in the macOS app): `uv`, the wheel, `pylock.*.toml` and
+    /// `deps.json`.
     pub bundle: PathBuf,
-    /// `%LOCALAPPDATA%\Cover_Maker\runtime`.
+    /// `runtime` in the engine data folder (`data_home`).
     pub root: PathBuf,
     pub app_version: String,
 }
@@ -49,11 +52,19 @@ impl Layout {
     }
 
     pub fn engine_exe(&self) -> PathBuf {
-        self.venv().join("Scripts").join("cover-maker.exe")
+        self.venv()
+            .join(platform::VENV_BIN)
+            .join(platform::exe("cover-maker"))
+    }
+
+    fn python(&self) -> PathBuf {
+        self.venv()
+            .join(platform::VENV_BIN)
+            .join(platform::exe("python"))
     }
 
     fn uv(&self) -> PathBuf {
-        self.bundle.join("uv.exe")
+        self.bundle.join(platform::exe("uv"))
     }
 
     fn state_file(&self) -> PathBuf {
@@ -73,23 +84,27 @@ impl Layout {
         self.bundle.join(format!("pylock.{profile}.toml"))
     }
 
-    /// `PATH` for the engine: the runtime tools (ffmpeg, deno) first.
+    /// `PATH` for the engine: the runtime tools (ffmpeg, deno) first, then
+    /// the inherited `PATH` and the platform's fallback folders.
     pub fn path_env(&self) -> std::ffi::OsString {
         let mut paths = vec![self.bin()];
         if let Some(current) = std::env::var_os("PATH") {
             paths.extend(std::env::split_paths(&current));
+        }
+        for dir in platform::fallback_tool_dirs() {
+            if !paths.contains(&dir) {
+                paths.push(dir);
+            }
         }
         std::env::join_paths(paths).unwrap_or_default()
     }
 }
 
 /// Engine data folder (`paths.py`): `Cover_Maker` for the installed app,
-/// `Cover_Maker.dev` for development builds, so they never share data.
+/// `Cover_Maker.dev` for development builds, so they never share data, in
+/// the platform's per-user data folder.
 pub fn data_home(development: bool) -> PathBuf {
-    let base = std::env::var_os("LOCALAPPDATA")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("."));
-    base.join(if development {
+    platform::local_data_dir().join(if development {
         "Cover_Maker.dev"
     } else {
         "Cover_Maker"
@@ -227,26 +242,7 @@ pub fn folder_bytes(dir: &Path) -> u64 {
 /// Free bytes on the drive that holds `path` (or its nearest existing parent).
 pub fn free_bytes(path: &Path) -> Option<u64> {
     let existing = path.ancestors().find(|p| p.exists())?;
-    #[cfg(windows)]
-    {
-        use std::os::windows::ffi::OsStrExt;
-        use windows::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
-        use windows::core::PCWSTR;
-        let wide: Vec<u16> = existing
-            .as_os_str()
-            .encode_wide()
-            .chain(std::iter::once(0))
-            .collect();
-        let mut free = 0u64;
-        // SAFETY: `wide` is a NUL-terminated path that outlives the call.
-        unsafe { GetDiskFreeSpaceExW(PCWSTR(wide.as_ptr()), Some(&mut free), None, None) }.ok()?;
-        Some(free)
-    }
-    #[cfg(not(windows))]
-    {
-        let _ = existing;
-        None
-    }
+    platform::free_bytes(existing)
 }
 
 /// The runtime's space needs for `torch`, or `None` without `sizes.json`.
@@ -367,12 +363,7 @@ impl Reporter<'_> {
 }
 
 fn hidden(command: &mut Command) -> &mut Command {
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        command.creation_flags(CREATE_NO_WINDOW);
-    }
-    command
+    platform::hide_window(command)
 }
 
 /// Run the bundled uv with the runtime's own cache and Python folders.
@@ -423,16 +414,38 @@ pub struct Download {
     pub sha256: String,
 }
 
+/// One platform's tools in `deps.json`. `ffmpeg` is `null` where the runtime
+/// installs none yet (macOS, ADR-013): the engine then uses one on `PATH`.
 #[derive(Debug, Deserialize)]
 struct Deps {
-    ffmpeg: Download,
+    ffmpeg: Option<Download>,
     deno: Download,
+}
+
+impl Deps {
+    /// The tools to install into `bin/`, in order.
+    fn tools(&self) -> Vec<(&'static str, &Download)> {
+        let mut tools = Vec::new();
+        if let Some(ffmpeg) = &self.ffmpeg {
+            tools.push(("ffmpeg", ffmpeg));
+        }
+        tools.push(("deno", &self.deno));
+        tools
+    }
 }
 
 fn load_deps(layout: &Layout) -> Result<Deps, String> {
     let text = fs::read_to_string(layout.bundle.join("deps.json"))
         .map_err(|e| format!("cannot read deps.json: {e}"))?;
-    serde_json::from_str(&text).map_err(|e| format!("invalid deps.json: {e}"))
+    parse_deps(&text, platform::DEPS_KEY)
+}
+
+/// `deps.json` holds the pinned downloads of every platform, by key.
+fn parse_deps(text: &str, key: &str) -> Result<Deps, String> {
+    let mut all: std::collections::HashMap<String, Deps> =
+        serde_json::from_str(text).map_err(|e| format!("invalid deps.json: {e}"))?;
+    all.remove(key)
+        .ok_or_else(|| format!("deps.json has no downloads for {key}"))
 }
 
 pub fn sha256_hex(bytes: &[u8]) -> String {
@@ -508,9 +521,11 @@ fn extract_bin(archive: &[u8], target: &Path) -> Result<(), String> {
             continue;
         }
         let name = path.file_name().ok_or("archive entry without name")?;
-        let mut file = fs::File::create(target.join(name)).map_err(|e| e.to_string())?;
+        let destination = target.join(name);
+        let mut file = fs::File::create(&destination).map_err(|e| e.to_string())?;
         std::io::copy(&mut entry, &mut file).map_err(|e| e.to_string())?;
         file.flush().map_err(|e| e.to_string())?;
+        platform::make_executable(&destination).map_err(|e| e.to_string())?;
     }
     Ok(())
 }
@@ -580,9 +595,12 @@ fn core_steps(layout: &Layout, report: &Reporter) -> Result<(), String> {
     report.update(|_, torch| *torch = installed.torch.clone());
     let current = installed.core.as_deref() == Some(layout.app_version.as_str());
     let deps = load_deps(layout)?;
+    let tools = deps.tools();
     if current && layout.engine_exe().exists() {
-        install_tool(layout, "ffmpeg", &deps.ffmpeg, report)?;
-        return install_tool(layout, "deno", &deps.deno, report);
+        for (name, dep) in &tools {
+            install_tool(layout, name, dep, report)?;
+        }
+        return Ok(());
     }
     // Check the room for the whole runtime (PyTorch included) before the
     // first download, so a full disk fails here and not halfway through.
@@ -598,13 +616,13 @@ fn core_steps(layout: &Layout, report: &Reporter) -> Result<(), String> {
     }
     fs::create_dir_all(&layout.root).map_err(|e| format!("cannot create runtime folder: {e}"))?;
     let venv = layout.venv();
-    let total = 5;
+    let total = 3 + tools.len() as u32;
 
     report.step(1, total, "python");
     uv(layout, &[os("python"), os("install"), os("3.12")], report)?;
 
     report.step(2, total, "venv");
-    if !venv.join("Scripts").join("python.exe").exists() {
+    if !layout.python().exists() {
         uv(
             layout,
             &[os("venv"), os("--python"), os("3.12"), venv.as_os_str()],
@@ -646,10 +664,10 @@ fn core_steps(layout: &Layout, report: &Reporter) -> Result<(), String> {
         report,
     )?;
 
-    report.step(4, total, "ffmpeg");
-    install_tool(layout, "ffmpeg", &deps.ffmpeg, report)?;
-    report.step(5, total, "deno");
-    install_tool(layout, "deno", &deps.deno, report)?;
+    for (index, (name, dep)) in (4..).zip(&tools) {
+        report.step(index, total, name);
+        install_tool(layout, name, dep, report)?;
+    }
 
     installed.core = Some(layout.app_version.clone());
     if profile != "core" {
@@ -661,11 +679,15 @@ fn core_steps(layout: &Layout, report: &Reporter) -> Result<(), String> {
 }
 
 /// PyTorch build for this machine: `COVER_MAKER_TORCH` overrides detection.
+/// macOS has one build (Metal, which also runs on the CPU).
 pub fn torch_build() -> String {
     if let Ok(forced) = std::env::var("COVER_MAKER_TORCH")
-        && (forced == "cpu" || forced == "cu128")
+        && platform::TORCH_BUILDS.contains(&forced.as_str())
     {
         return forced;
+    }
+    if cfg!(target_os = "macos") {
+        return platform::TORCH_BUILDS[0].to_string();
     }
     let mut command = Command::new("nvidia-smi");
     command.args(["--query-gpu=compute_cap", "--format=csv,noheader"]);
@@ -740,8 +762,7 @@ pub struct YtDlpVersions {
 }
 
 fn installed_ytdlp(layout: &Layout) -> Result<String, String> {
-    let python = layout.venv().join("Scripts").join("python.exe");
-    let mut command = Command::new(python);
+    let mut command = Command::new(layout.python());
     command.args(["-c", "import yt_dlp.version as v; print(v.__version__)"]);
     let output = hidden(&mut command)
         .output()
@@ -855,7 +876,6 @@ mod tests {
         fs::write(dir.join("sub").join("b.bin"), [0u8; 5]).unwrap();
         assert_eq!(folder_bytes(&dir), 15);
         assert_eq!(folder_bytes(&dir.join("missing")), 0);
-        #[cfg(windows)]
         assert!(free_bytes(&dir.join("not").join("yet")).unwrap() > 0);
         fs::remove_dir_all(&dir).unwrap();
     }
@@ -905,6 +925,43 @@ mod tests {
         assert_eq!(extract_licences(buffer.get_ref(), &licences).unwrap(), 1);
         assert_eq!(names_in(&licences), ["LICENSE.txt"]);
         fs::remove_dir_all(&target).unwrap();
+    }
+
+    #[test]
+    fn reads_the_downloads_of_one_platform() {
+        let tool = |name: &str| {
+            format!(
+                r#"{{"version": "1", "file": "{name}.zip", "urls": ["https://x/{name}.zip"], "sha256": "00"}}"#
+            )
+        };
+        let text = format!(
+            r#"{{"windows-x64": {{"uv": {uv}, "ffmpeg": {ffmpeg}, "deno": {deno}}},
+                "macos-arm64": {{"uv": {uv}, "ffmpeg": null, "deno": {deno}}}}}"#,
+            uv = tool("uv"),
+            ffmpeg = tool("ffmpeg"),
+            deno = tool("deno"),
+        );
+        let names = |deps: &Deps| deps.tools().iter().map(|(n, _)| *n).collect::<Vec<_>>();
+        let windows = parse_deps(&text, "windows-x64").unwrap();
+        assert_eq!(names(&windows), ["ffmpeg", "deno"]);
+        let macos = parse_deps(&text, "macos-arm64").unwrap();
+        assert_eq!(names(&macos), ["deno"]);
+        assert!(parse_deps(&text, "linux-x64").is_err());
+    }
+
+    #[test]
+    fn bundled_deps_cover_this_platform() {
+        let text = include_str!("../resources/runtime/deps.json");
+        let deps = parse_deps(text, platform::DEPS_KEY).unwrap();
+        assert!(deps.tools().iter().all(|(_, d)| d.sha256.len() == 64));
+        if cfg!(windows) {
+            assert!(deps.ffmpeg.is_some());
+        }
+    }
+
+    #[test]
+    fn torch_build_is_one_this_platform_has() {
+        assert!(platform::TORCH_BUILDS.contains(&torch_build().as_str()));
     }
 
     #[test]

@@ -173,6 +173,7 @@ export const en = {
   "bootstrap.space.free": "Free on this drive",
   "bootstrap.space.build": "PyTorch build",
   "bootstrap.space.torch.cu128": "CUDA (NVIDIA graphics card)",
+  "bootstrap.space.torch.mps": "Metal (Apple Silicon graphics)",
   "bootstrap.space.torch.cpu": "Processor (no compatible graphics card found)",
   "bootstrap.space.folder": "Folder",
   "bootstrap.space.models":

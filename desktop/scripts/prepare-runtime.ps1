@@ -1,6 +1,7 @@
 # Stage the files the installer bundles for the first-run bootstrap (ADR-006):
 # uv.exe, the engine wheel and one pylock.toml per install profile, all taken
-# from engine/uv.lock. Run before `pnpm tauri build`.
+# from engine/uv.lock. Run before `pnpm tauri build`. The macOS app uses
+# prepare-runtime.sh instead (ADR-013).
 #
 #   powershell -File desktop/scripts/prepare-runtime.ps1
 
@@ -8,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $repo = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $engine = Join-Path $repo "engine"
 $out = Join-Path $repo "desktop\src-tauri\resources\runtime"
-$deps = Get-Content (Join-Path $out "deps.json") -Raw | ConvertFrom-Json
+$deps = (Get-Content (Join-Path $out "deps.json") -Raw | ConvertFrom-Json)."windows-x64"
 
 Get-ChildItem $out -Exclude deps.json, README.md, licenses | Remove-Item -Recurse -Force
 
@@ -42,6 +43,6 @@ foreach ($name in $profiles.Keys) {
     if ($LASTEXITCODE -ne 0) { throw "uv export ($name) failed" }
 }
 # Download and disk sizes per profile, shown before the first-run download.
-uv run --no-project python (Join-Path $PSScriptRoot "runtime_sizes.py") $out
+uv run --no-project python (Join-Path $PSScriptRoot "runtime_sizes.py") $out windows-x64
 if ($LASTEXITCODE -ne 0) { throw "runtime_sizes.py failed" }
 Get-ChildItem $out | Format-Table Name, Length -AutoSize
