@@ -6,7 +6,7 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.4.0] - 2026-11-11
+## [0.4.0] - 2026-11-13
 
 Practice tools (key, tuning and tempo analysis, real-time pitch and tempo,
 bar loops, count-in, click and speed trainer), DAW session export, audio to
