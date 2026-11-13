@@ -67,13 +67,21 @@ does not check them.
 Two gaps remain. \emph{ffmpeg:} the Windows runtime installs an LGPL shared
 build from BtbN, which publishes no macOS builds, and the macOS builds found
 (evermeet, osxexperts, Martin Riedl's build server) are GPL, with x264 and
-x265. Until the owner decides, the macOS entry is \texttt{null} and the engine
-uses an ffmpeg on \texttt{PATH}; the shell appends Homebrew's folders, since
-apps started from Finder get a minimal \texttt{PATH}. The options are: (a)
-build an LGPL ffmpeg on a macOS runner and mirror it on the releases like the
-Windows build, pinning its hash after the first build (recommended); (b) pin
-a third-party GPL static build, which the app would download but not
-redistribute; (c) keep requiring Homebrew. \emph{diffq:} audio-separator
+x265. The project therefore builds its own (decided by the owner):
+\texttt{desktop/scripts/build-ffmpeg-macos.sh} compiles FFmpeg n9.0.2 (pinned
+by its release tag object) with LAME 3.100 for MP3 export (pinned by
+SHA-256). Both are LGPL. It builds static programs with
+\texttt{-{}-disable-autodetect}, linking only to macOS system libraries
+(zlib, AudioToolbox), and the script refuses a build that is not LGPL or links
+anything else. The zip has the layout of the Windows build (\texttt{bin/},
+licence texts) plus \texttt{SOURCE.md} with the sources and configure line.
+The \emph{ffmpeg for macOS} workflow builds it on \texttt{macos-latest},
+checks that it encodes MP3, and keeps the zip with its SHA-256. The build is
+not byte-for-byte reproducible, so one artifact is published once as a release
+asset, and \texttt{deps.json} pins that file. Until then the macOS entry is
+\texttt{null} and the engine uses an ffmpeg on \texttt{PATH}; the shell appends
+Homebrew's folders, since apps started from Finder get a minimal
+\texttt{PATH}. \emph{diffq:} audio-separator
 needs \texttt{diffq} outside Windows, and it ships only a source
 distribution. The separation runtime therefore compiles it, which needs the
 Xcode Command Line Tools. Homebrew installs them anyway. Mirroring a prebuilt
@@ -135,6 +143,6 @@ need a real Mac and are listed in the Installation Guide as experimental.
 \textbf{Consequences.} One code base builds on both platforms, and the
 Windows behaviour and lock are unchanged. Each OS-specific piece has one
 place, so that piece can later move to a stable macOS build. Before macOS
-leaves the experimental label, it needs an LGPL ffmpeg in the runtime,
+leaves the experimental label, it needs the LGPL ffmpeg published and pinned,
 signing and notarization, a macOS entry for the updater and a test pass on
 real hardware.
