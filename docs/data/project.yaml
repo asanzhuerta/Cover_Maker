@@ -57,15 +57,15 @@ milestones:
     goal: Guided welcome while the runtime installs, installer language, model download progress, layout, licence review and author data.
     status: Done
   - id: M10
-    name: Quality and 1.0
+    name: Quality and release 0.4.0
     effort: M
-    goal: Hardening, accessibility, test report and the 1.0 release.
+    goal: Hardening, accessibility, test report and the 0.4.0 release.
     status: Release after M13
   - id: M11
     name: DAW integration (VST3 + REAPER)
     effort: L
     goal: VST3 plugin as a client of the local engine, plus a REAPER extension that inserts each stem as a new track.
-    status: Done (v1.0.0)
+    status: Done (v0.4.0)
   - id: M12
     name: About and credits
     effort: S

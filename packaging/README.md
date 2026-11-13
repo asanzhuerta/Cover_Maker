@@ -28,7 +28,7 @@ One-time setup:
 
 1. Submit the first version by hand, because `wingetcreate update` only
    updates a package that already exists:
-   `wingetcreate new https://github.com/asanzhuerta/Cover_Maker/releases/download/v1.0.0/Cover_Maker_1.0.0_x64-setup.exe`
+   `wingetcreate new https://github.com/asanzhuerta/Cover_Maker/releases/download/v0.4.0/Cover_Maker_0.4.0_x64-setup.exe`
    with the package identifier `asanzhuerta.CoverMaker` (change `WINGET_ID` in
    `release.yml` if you pick another one).
 2. Create a classic personal access token with the `public_repo` scope and
@@ -42,7 +42,7 @@ NSIS installer with 7-Zip (`#/dl.7z`) instead of running it, as Scoop expects,
 and keeps itself current with `checkver` (GitHub releases) and `autoupdate`
 (hash from `SHA256SUMS.txt`).
 
-To submit it once v1.0.0 is published:
+To submit it once v0.4.0 is published:
 
 1. Fork ScoopInstaller/Extras, copy the manifest to `bucket/cover-maker.json`.
 2. Run `.\bin\checkver.ps1 cover-maker -u` there; it adds the hash.

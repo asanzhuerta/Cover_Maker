@@ -6,7 +6,17 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Added
+## [0.4.0] - 2026-11-13
+
+Practice tools (key, tuning and tempo analysis, real-time pitch and tempo,
+bar loops, count-in, click and speed trainer), DAW session export, audio to
+MIDI per stem, lead and backing vocal separation, four more interface
+languages, the *Tape & Console* visual identity, a first-run quick start with
+a Creative Commons example song, a stable download link, DAW integration
+(REAPER script and VST3 plugin), security hardening, and all documents at
+version 1.0 (M8, M10, M11, M13, M14).
+
+### Added (DAW export, MIDI and vocals)
 - Audio to MIDI per stem (FR-MIDI-01, ADR-012). The mixer's *MIDI* card
   converts chosen stems to Standard MIDI Files named like the stem exports
   (`My Song - Bass.mid`), with the song's tempo map from the beat grid
@@ -26,6 +36,8 @@ project follows [Semantic Versioning](https://semver.org/).
   with both residual modes. New stem cards and colours in New job (English
   and Spanish), requirement FR-SEP-04, a User Manual section and a benchmark
   row for the RTX 3050 Laptop.
+
+### Added (M14: practice tools)
 - Practice tools (M14). The engine analyses each song once, after decoding:
   tuning offset from A440 in cents, key (major or minor), tempo, beats and bar
   starts, with librosa (no model weights). Results are stored in SQLite
@@ -71,7 +83,7 @@ project follows [Semantic Versioning](https://semver.org/).
   stretch worklet's WebAssembly; the worklet is served from the app itself, so
   no `blob:` scripts are allowed.
 
-### Changed
+### Changed (M13: visual identity)
 - New visual identity, *Tape & Console* (warm analogue hardware), with the
   descriptor "the cover musician's studio": warm near-black and cream
   surfaces, one signal-orange accent, a cream-paper light theme, new stem
@@ -83,7 +95,7 @@ project follows [Semantic Versioning](https://semver.org/).
 - Engine and runtime status are lights in the amber display at the bottom
   right instead of a box at the bottom left of the side bar.
 
-### Added
+### Added (M13: visual identity)
 - Transport dock at the bottom of every page: the song opened in the mixer
   keeps playing while you visit other pages, with play, loop, A/B, a scrub
   waveform, an output meter and the display (clock, and slots for tempo, key
@@ -97,6 +109,8 @@ project follows [Semantic Versioning](https://semver.org/).
   the system's reduced-motion setting.
 - *Retry* next to the runtime notice when the separation runtime failed to
   install.
+
+### Added (installer test)
 - First run asks before downloading: the setup screen shows the download
   size, the approximate disk space, the free space on the drive, the PyTorch
   build and the folder, and stops with a clear message when the drive is too
@@ -182,7 +196,7 @@ project follows [Semantic Versioning](https://semver.org/).
   licence, source and verification date (generated from the catalogue).
 - All six documents at version 1.0; the SRS includes the traceability
   matrix, the Installation Guide explains what the installer downloads and how
-  it is verified, and the Test Report covers v1.0.0.
+  it is verified, and the Test Report covers v0.4.0.
 
 ### Added (M11: DAW integration)
 - REAPER script (`daw/reaper`): separates the selected item's song (or a

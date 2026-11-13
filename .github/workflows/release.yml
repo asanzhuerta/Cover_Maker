@@ -6,6 +6,11 @@ name: Release
 # documents to a draft GitHub release. Publishing the draft stays a manual
 # step; publishing it as a full release submits the new version to winget
 # when a WINGET_TOKEN secret exists.
+#
+# Authenticode signing (issue #51) goes through the SignPath Foundation and
+# runs only when the repository variable SIGNPATH_ORGANIZATION_ID is set (plus
+# the secret SIGNPATH_API_TOKEN); every signing request is approved by hand in
+# SignPath. See docs/signing/README.md.
 
 on:
   push:
@@ -86,6 +91,55 @@ jobs:
           prerelease: ${{ contains(github.ref_name, '-') }}
           includeUpdaterJson: true
 
+      - name: Upload the unsigned installer for code signing
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        id: unsigned-installer
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unsigned-installer
+          path: desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
+
+      - name: Sign the installer (SignPath, approved by hand)
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: Cover_Maker
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 18000
+          output-artifact-directory: signed
+
+      - name: Replace the installer and its update signature with the signed ones
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          $tag = $env:REF_NAME
+          $exe = Get-ChildItem signed -Recurse -Filter *-setup.exe | Select-Object -First 1
+          if (-not $exe) { throw "the signed installer is missing" }
+          $auth = Get-AuthenticodeSignature $exe.FullName
+          if ($auth.Status -ne "Valid") { throw "Authenticode signature is $($auth.Status)" }
+          # The updater signature covers the file's bytes: sign the signed file again.
+          pnpm --dir desktop tauri signer sign $exe.FullName
+          gh release upload $tag $exe.FullName "$($exe.FullName).sig" --clobber
+          New-Item -ItemType Directory -Force updater | Out-Null
+          gh release download $tag -p latest.json -D updater --clobber
+          $manifest = Get-Content updater/latest.json -Raw | ConvertFrom-Json
+          $signature = (Get-Content "$($exe.FullName).sig" -Raw).Trim()
+          foreach ($platform in $manifest.platforms.PSObject.Properties) {
+            $platform.Value.signature = $signature
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content updater/latest.json -Encoding utf8NoBOM
+          gh release upload $tag updater/latest.json --clobber
+
       - name: Attach the ffmpeg mirror
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -128,6 +182,27 @@ jobs:
       - name: Build the VST3 bundle
         working-directory: daw/vst3
         run: cargo xtask bundle cover_maker_vst3 --release --locked
+      - name: Upload the unsigned plugin for code signing
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        id: unsigned-plugin
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unsigned-vst3
+          path: daw/vst3/target/bundled/
+          if-no-files-found: error
+      - name: Sign the plugin (SignPath, approved by hand)
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: Cover_Maker
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: vst3-plugin
+          github-artifact-id: ${{ steps.unsigned-plugin.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 18000
+          output-artifact-directory: daw/vst3/target/bundled
       - name: Package the plugin (GPL-3.0-or-later) and the REAPER script (MIT)
         shell: pwsh
         run: |
