@@ -1,0 +1,43 @@
+name: ffmpeg for macOS
+
+# Builds the LGPL ffmpeg that the macOS runtime installs (ADR-013) from pinned
+# sources, checks that it is LGPL and links only to system libraries, and
+# keeps the zip and its SHA-256 as a workflow artifact. The build is not
+# byte-for-byte reproducible, so one chosen artifact is published once, by
+# hand, as a release asset, and deps.json pins that file's hash.
+
+on:
+  pull_request:
+    paths:
+      - desktop/scripts/build-ffmpeg-macos.sh
+      - .github/workflows/ffmpeg-macos.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build LGPL ffmpeg (macOS arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Build
+        run: bash desktop/scripts/build-ffmpeg-macos.sh out
+      - name: Check the programs run and encode MP3
+        run: |
+          mkdir check
+          unzip -q out/*.zip -d check
+          bin="$(echo check/*/bin)"
+          "$bin/ffmpeg" -hide_banner -version | head -n 1
+          "$bin/ffmpeg" -hide_banner -loglevel error -f lavfi -i "sine=frequency=440:duration=1" \
+            -c:a libmp3lame -b:a 320k check/tone.mp3
+          "$bin/ffprobe" -hide_banner -loglevel error -show_entries stream=codec_name \
+            -of csv=p=0 check/tone.mp3 | grep -x mp3
+          (cd out && shasum -a 256 *.zip | tee SHA256SUMS.txt)
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ffmpeg-macos-arm64-lgpl
+          path: out/
+          if-no-files-found: error
+          retention-days: 90

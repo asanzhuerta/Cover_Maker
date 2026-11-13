@@ -5,11 +5,14 @@ Handshake: the first stdout line is a JSON object
 desktop shell reads to learn where the engine listens. The session token comes
 from the ``COVER_MAKER_TOKEN`` environment variable (never from argv, which is
 visible to other processes). If ``COVER_MAKER_PARENT_PID`` is set, the engine
-exits when that process disappears.
+exits when that process disappears; outside Windows, whose Job Object already
+ends the whole tree with the shell, it first stops its own child processes
+(ADR-013).
 """
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -36,9 +39,18 @@ TOKEN_ENV = "COVER_MAKER_TOKEN"
 PARENT_ENV = "COVER_MAKER_PARENT_PID"
 
 
+def _stop_children() -> None:
+    """Kill the separation worker and running tools (ffmpeg, yt-dlp)."""
+    for child in psutil.Process().children(recursive=True):
+        with contextlib.suppress(psutil.Error):
+            child.kill()
+
+
 def _watch_parent(parent_pid: int, server: uvicorn.Server) -> None:
     while psutil.pid_exists(parent_pid):
         time.sleep(1)
+    if sys.platform != "win32":
+        _stop_children()
     server.should_exit = True
 
 

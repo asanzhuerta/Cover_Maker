@@ -1,8 +1,9 @@
 //! Lifecycle of the Python engine process.
 //!
 //! The shell generates a per-session token, starts `cover-maker serve` with the
-//! token and its own PID in the environment, assigns the process to a
-//! kill-on-close Job Object and waits for the handshake line printed on stdout.
+//! token and its own PID in the environment, puts the process tree under a
+//! guard that kills it with the shell (a kill-on-close Job Object on Windows,
+//! a process group on macOS) and waits for the handshake line printed on stdout.
 //! Development builds run the repository engine through `uv run`; release
 //! builds run the engine installed in the runtime venv (see `runtime`).
 
@@ -15,12 +16,10 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use crate::jobobject::KillOnCloseJob;
+use crate::platform::{self, ProcessTree};
 use crate::runtime::Layout;
 
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(60);
-#[cfg(windows)]
-const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 /// What the UI needs to talk to the engine.
 #[derive(Clone, Debug, Serialize)]
@@ -42,13 +41,14 @@ struct Handshake {
 pub struct Engine {
     pub info: EngineInfo,
     child: Child,
-    _job: KillOnCloseJob,
+    tree: ProcessTree,
 }
 
 impl Engine {
     pub fn kill(&mut self) {
         let _ = self.child.kill();
         let _ = self.child.wait();
+        self.tree.terminate();
     }
 }
 
@@ -109,26 +109,21 @@ fn engine_command(token: &str, runtime: Option<&Layout>) -> Command {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit());
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        command.creation_flags(CREATE_NO_WINDOW);
-    }
+    platform::hide_window(&mut command);
     command
 }
 
 /// Start the engine and block until it announces its port.
 pub fn start(runtime: Option<&Layout>) -> Result<Engine, String> {
-    let job = KillOnCloseJob::new().map_err(|e| format!("cannot create job object: {e}"))?;
+    let mut tree = ProcessTree::new()?;
     let token = new_token();
-    let mut child = engine_command(&token, runtime)
-        .spawn()
-        .map_err(|e| match runtime {
-            Some(_) => format!("cannot start the installed engine: {e}"),
-            None => format!("cannot start engine (is uv installed?): {e}"),
-        })?;
-    job.assign(&child)
-        .map_err(|e| format!("cannot assign engine to job object: {e}"))?;
+    let mut command = engine_command(&token, runtime);
+    tree.prepare(&mut command);
+    let mut child = command.spawn().map_err(|e| match runtime {
+        Some(_) => format!("cannot start the installed engine: {e}"),
+        None => format!("cannot start engine (is uv installed?): {e}"),
+    })?;
+    tree.adopt(&child)?;
 
     let stdout = child.stdout.take().ok_or("engine stdout unavailable")?;
     let (tx, rx) = mpsc::channel();
@@ -152,10 +147,11 @@ pub fn start(runtime: Option<&Layout>) -> Result<Engine, String> {
                 version: handshake.version,
             },
             child,
-            _job: job,
+            tree,
         }),
         Err(_) => {
             let _ = child.kill();
+            tree.terminate();
             Err("engine did not report ready in time".into())
         }
     }

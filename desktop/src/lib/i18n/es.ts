@@ -172,6 +172,7 @@ export const es: Dictionary = {
   "bootstrap.space.free": "Libre en esta unidad",
   "bootstrap.space.build": "Versión de PyTorch",
   "bootstrap.space.torch.cu128": "CUDA (tarjeta gráfica NVIDIA)",
+  "bootstrap.space.torch.mps": "Metal (gráficos de Apple Silicon)",
   "bootstrap.space.torch.cpu": "Procesador (no hay tarjeta gráfica compatible)",
   "bootstrap.space.folder": "Carpeta",
   "bootstrap.space.models":

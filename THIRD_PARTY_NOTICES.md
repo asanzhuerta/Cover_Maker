@@ -44,6 +44,7 @@ The installer also copies this file and Cover_Maker's `LICENSE` to
 |---|---|---|
 | [Python](https://www.python.org) 3.12, python-build-standalone | PSF-2.0; its bundled libraries (OpenSSL, SQLite, zlib…) under their own permissive licences | https://github.com/astral-sh/python-build-standalone |
 | [FFmpeg](https://ffmpeg.org) 9.0, LGPL shared build by BtbN | LGPL-3.0-or-later | https://github.com/BtbN/FFmpeg-Builds (sources: https://ffmpeg.org/download.html) |
+| [FFmpeg](https://ffmpeg.org) 9.0.2 with [LAME](https://lame.sourceforge.io) 3.100, the project's static LGPL build (macOS, experimental) | LGPL-2.1-or-later (LAME: LGPL-2.0-or-later) | Built by `desktop/scripts/build-ffmpeg-macos.sh`; release `ffmpeg-macos-n9.0.2` |
 | [deno](https://deno.com) | MIT | https://github.com/denoland/deno |
 | [PyTorch](https://pytorch.org) | BSD-3-Clause | https://github.com/pytorch/pytorch |
 | NVIDIA CUDA runtime libraries (CUDA build of PyTorch only) | NVIDIA software licence (redistributable components) | Inside the PyTorch wheel from download.pytorch.org |
@@ -55,6 +56,14 @@ FFmpeg is used as an unmodified separate program (`ffmpeg.exe` and its DLLs in
 each GitHub release. The corresponding source code is available from
 https://ffmpeg.org/download.html and the build scripts from BtbN's repository.
 You may replace it with another build of the same version.
+
+On macOS (experimental, ADR-013) the runtime installs the project's own static
+LGPL build of FFmpeg n9.0.2 with LAME 3.100 (`ffmpeg` and `ffprobe` in
+`~/Library/Application Support/Cover_Maker/runtime/bin`), downloaded from the
+`ffmpeg-macos-n9.0.2` GitHub release and pinned by SHA-256. Its `SOURCE.md`
+names the exact sources (the FFmpeg `n9.0.2` tag and `lame-3.100.tar.gz`) and
+configure line, and `desktop/scripts/build-ffmpeg-macos.sh` rebuilds it, so
+you can relink or replace it.
 
 ### Python packages of the runtime
 

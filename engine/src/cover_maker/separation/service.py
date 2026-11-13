@@ -132,7 +132,9 @@ class WorkerService:
             os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
         try:
             process = context.Process(
-                target=worker.main, args=(child, self.threads, self.low_priority), daemon=True
+                target=worker.main,
+                args=(child, self.threads, self.low_priority, device),
+                daemon=True,
             )
             process.start()
         finally:

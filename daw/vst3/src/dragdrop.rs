@@ -99,7 +99,7 @@ pub fn drag_files(files: &[PathBuf]) -> Result<(), String> {
     }
 }
 
-/// Opens Explorer with the file selected.
+/// Opens Explorer (Finder on macOS) with the file selected.
 pub fn show_in_folder(file: &Path) {
     #[cfg(windows)]
     {
@@ -109,6 +109,13 @@ pub fn show_in_folder(file: &Path) {
             .arg(format!("/select,{}", file.display()))
             .spawn();
     }
-    #[cfg(not(windows))]
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("/usr/bin/open")
+            .arg("-R")
+            .arg(file)
+            .spawn();
+    }
+    #[cfg(not(any(windows, target_os = "macos")))]
     let _ = file;
 }

@@ -39,6 +39,10 @@
       "resources/runtime/": "bundle/"
     },
     "createUpdaterArtifacts": false,
+    "macOS": {
+      "minimumSystemVersion": "12.3",
+      "signingIdentity": "-"
+    },
     "windows": {
       "nsis": {
         "installMode": "currentUser",

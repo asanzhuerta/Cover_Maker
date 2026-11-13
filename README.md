@@ -45,6 +45,12 @@ also has the optional VST3 plugin and REAPER script, and
 the installer is code-signed, Windows SmartScreen may warn about an unknown
 publisher; see the [code signing policy](#code-signing-policy).
 
+**macOS (experimental).** Cover_Maker also builds for Macs with Apple Silicon
+(macOS 12.3 or later), separating on the GPU with Metal. That build is
+unsigned, built only by a manual CI run, and not yet tested on a real Mac; see
+the Installation Guide and [ADR-013](docs/latex/architecture/adr/adr-013-macos.tex)
+for how to get and open it. Windows is the supported platform.
+
 ## Features
 
 <table>

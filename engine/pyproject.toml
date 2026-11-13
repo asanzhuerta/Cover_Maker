@@ -39,7 +39,8 @@ dependencies = [
 
 [project.optional-dependencies]
 # Heavy runtime for the separation worker (PyTorch + audio-separator). Pick
-# the PyTorch build with exactly one of the `cpu` / `cu128` extras.
+# the PyTorch build with exactly one of the `cpu` / `cu128` extras on Windows,
+# or `mps` on macOS (PyPI's build, with Metal; it also runs on the CPU).
 separation = [
     "audio-separator[cpu]==0.48.0",
     "audioread>=3",
@@ -47,6 +48,7 @@ separation = [
 ]
 cpu = ["torch>=2.8"]
 cu128 = ["torch>=2.8"]
+mps = ["torch>=2.8"]
 
 [project.scripts]
 cover-maker = "cover_maker.cli:app"
@@ -93,13 +95,18 @@ addopts = "-ra"
 [tool.uv]
 # Dependency cooldown: resolve only versions published at least a week ago.
 exclude-newer = "7 days"
-environments = ["sys_platform == 'win32'"]
-conflicts = [[{ extra = "cpu" }, { extra = "cu128" }]]
+# Windows (x64) and, experimentally, macOS on Apple Silicon (ADR-013).
+environments = [
+    "sys_platform == 'win32'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+conflicts = [[{ extra = "cpu" }, { extra = "cu128" }, { extra = "mps" }]]
 
 [tool.uv.sources]
+# `mps` takes PyTorch from PyPI. NVIDIA publishes no CUDA build for macOS.
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
-    { index = "pytorch-cu128", extra = "cu128" },
+    { index = "pytorch-cu128", extra = "cu128", marker = "sys_platform == 'win32'" },
 ]
 
 [[tool.uv.index]]

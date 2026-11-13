@@ -174,6 +174,7 @@ export const ptBR: Dictionary = {
   "bootstrap.space.free": "Livre nesta unidade",
   "bootstrap.space.build": "Versão do PyTorch",
   "bootstrap.space.torch.cu128": "CUDA (placa de vídeo NVIDIA)",
+  "bootstrap.space.torch.mps": "Metal (gráficos do Apple Silicon)",
   "bootstrap.space.torch.cpu":
     "Processador (nenhuma placa de vídeo compatível encontrada)",
   "bootstrap.space.folder": "Pasta",

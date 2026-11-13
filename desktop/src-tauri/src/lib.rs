@@ -3,8 +3,8 @@
 //! the first-run bootstrap of the engine runtime).
 
 mod engine;
-mod jobobject;
 mod locale;
+mod platform;
 mod runtime;
 
 use std::sync::Arc;
@@ -125,7 +125,7 @@ async fn update_ytdlp(app: AppHandle, runtime: State<'_, Runtime>) -> Result<Str
     Ok(version)
 }
 
-/// Open one of the engine's data folders in Explorer. Only these fixed
+/// Open one of the engine's data folders in Explorer (Finder on macOS). Only these fixed
 /// sub-folders of the data home (`paths.py`) can be opened.
 #[tauri::command]
 fn open_data_folder(name: String) -> Result<(), String> {

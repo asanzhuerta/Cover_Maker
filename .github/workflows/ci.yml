@@ -1,5 +1,9 @@
 name: CI
 
+# Every job runs on Windows, the reference platform, and on macOS (Apple
+# Silicon), which is experimental (ADR-013). The Windows jobs keep their
+# original names, which branch protection may require.
+
 on:
   pull_request:
   push:
@@ -11,8 +15,16 @@ concurrency:
 
 jobs:
   engine:
-    name: Engine (Python)
-    runs-on: windows-latest
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Engine (Python)
+          - os: macos-latest
+            name: Engine (Python, macOS)
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: engine
@@ -23,18 +35,43 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - run: uv run ruff check .
+        if: runner.os == 'Windows'
       - run: uv run ruff format --check .
+        if: runner.os == 'Windows'
       - run: uv run pyright
+        if: runner.os == 'Windows'
       - run: uv run pytest --cov=cover_maker --cov-report=term
       - name: Check the API contract used by the UI is up to date
+        if: runner.os == 'Windows'
         shell: bash
         run: |
           uv run cover-maker openapi > ../desktop/src/lib/api/openapi.json
           git diff --exit-code -- ../desktop/src/lib/api/openapi.json
+      # The macOS separation runtime: PyTorch from PyPI (with Metal) and the
+      # separation extra install from the lock, diffq builds from its sdist,
+      # and the engine detects the Apple GPU. CI runners are virtual machines,
+      # so Metal may be missing there; nothing is separated here.
+      - name: Install the macOS separation runtime
+        if: runner.os == 'macOS'
+        run: uv sync --locked --extra separation --extra mps
+      - name: Check PyTorch, audio-separator and the hardware detection
+        if: runner.os == 'macOS'
+        run: |
+          uv run --no-sync python -c "import torch; print('torch', torch.__version__, '| MPS built:', torch.backends.mps.is_built(), '| MPS available:', torch.backends.mps.is_available())"
+          uv run --no-sync python -c "from audio_separator.separator import Separator; from cover_maker.separation.installer import separation_available; assert separation_available()"
+          uv run --no-sync cover-maker doctor
 
   frontend:
-    name: Desktop UI (Svelte)
-    runs-on: windows-latest
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Desktop UI (Svelte)
+          - os: macos-latest
+            name: Desktop UI (Svelte, macOS)
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: desktop
@@ -57,8 +94,16 @@ jobs:
       - run: pnpm build
 
   shell:
-    name: Desktop shell (Rust)
-    runs-on: windows-latest
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Desktop shell (Rust)
+          - os: macos-latest
+            name: Desktop shell (Rust, macOS)
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: desktop/src-tauri
@@ -77,10 +122,28 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+      # The macOS runtime's ffmpeg is the project's own build (ADR-013): check
+      # that the pinned release asset is still there and unchanged.
+      - name: Check the pinned macOS ffmpeg download
+        if: runner.os == 'macOS'
+        working-directory: desktop/src-tauri/resources/runtime
+        run: |
+          url="$(jq -r '."macos-arm64".ffmpeg.urls[0]' deps.json)"
+          sha="$(jq -r '."macos-arm64".ffmpeg.sha256' deps.json)"
+          curl --fail --location --silent --show-error --retry 3 --output "$RUNNER_TEMP/ffmpeg.zip" "$url"
+          echo "$sha  $RUNNER_TEMP/ffmpeg.zip" | shasum -a 256 --check
 
   vst3:
-    name: VST3 plugin (Rust)
-    runs-on: windows-latest
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: VST3 plugin (Rust)
+          - os: macos-latest
+            name: VST3 plugin (Rust, macOS)
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: daw/vst3
@@ -95,3 +158,6 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
+      - name: Build the VST3 bundle
+        if: runner.os == 'macOS'
+        run: cargo xtask bundle cover_maker_vst3 --locked

@@ -590,6 +590,7 @@ name = "cover-maker-desktop"
 version = "0.4.0"
 dependencies = [
  "getrandom 0.3.4",
+ "libc",
  "serde",
  "serde_json",
  "sha2 0.11.1",
