@@ -1,6 +1,6 @@
 {
   "name": "cover-maker-desktop",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cover_Maker desktop app (Tauri 2 + Svelte 5).",
   "type": "module",
   "scripts": {
