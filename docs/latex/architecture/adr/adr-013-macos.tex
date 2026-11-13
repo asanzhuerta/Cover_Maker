@@ -1,0 +1,140 @@
+\section{ADR-013: macOS on Apple Silicon (experimental)}
+\textbf{Status:} accepted; implemented as an experimental platform (Future
+work). Windows stays the reference platform and behaves as before.
+
+\textbf{Context.} Many musicians use a Mac. Every layer of Cover\_Maker was
+written for Windows: the shell kills the engine's process tree with a Job
+Object and hides console windows, the runtime bootstrap (ADR-006) bundles
+\texttt{uv.exe} and pins Windows downloads, the engine keeps its data in
+\texttt{\%LOCALAPPDATA\%} and finds the GPU with \texttt{nvidia-smi}, and the
+lock file only resolves for \texttt{win32}. The project has no Mac: macOS can
+only be built and tested in CI, on GitHub's \texttt{macos-latest} runners
+(Apple Silicon virtual machines). Intel Macs are out of scope, because
+PyTorch publishes no x86-64 macOS wheels after 2.2.
+
+\textbf{Process lifecycle.} Unix has no Job Objects. The engine starts as
+the leader of a new process group (\texttt{process\_group(0)}), which its
+children join: the separation worker, ffmpeg and yt-dlp. Stopping the engine
+sends \texttt{SIGKILL} to the whole group, and so does dropping the guard,
+so the shell's exit path is the same as on Windows. A crash or
+\texttt{kill -9} of the shell cannot clean up, so the existing parent-PID
+watchdog (\texttt{COVER\_MAKER\_PARENT\_PID}, ADR-005) now kills the
+engine's children before it exits, outside Windows. The shell's OS code lives
+in \texttt{src/platform/} (\texttt{win.rs}, \texttt{unix.rs}), with the same
+functions on each platform: the process tree guard, hidden windows, the data
+folder, free space (\texttt{statvfs}), the executable bit, and the names
+\texttt{Scripts}/\texttt{bin} and \texttt{.exe}.
+
+\textbf{Separation on Apple Silicon.} audio-separator 0.48 already selects
+PyTorch's Metal backend (\texttt{mps}) when it is available on an arm64
+processor, and the ONNX Runtime CoreML provider when it is installed.
+Native float16 is verified upstream only for BS- and Mel-RoFormer on
+\texttt{mps}; for other model families it logs a warning and keeps float32.
+So the GPU ladder (ADR-002) works unchanged: the \texttt{gpu} device means
+CUDA on Windows and Metal on a Mac. Two differences are handled in the worker:
+\texttt{PYTORCH\_ENABLE\_MPS\_FALLBACK=1} runs operations that Metal lacks
+on the CPU instead of failing, and a CPU worker reports MPS as unavailable,
+since Metal has no equivalent of \texttt{CUDA\_VISIBLE\_DEVICES=-1}. The
+engine detects the Apple GPU without importing torch: on
+\texttt{darwin}/\texttt{arm64} it is always there, named after the chip
+(\texttt{sysctl machdep.cpu.brand\_string}). It shares the unified memory,
+so its ``VRAM'' for the hardware tiers is two thirds of the RAM, which is
+about Metal's recommended working set. An 8\,GB Mac is in the 4\,GB tier, a
+16\,GB Mac in the 8\,GB tier, and 18\,GB or more in the 12\,GB tier. An
+out-of-memory error on \texttt{mps} contains ``out of memory'', so the ladder
+steps down as on CUDA, and \texttt{torch.mps.empty\_cache()} frees memory
+between models.
+
+\textbf{Runtime bootstrap.} The bootstrap does the same on both platforms.
+The uv lock now resolves for
+\texttt{sys\_platform == 'darwin' and platform\_machine == 'arm64'} too, with
+a third PyTorch extra, \texttt{mps}, that takes PyTorch from PyPI (its macOS
+wheel includes Metal; NVIDIA publishes no CUDA build for macOS, so the
+\texttt{cu128} index applies only on Windows). The Windows profiles
+(\texttt{core}, \texttt{cpu}, \texttt{cu128}) resolve to exactly the same
+packages as before. The exported \texttt{pylock} files cover both platforms,
+and the installer keeps only the wheels for the machine. The shell's only
+torch build on macOS is \texttt{mps}, which also runs on the CPU. The
+\texttt{mps} profile downloads about 290\,MB of wheels. uv installs CPython
+3.12 from python-build-standalone, which has native arm64 builds.
+\texttt{deps.json} now pins downloads per platform (\texttt{windows-x64},
+\texttt{macos-arm64}), by URL and SHA-256. On macOS these are uv 0.13.6
+(\texttt{.tar.gz}, staged at build time by \texttt{prepare-runtime.sh}) and
+deno 2.9.8 (\texttt{.zip}). Extracted tools are marked executable. Files
+that the app downloads itself carry no quarantine attribute, so Gatekeeper
+does not check them.
+
+Two gaps remain. \emph{ffmpeg:} the Windows runtime installs an LGPL shared
+build from BtbN, which publishes no macOS builds, and the macOS builds found
+(evermeet, osxexperts, Martin Riedl's build server) are GPL, with x264 and
+x265. Until the owner decides, the macOS entry is \texttt{null} and the engine
+uses an ffmpeg on \texttt{PATH}; the shell appends Homebrew's folders, since
+apps started from Finder get a minimal \texttt{PATH}. The options are: (a)
+build an LGPL ffmpeg on a macOS runner and mirror it on the releases like the
+Windows build, pinning its hash after the first build (recommended); (b) pin
+a third-party GPL static build, which the app would download but not
+redistribute; (c) keep requiring Homebrew. \emph{diffq:} audio-separator
+needs \texttt{diffq} outside Windows, and it ships only a source
+distribution. The separation runtime therefore compiles it, which needs the
+Xcode Command Line Tools. Homebrew installs them anyway. Mirroring a prebuilt
+wheel would remove this step.
+
+\textbf{Paths.} The engine (\texttt{paths.data\_root}), the shell
+(\texttt{platform::local\_data\_dir}), the VST3 plug-in and the REAPER script
+all use \texttt{\textasciitilde/Library/Application Support/Cover\_Maker}
+(\texttt{Cover\_Maker.dev} for development builds) on macOS, with the same
+layout as on Windows. The app bundle keeps the bootstrap files in
+\texttt{Contents/Resources/bundle}.
+
+\textbf{DAW integration.} The nih-plug VST3 plug-in builds on macOS as a
+\texttt{.vst3} bundle, which CI checks. Its engine discovery and \emph{Show in
+folder} (Finder) work there. Dragging stems out of the plug-in uses OLE and
+stays Windows-only. Audio Unit support is not cheap: nih-plug has no AU
+wrapper, so Logic Pro would need a separate wrapper (for example
+clap-wrapper's AUv2 target), and it is left out. The REAPER script reads the
+macOS discovery file and calls \texttt{/usr/bin/curl}; it has not been tested
+on a Mac.
+
+\textbf{Packaging.} Tauri builds the \texttt{.app} and a \texttt{.dmg}
+(\texttt{--bundles app,dmg}). The minimum system is macOS 12.3, the first
+with PyTorch's Metal backend. A manual run of the release workflow
+(\texttt{workflow\_dispatch}) builds the disk image, the VST3 bundle and the
+REAPER script, with their SHA-256 checksums, as a workflow artifact. It
+attaches nothing to a release, and tag builds stay Windows-only. The app
+updater has no macOS entry in \texttt{latest.json}, so \emph{Check for
+updates} fails on macOS for now.
+
+\textbf{Signing and notarization.} Signing for distribution needs an Apple
+Developer Program membership (99\,USD a year, the owner's decision), a
+Developer ID certificate, the hardened runtime and notarization with
+\texttt{notarytool}. The bundled \texttt{uv} must be re-signed as nested
+code. Without it the app is signed ad hoc (\texttt{signingIdentity "-"}),
+which Apple Silicon requires to run code at all. Gatekeeper blocks a
+downloaded copy (``cannot be opened because Apple cannot check it'').
+The workaround, documented in the Installation Guide, is
+\texttt{xattr -dr com.apple.quarantine /Applications/Cover\_Maker.app}, or
+\emph{System Settings} $\rightarrow$ \emph{Privacy \& Security} $\rightarrow$
+\emph{Open Anyway} on macOS 15. The same applies to the VST3 bundle.
+
+\textbf{What CI verifies.} Every CI job now also runs on
+\texttt{macos-latest}. The engine tests and the macOS separation runtime install
+from the lock, which compiles diffq. PyTorch and audio-separator import there,
+and the Apple GPU is detected. The UI checks and the build also run, as do the
+shell's clippy and tests (process group, \texttt{statvfs}, paths), and the
+VST3 plug-in's tests and bundle. The manual release run builds the
+\texttt{.dmg}.
+
+\textbf{What CI cannot verify.} The runners are virtual machines, which may
+expose no Metal GPU, and no model is downloaded in CI, so no stems are
+separated on \texttt{mps}. Its speed, memory use and fp16 quality are
+unmeasured. Nobody has launched the app, run the first-run bootstrap
+end to end or checked Gatekeeper's behaviour on a downloaded copy. The VST3
+has not been loaded in a DAW, and the REAPER script has not been run. These
+need a real Mac and are listed in the Installation Guide as experimental.
+
+\textbf{Consequences.} One code base builds on both platforms, and the
+Windows behaviour and lock are unchanged. Each OS-specific piece has one
+place, so that piece can later move to a stable macOS build. Before macOS
+leaves the experimental label, it needs an LGPL ffmpeg in the runtime,
+signing and notarization, a macOS entry for the updater and a test pass on
+real hardware.

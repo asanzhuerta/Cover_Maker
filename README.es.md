@@ -48,6 +48,13 @@ están también el plugin VST3 y el script de REAPER (opcionales), y
 Mientras el instalador no esté firmado, Windows SmartScreen puede avisar de un
 editor desconocido; consulta la [política de firma de código](README.md#code-signing-policy).
 
+**macOS (experimental).** Cover_Maker también se compila para Mac con Apple
+Silicon (macOS 12.3 o posterior) y separa en la GPU con Metal. Esa versión no
+está firmada, solo se genera con una ejecución manual de CI y aún no se ha
+probado en un Mac real; la Guía de instalación y el
+[ADR-013](docs/latex/architecture/adr/adr-013-macos.tex) explican cómo
+obtenerla y abrirla. Windows es la plataforma soportada.
+
 ## Funciones
 
 <table>

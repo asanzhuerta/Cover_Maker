@@ -173,6 +173,65 @@ models, database and logs in
 tick \emph{Delete the application data}. Exported stems in your own folders are
 never touched.
 
+\chapter{macOS on Apple Silicon (experimental)}
+\CM{} also builds for Macs with Apple Silicon (M1 or newer) running macOS
+12.3 or later (ADR-013). This build is \emph{experimental}. It is built
+and tested only in CI, on virtual machines. Nobody has run it on a real Mac
+yet, so expect rough edges and please report what you find. Intel Macs are not
+supported.
+
+\section{Getting the app}
+There is no macOS download on the release page yet. A maintainer builds the
+app by running the \emph{Release} workflow by hand on GitHub Actions. The
+run's artifact \texttt{Cover\_Maker-macos-arm64-unsigned} contains the disk
+image (\texttt{.dmg}), the VST3 plugin, the REAPER script and their SHA-256
+checksums. To build it yourself on a Mac with Xcode Command Line Tools, Rust,
+Node.js with pnpm and uv, run
+\texttt{bash desktop/scripts/prepare-runtime.sh}, then
+\texttt{pnpm tauri build -{}-bundles app,dmg} in \texttt{desktop/}.
+
+\section{Before the first start}
+\begin{description}
+  \item[Command Line Tools.] The separation runtime compiles one small
+  package (\texttt{diffq}) on your Mac. Install Apple's tools once with
+  \texttt{xcode-select -{}-install}; Homebrew installs them too.
+  \item[ffmpeg.] The macOS runtime does not install ffmpeg yet. Install it
+  with Homebrew (\texttt{brew install ffmpeg}); the app finds it in
+  \texttt{/opt/homebrew/bin}. Without ffmpeg, formats such as M4A cannot be
+  opened or exported, and video links do not work.
+\end{description}
+
+\section{Opening an unsigned app}
+The app is not signed with an Apple Developer ID or notarized, so Gatekeeper
+blocks it the first time (``Apple could not verify \ldots''). Drag
+\texttt{Cover\_Maker.app} from the disk image to \emph{Applications}, then
+either
+\begin{itemize}
+  \item open \emph{System Settings} $\rightarrow$ \emph{Privacy \& Security},
+  scroll to the message about \CM{} and choose \emph{Open Anyway} (on macOS
+  14 and earlier, Control-click the app and choose \emph{Open}); or
+  \item run \texttt{xattr -dr com.apple.quarantine /Applications/Cover\_Maker.app}
+  in Terminal, which also clears the files inside the app.
+\end{itemize}
+Only do this for a copy you got from this project's GitHub Actions run or
+built yourself, and compare its SHA-256 with \texttt{SHA256SUMS-macos.txt}
+(\texttt{shasum -a 256 <file>}).
+
+\section{What is different on macOS}
+\begin{itemize}
+  \item The data, models and runtime live in
+  \texttt{\textasciitilde/Library/Application Support/Cover\_Maker}. To remove
+  \CM{}, delete the app and that folder.
+  \item The separation runtime uses PyTorch with Metal: about 300\,MB to
+  download. The GPU shares the Mac's memory; \CM{} counts two thirds of it as
+  graphics memory when it picks a preset.
+  \item \emph{Check for updates} does not work yet: install new builds by
+  hand.
+  \item The VST3 plugin goes to \texttt{\textasciitilde/Library/Audio/Plug-Ins/VST3};
+  clear its quarantine attribute as above. Dragging stems out of the plugin
+  works only on Windows, and there is no Audio Unit version for Logic Pro.
+\end{itemize}
+
 \chapter{Troubleshooting}
 \begin{description}
   \item[Setup could not finish.] The error is shown on the setup screen. Check

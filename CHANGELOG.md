@@ -7,6 +7,20 @@ project follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- macOS on Apple Silicon, experimental (ADR-013). The shell's OS code moved
+  into platform modules: a process group replaces the Job Object on macOS,
+  and the engine's parent watchdog stops its children when the shell dies.
+  Data lives in `~/Library/Application Support/Cover_Maker`. The engine detects
+  the Apple GPU without importing PyTorch and separates with Metal (`mps`),
+  keeping CPU workers off it. The uv lock also resolves for macOS arm64 with an
+  `mps` extra (PyTorch from PyPI); the Windows profiles resolve to the same
+  packages. `deps.json` pins downloads per platform, and
+  `prepare-runtime.sh` stages the macOS runtime. On macOS, ffmpeg comes from
+  `PATH` (Homebrew) for now. The VST3 plug-in and the REAPER script find the
+  engine on macOS. CI runs every job on `macos-latest` too, and a manual run
+  of the release workflow builds an unsigned `.dmg` as an artifact. The
+  Installation Guide has an experimental macOS chapter, including how to open
+  an unsigned app.
 - Audio to MIDI per stem (FR-MIDI-01, ADR-012). The mixer's *MIDI* card
   converts chosen stems to Standard MIDI Files named like the stem exports
   (`My Song - Bass.mid`), with the song's tempo map from the beat grid
