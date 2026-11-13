@@ -179,6 +179,8 @@ version 1.0 (M8, M10, M11, M13, M14).
 - A second song separated with the same model in one session no longer
   fails with `FileNotFoundError`: the reused model wrote its stems into the
   previous job's temporary folder.
+- The first-run disk estimate matches a measured install (about 5 GB with
+  CUDA instead of 4.7 GB).
 
 ### Changed
 - Development runs (the engine from a source checkout, `pnpm tauri dev`) keep

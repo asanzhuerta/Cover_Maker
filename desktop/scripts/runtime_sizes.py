@@ -16,9 +16,10 @@ import tomllib
 import urllib.request
 from pathlib import Path
 
-# Installed size / download size, measured on a cu128 runtime (venv + uv
-# cache, which hold the same unpacked files through hard links) and rounded up.
-UNPACK_FACTOR = 1.6
+# Installed size / download size, measured on an installed cu128 runtime
+# (5.0 GiB for 2.9 GiB of wheels; the uv cache shares the venv's files through
+# hard links, so it adds almost nothing) and rounded up.
+UNPACK_FACTOR = 1.7
 # uv's managed CPython 3.12: download and installed size.
 PYTHON_DOWNLOAD = 30 * 2**20
 PYTHON_DISK = 110 * 2**20
