@@ -195,11 +195,8 @@ Node.js with pnpm and uv, run
   \item[Command Line Tools.] The separation runtime compiles one small
   package (\texttt{diffq}) on your Mac. Install Apple's tools once with
   \texttt{xcode-select -{}-install}; Homebrew installs them too.
-  \item[ffmpeg.] The project builds its own LGPL ffmpeg for macOS, but the
-  runtime does not install it until that build is published. Until then,
-  install ffmpeg with Homebrew (\texttt{brew install ffmpeg}); the app finds it in
-  \texttt{/opt/homebrew/bin}. Without ffmpeg, formats such as M4A cannot be
-  opened or exported, and video links do not work.
+  \item[ffmpeg.] Nothing to do: the setup downloads the project's own LGPL
+  build of ffmpeg for macOS, like on Windows.
 \end{description}
 
 \section{Opening an unsigned app}

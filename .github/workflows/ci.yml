@@ -122,6 +122,16 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+      # The macOS runtime's ffmpeg is the project's own build (ADR-013): check
+      # that the pinned release asset is still there and unchanged.
+      - name: Check the pinned macOS ffmpeg download
+        if: runner.os == 'macOS'
+        working-directory: desktop/src-tauri/resources/runtime
+        run: |
+          url="$(jq -r '."macos-arm64".ffmpeg.urls[0]' deps.json)"
+          sha="$(jq -r '."macos-arm64".ffmpeg.sha256' deps.json)"
+          curl --fail --location --silent --show-error --retry 3 --output "$RUNNER_TEMP/ffmpeg.zip" "$url"
+          echo "$sha  $RUNNER_TEMP/ffmpeg.zip" | shasum -a 256 --check
 
   vst3:
     name: ${{ matrix.name }}

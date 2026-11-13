@@ -16,9 +16,9 @@ project follows [Semantic Versioning](https://semver.org/).
   `mps` extra (PyTorch from PyPI); the Windows profiles resolve to the same
   packages. `deps.json` pins downloads per platform, and
   `prepare-runtime.sh` stages the macOS runtime. `build-ffmpeg-macos.sh` and
-  its workflow build an LGPL ffmpeg (with LAME) for macOS from pinned sources.
-  Until that build is published and pinned, ffmpeg comes from `PATH`
-  (Homebrew) on macOS. The VST3 plug-in and the REAPER script find the
+  its workflow build an LGPL ffmpeg (with LAME) for macOS from pinned sources;
+  the macOS runtime installs that build from the `ffmpeg-macos-n9.0.2`
+  prerelease, pinned by SHA-256. The VST3 plug-in and the REAPER script find the
   engine on macOS. CI runs every job on `macos-latest` too, and a manual run
   of the release workflow builds an unsigned `.dmg` as an artifact. The
   Installation Guide has an experimental macOS chapter, including how to open

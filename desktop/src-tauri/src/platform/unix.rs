@@ -102,8 +102,8 @@ pub fn make_executable(path: &Path) -> std::io::Result<()> {
 /// Folders searched after the runtime's own `bin/` and the inherited `PATH`.
 ///
 /// An app started from Finder inherits only `/usr/bin:/bin:/usr/sbin:/sbin`;
-/// Homebrew's folders let the engine find a user-installed ffmpeg while the
-/// macOS runtime installs none (ADR-013).
+/// Homebrew's folders let the engine find user-installed tools when the
+/// runtime's own are missing (ADR-013).
 pub fn fallback_tool_dirs() -> Vec<PathBuf> {
     if cfg!(target_os = "macos") {
         vec![

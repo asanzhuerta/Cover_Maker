@@ -37,7 +37,15 @@
       ],
       "sha256": "60fbd5c8a1ed681845eea28d9d622fcde03c51e91a43465b64a1e17db1ed3472"
     },
-    "ffmpeg": null,
+    "ffmpeg": {
+      "version": "9.0.2",
+      "license": "LGPL-2.1-or-later",
+      "file": "ffmpeg-n9.0.2-macos-arm64-lgpl.zip",
+      "urls": [
+        "https://github.com/asanzhuerta/Cover_Maker/releases/download/ffmpeg-macos-n9.0.2/ffmpeg-n9.0.2-macos-arm64-lgpl.zip"
+      ],
+      "sha256": "230e18fce1b9676e706dddb5818335833d2e81dc696d4190dbc273a73d83281b"
+    },
     "deno": {
       "version": "2.9.8",
       "license": "MIT",

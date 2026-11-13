@@ -414,8 +414,8 @@ pub struct Download {
     pub sha256: String,
 }
 
-/// One platform's tools in `deps.json`. `ffmpeg` is `null` where the runtime
-/// installs none yet (macOS, ADR-013): the engine then uses one on `PATH`.
+/// One platform's tools in `deps.json`. `ffmpeg` may be `null` for a platform
+/// whose runtime installs none: the engine then uses one on `PATH`.
 #[derive(Debug, Deserialize)]
 struct Deps {
     ffmpeg: Option<Download>,
@@ -954,9 +954,7 @@ mod tests {
         let text = include_str!("../resources/runtime/deps.json");
         let deps = parse_deps(text, platform::DEPS_KEY).unwrap();
         assert!(deps.tools().iter().all(|(_, d)| d.sha256.len() == 64));
-        if cfg!(windows) {
-            assert!(deps.ffmpeg.is_some());
-        }
+        assert!(deps.ffmpeg.is_some());
     }
 
     #[test]

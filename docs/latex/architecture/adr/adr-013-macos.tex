@@ -78,10 +78,13 @@ licence texts) plus \texttt{SOURCE.md} with the sources and configure line.
 The \emph{ffmpeg for macOS} workflow builds it on \texttt{macos-latest},
 checks that it encodes MP3, and keeps the zip with its SHA-256. The build is
 not byte-for-byte reproducible, so one artifact is published once as a release
-asset, and \texttt{deps.json} pins that file. Until then the macOS entry is
-\texttt{null} and the engine uses an ffmpeg on \texttt{PATH}; the shell appends
-Homebrew's folders, since apps started from Finder get a minimal
-\texttt{PATH}. \emph{diffq:} audio-separator
+asset: the prerelease \texttt{ffmpeg-macos-n9.0.2} holds the zip of
+workflow run 43429655833, and \texttt{deps.json} pins its SHA-256
+(\texttt{230e18fc\ldots}). Unlike the Windows mirror, the URL does not follow
+the app version, since the file never changes. A newer FFmpeg means a new
+build, a new release tag and a new pin. The shell also appends Homebrew's
+folders to the engine's \texttt{PATH}, since apps started from Finder get a
+minimal one. \emph{diffq:} audio-separator
 needs \texttt{diffq} outside Windows, and it ships only a source
 distribution. The separation runtime therefore compiles it, which needs the
 Xcode Command Line Tools. Homebrew installs them anyway. Mirroring a prebuilt
@@ -143,6 +146,6 @@ need a real Mac and are listed in the Installation Guide as experimental.
 \textbf{Consequences.} One code base builds on both platforms, and the
 Windows behaviour and lock are unchanged. Each OS-specific piece has one
 place, so that piece can later move to a stable macOS build. Before macOS
-leaves the experimental label, it needs the LGPL ffmpeg published and pinned,
+leaves the experimental label, it needs
 signing and notarization, a macOS entry for the updater and a test pass on
 real hardware.
